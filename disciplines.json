@@ -1,0 +1,205 @@
+{
+  "Chirurgie dentaire": {
+    "custom": false,
+    "condition": "",
+    "matière": "velours",
+    "couleurs": ["violet"],
+    "couleursRGB": ["143, 0, 255"]
+  },
+  "Études courtes de santé": {
+    "custom": false,
+    "condition": "",
+    "matière": "velours",
+    "couleurs": ["blanc"],
+    "couleursRGB": ["255, 255, 255"]
+  },
+  "Médecine": {
+    "custom": false,
+    "condition": "",
+    "matière": "velours",
+    "couleurs": ["rouge"],
+    "couleursRGB": ["255, 0, 0"]
+  },
+  "Ostéopathie": {
+    "custom": false,
+    "condition": "",
+    "matière": "velours",
+    "couleurs": ["bleu roy"],
+    "couleursRGB": ["65, 105, 225"]
+  },
+  "Paramédical": {
+    "custom": false,
+    "condition": "",
+    "matière": "velours",
+    "couleurs": ["rose"],
+    "couleursRGB": ["255, 192, 203"]
+  },
+  "Pharmacie, préparateurs en pharmacie": {
+    "custom": false,
+    "condition": "",
+    "matière": "velours",
+    "couleurs": ["vert"],
+    "couleursRGB": ["0, 128, 0"]
+  },
+  "Classes préparatoires santé": {
+    "custom": false,
+    "condition": "",
+    "matière": "velours",
+    "couleurs": ["marron"],
+    "couleursRGB": ["165, 42, 42"]
+  },
+  "Sage-Femme": {
+    "custom": false,
+    "condition": "",
+    "matière": "velours",
+    "couleurs": ["fuchsia"],
+    "couleursRGB": ["255, 0, 255"]
+  },
+  "Vétérinaire": {
+    "custom": false,
+    "condition": "",
+    "matière": "velours",
+    "couleurs": ["bordeaux"],
+    "couleursRGB": ["128, 0, 32"]
+  },
+  "DU": {
+    "custom": true,
+    "condition": "Selon l'UFR de rattachement",
+    "matière": "velours ou satin",
+    "couleurs": [],
+    "couleursRGB": []
+  },
+  "Administration Économique et Sociale (AES)": {
+    "custom": false,
+    "condition": "",
+    "matière": "satin",
+    "couleurs": ["vert clair"],
+    "couleursRGB": ["144, 238, 144"]
+  },
+  "Architecture, arts du spectacle, arts numérique, audiovisuel, beaux-arts et arts plastiques": {
+    "custom": false,
+    "condition": "",
+    "matière": "satin",
+    "couleurs": ["bleu"],
+    "couleursRGB": ["0, 0, 255"]
+  },
+  "BUT, DUT, BTS, Bachelor (au RNCP)": {
+    "custom": false,
+    "condition": "",
+    "matière": "satin",
+    "couleurs": ["blanc"],
+    "couleursRGB": ["255, 255, 255"]
+  },
+  "Classes préparatoires": {
+    "custom": false,
+    "condition": "",
+    "matière": "satin",
+    "couleurs": ["marron"],
+    "couleursRGB": ["165, 42, 42"]
+  },
+  "Communication": {
+    "custom": true,
+    "condition": "Selon la filière de rattachement",
+    "matière": "satin",
+    "couleurs": [],
+    "couleursRGB": []
+  },
+  "Droit": {
+    "custom": false,
+    "condition": "",
+    "matière": "satin",
+    "couleurs": ["rouge"],
+    "couleursRGB": ["255, 0, 0"]
+  },
+  "Écoles d'ingénieurs": {
+    "custom": false,
+    "condition": "",
+    "matière": "satin",
+    "couleurs": ["bleu roy", "noir"],
+    "couleursRGB": ["65, 105, 225", "0, 0, 0"]
+  },
+  "Écoles de commerce, gestion, communication et journalisme": {
+    "custom": false,
+    "condition": "",
+    "matière": "satin",
+    "couleurs": ["rouge", "vert"],
+    "couleursRGB": ["255, 0, 0", "0, 128, 0"]
+  },
+  "Écoles nationales": {
+    "custom": true,
+    "condition": "Selon le pays de l'école",
+    "matière": "satin",
+    "couleurs": [],
+    "couleursRGB": []
+  },
+  "Filières sportives": {
+    "custom": false,
+    "condition": "",
+    "matière": "satin",
+    "couleurs": ["vert foncé"],
+    "couleursRGB": ["0, 100, 0"]
+  },
+  "IUP": {
+    "custom": true,
+    "condition": "Selon la discipline étudiée",
+    "matière": "satin",
+    "couleurs": [],
+    "couleursRGB": []
+  },
+  "Lettres, langues, sciences humaines, sciences sociales, etc.": {
+    "custom": false,
+    "condition": "",
+    "matière": "satin",
+    "couleurs": ["jaune"],
+    "couleursRGB": ["255, 255, 0"]
+  },
+  "MEEF": {
+    "custom": false,
+    "condition": "",
+    "matière": "satin",
+    "couleurs": ["gris"],
+    "couleursRGB": ["128, 128, 128"]
+  },
+  "Musique, musicologie": {
+    "custom": false,
+    "condition": "",
+    "matière": "satin",
+    "couleurs": ["argenté"],
+    "couleursRGB": ["192, 192, 192"]
+  },
+  "Enologie": {
+    "custom": false,
+    "condition": "",
+    "matière": "satin",
+    "couleurs": ["saumon"],
+    "couleursRGB": ["250, 128, 114"]
+  },
+  "Sciences": {
+    "custom": false,
+    "condition": "",
+    "matière": "satin",
+    "couleurs": ["violet"],
+    "couleursRGB": ["143, 0, 255"]
+  },
+  "Sciences économiques, gestion et IAE": {
+    "custom": false,
+    "condition": "",
+    "matière": "satin",
+    "couleurs": ["orange"],
+    "couleursRGB": ["255, 165, 0"]
+  },
+  "Sciences politiques": {
+    "custom": false,
+    "condition": "",
+    "matière": "satin",
+    "couleurs": ["rouge", "bleu"],
+    "couleursRGB": ["255, 0, 0", "0, 0, 255"]
+  },
+  "Théologie": {
+    "custom": false,
+    "condition": "",
+    "matière": "satin",
+    "couleurs": ["blanc", "rouge"],
+    "couleursRGB": ["255, 255, 255", "255, 0, 0"]
+  }
+}
