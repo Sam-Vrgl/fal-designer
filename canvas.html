@@ -39,7 +39,7 @@
     // --- Constants in millimeters ---
     const mmToPx   = 3.7795275591; // CSS px at 96dpi
     const GRID_W_MM = 700;         // grid width
-    const GRID_H_MM = 120;         // grid height
+    const GRID_H_MM = 38;         // grid height
     const MARGIN_MM = 10;          // inner margin around the grid
 
     // Total drawing area (grid + inner margins)
@@ -123,8 +123,8 @@
       ctx.stroke();
 
       // Demo fills
-      colorRectGridMM(0, 0, 700, 60, 'rgba(0,0,255)');
-      colorRectGridMM(0, 60, 700, 120, 'rgba(0,0,0)');
+      colorRectGridMM(0, 0, 700, 19, 'rgba(0,0,255)');
+      colorRectGridMM(0, 20, 700, 38, 'rgba(0,0,0)');
 
       // --- Helper lines (including margins) ---
       const midX = totalCssW / 2;
