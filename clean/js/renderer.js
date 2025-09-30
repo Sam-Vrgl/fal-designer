@@ -153,3 +153,92 @@ export function colorRectGridMM(ctx, s, x1_mm, y1_mm, x2_mm, y2_mm, color, opts 
     ctx.fillRect(left, top, width, height);
     ctx.restore();
 }
+
+export function drawImgMM(ctx, s, img, x_mm, y_mm, opts = {}) {
+  const {
+    height_mm = null,
+    width_mm  = null,
+    heightPct = null,
+    aspect = 'natural',
+    anchor = 'tl',
+    clampToGrid = true,
+    snapMm = null,
+    behind = false,
+    onLoadRedraw = null
+  } = opts;
+
+  // Lazy load handling: schedule a redraw once and bail out
+  const isBitmap = typeof ImageBitmap !== 'undefined' && img instanceof ImageBitmap;
+  const loaded = isBitmap || (img && img.complete && img.naturalWidth > 0);
+  if (!loaded) {
+    if (typeof onLoadRedraw === 'function' && img && !img.__mmDrawHooked) {
+      img.__mmDrawHooked = true;
+      img.addEventListener?.('load', onLoadRedraw, { once: true });
+    }
+    return null;
+  }
+
+  // Resolve aspect
+  const natAspect = isBitmap ? (img.width / img.height) : (img.naturalWidth / img.naturalHeight);
+  const useAspect = aspect === 'natural' ? natAspect : (Number(aspect) || natAspect);
+
+  // Resolve size in mm
+  let h_mm, w_mm;
+  if (height_mm != null && width_mm != null) {
+    h_mm = height_mm;
+    w_mm = width_mm;
+  } else if (height_mm != null) {
+    h_mm = height_mm;
+    w_mm = h_mm * useAspect;
+  } else if (width_mm != null) {
+    w_mm = width_mm;
+    h_mm = w_mm / useAspect;
+  } else {
+    // Default via % of grid height if provided, else 0.3 (30%)
+    const pct = (heightPct != null) ? Math.max(0, Math.min(1, heightPct)) : 0.3;
+    h_mm = pct * s.gridHmm;
+    w_mm = h_mm * useAspect;
+  }
+
+  // Optional snapping of the *anchor point*
+  if (snapMm && isFinite(snapMm) && snapMm > 0) {
+    const snap = (v) => Math.round(v / snapMm) * snapMm;
+    x_mm = snap(x_mm);
+    y_mm = snap(y_mm);
+  }
+
+  // Anchor → normalized offset: left/center/right × top/center/bottom
+  const ax = /(^|[^c])l/.test(anchor) ? 0 : /r/.test(anchor) ? -1 : -0.5;  // l=0, r=-1, c=-0.5
+  const ay = /t/.test(anchor) ? 0 : /b/.test(anchor) ? -1 : -0.5;          // t=0, b=-1, c=-0.5
+
+  // Top-left corner in *grid mm* after anchor shift
+  let left_mm = x_mm + ax * w_mm;
+  let top_mm  = y_mm + ay * h_mm;
+
+  // Optional clamp so the whole image remains inside the grid box
+  if (clampToGrid) {
+    const maxLeft = Math.max(0, s.gridWmm - w_mm);
+    const maxTop  = Math.max(0, s.gridHmm - h_mm);
+    left_mm = Math.max(0, Math.min(left_mm, maxLeft));
+    top_mm  = Math.max(0, Math.min(top_mm,  maxTop));
+  }
+
+  // Convert to *canvas world CSS px* (your renderer already set the transform)
+  const originX = s.marginMm * s.mmToPx;
+  const originY = s.marginMm * s.mmToPx;
+
+  const x_px = originX + left_mm * s.mmToPx;
+  const y_px = originY + top_mm  * s.mmToPx;
+  const w_px = w_mm * s.mmToPx;
+  const h_px = h_mm * s.mmToPx;
+
+  // Draw
+  ctx.save();
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.globalCompositeOperation = behind ? 'destination-over' : 'source-over';
+  ctx.drawImage(img, x_px, y_px, w_px, h_px);
+  ctx.restore();
+
+  return { x_px, y_px, w_px, h_px };
+}
