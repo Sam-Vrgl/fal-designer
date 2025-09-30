@@ -16,13 +16,4 @@ Outil pour planifier la création d'une faluche et les ruban et pins nécessaire
         - inisignes se succedant de gauche à droite: étoiles, tête de vache, palmes (simple et doubles), 0 et tête de mort
         - options d'insigne: moivre, filière différente, particularités PASS/LASS/prépa,
 
-Les insignes viendront se placer sur un grile donc:
- - définir un format d'affichage pour le circulaire
-    - Choisir une unité pour la grille ou viendra se placer les rubans/insignes
-    - Verticale divisible par 2, ± 2 hauteurs d'insignes (12cm)
-    - Horizontale ajustable en fonction du tour de tête (55-62cm)
- - Grille millimètre?
-
- - Chaque insigne aura un centre défini pour le placement
- - Les assets seront à pré traiter pour un taille homogène
- - 
+![Current POC preview](./Thumbnail.png)
