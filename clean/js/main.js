@@ -2,6 +2,7 @@ import { state, subscribe } from './state.js';
 import { draw } from './renderer.js';
 import { bindUI } from './ui.js';
 import { loadImage } from './images.js';
+import { initDisciplines } from './disciplines.js';
 
 const canvas = document.getElementById('myCanvas');
 const ctx = canvas.getContext('2d', { alpha: true });
@@ -40,6 +41,6 @@ window.addEventListener('resize', rerender);
 
 // Bind UI <-> state and do initial draw
 bindUI();
-preloadImages().finally(rerender);
-
-
+initDisciplines('disciplineSelect').finally(() => {
+    preloadImages().finally(rerender);
+});

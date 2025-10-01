@@ -12,6 +12,8 @@ export const state = {
     color: '#666666',
     thickness: 3
   },
+  disciplineColors: [],
+  disciplineMaterial: null,
   images: [
     // Example entries (url + placement opts). Start empty if you want.
     // { url: './assets/logo.png', x_mm: 20, y_mm: 5, heightPct: 0.4, anchor: 'tl', behind: false }

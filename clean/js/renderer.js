@@ -1,4 +1,5 @@
 import { getCachedImage } from './main.js';
+import { createVelvetTexture, createSatinTexture } from './textures.js';
 // Drawing & geometry helpers
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
@@ -91,9 +92,28 @@ export function draw(canvas, ctx, s) {
     ctx.lineWidth = 1.25;
     ctx.stroke();
 
+        if (s.disciplineColors && s.disciplineColors.length > 0) {
+      const fillStyles = s.disciplineColors.map(color => {
+        if (s.disciplineMaterial === 'velours') {
+          return createVelvetTexture(ctx, color);
+        } else if (s.disciplineMaterial === 'satin') {
+          return createSatinTexture(ctx, color);
+        }
+        return color; // Fallback to solid color
+      });
+
+      if (fillStyles.length === 1) {
+        colorRectGridMM(ctx, s, 0, 0, s.gridWmm, s.gridHmm, fillStyles[0]);
+      } else if (fillStyles.length > 1) {
+        const midY = s.gridHmm / 2;
+        colorRectGridMM(ctx, s, 0, 0, s.gridWmm, midY, fillStyles[0]);
+        colorRectGridMM(ctx, s, 0, midY, s.gridWmm, s.gridHmm, fillStyles[1]);
+      }
+    }
+
     // --- Demo fills (kept for testing)
-    colorRectGridMM(ctx, s, 0, 0, s.gridWmm, Math.min(19, s.gridHmm / 2), 'rgba(0,0,255)', { behind: false });
-    colorRectGridMM(ctx, s, 0, Math.min(20, s.gridHmm / 2), s.gridWmm, s.gridHmm, 'rgba(0,0,0)', { behind: false });
+    // colorRectGridMM(ctx, s, 0, 0, s.gridWmm, Math.min(19, s.gridHmm / 2), 'rgba(0,0,255)', { behind: false });
+    // colorRectGridMM(ctx, s, 0, Math.min(20, s.gridHmm / 2), s.gridWmm, s.gridHmm, 'rgba(0,0,0)', { behind: false });
     // 40% of grid height, centered on (x=350mm, y=10mm), on top:
     for (const it of s.images) {
         const img = getCachedImage(it.url);
@@ -126,9 +146,10 @@ export function draw(canvas, ctx, s) {
 
 // Fill a rectangle in grid mm coordinates.
 // (x1_mm,y1_mm) to (x2_mm,y2_mm). Options: behind (draw under), clamp (stay within grid)
-export function colorRectGridMM(ctx, s, x1_mm, y1_mm, x2_mm, y2_mm, color, opts = {}) {
+export function colorRectGridMM(ctx, s, x1_mm, y1_mm, x2_mm, y2_mm, fillStyle, opts = {}) {
     const { behind = false, clamp: doClamp = true } = opts;
 
+    // ... (geometry calculations are the same)
     const gx1 = doClamp ? clamp(x1_mm, 0, s.gridWmm) : x1_mm;
     const gy1 = doClamp ? clamp(y1_mm, 0, s.gridHmm) : y1_mm;
     const gx2 = doClamp ? clamp(x2_mm, 0, s.gridWmm) : x2_mm;
@@ -149,11 +170,10 @@ export function colorRectGridMM(ctx, s, x1_mm, y1_mm, x2_mm, y2_mm, color, opts 
 
     ctx.save();
     ctx.globalCompositeOperation = behind ? 'destination-over' : 'source-over';
-    ctx.fillStyle = color;
+    ctx.fillStyle = fillStyle; // <-- Use the provided fillStyle (can be color or pattern)
     ctx.fillRect(left, top, width, height);
     ctx.restore();
 }
-
 export function drawImgMM(ctx, s, img, x_mm, y_mm, opts = {}) {
   const {
     height_mm = null,
