@@ -1,5 +1,5 @@
 import { state, notify, subscribe } from './state.js';
-import { addImage } from './main.js';
+import { addImage, getCachedImage } from './main.js';
 
 export function bindUI() {
   const $ = (id) => document.getElementById(id);
@@ -82,13 +82,11 @@ export function bindUI() {
     notify();
   });
 
-  addInsigneBtn.addEventListener('click', () => {
+  addInsigneBtn.addEventListener('click', async (event) => {
     const url = insigneSelect.value;
-    const newInsigne = {
-      url,
-      x_mm: 10,
-      y_mm: 10,
-    };
+    if (!url) return;
+
+    const newInsigne = { url, x_mm: -999, y_mm: -999 };
 
     if (url.includes('/petit/') || url.includes('/min/')) {
       newInsigne.height_mm = 10;
@@ -98,8 +96,24 @@ export function bindUI() {
       newInsigne.heightPct = 0.5;
     }
 
-    addImage(newInsigne);
+    await addImage(newInsigne);
+    const img = getCachedImage(url);
+    if (!img) return;
+
+    const natAspect = img.naturalWidth / img.naturalHeight;
+    let h_mm;
+    if (newInsigne.height_mm) {
+      h_mm = newInsigne.height_mm;
+    } else {
+      h_mm = (newInsigne.heightPct || 0.5) * state.gridHmm;
+    }
+    const w_mm = h_mm * natAspect;
+
     state.selectedInsigne = newInsigne;
+    state.isDragging = true;
+    state.dragOffsetX = w_mm / 2;
+    state.dragOffsetY = h_mm / 2;
+
     notify();
   });
 
