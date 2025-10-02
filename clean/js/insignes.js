@@ -4,7 +4,7 @@
  */
 async function fetchInsignes() {
   try {
-    const response = await fetch('../insignes-list.json'); // Assumes this is the new structured file
+    const response = await fetch('./insignes-list.json'); // Assumes this is the new structured file
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }

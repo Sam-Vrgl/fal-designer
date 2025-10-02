@@ -1,5 +1,5 @@
 import { state, notify, subscribe } from './state.js';
-import { addImage, getInsignes } from './main.js';
+import { addImage } from './main.js';
 
 export function bindUI() {
   const $ = (id) => document.getElementById(id);
@@ -39,15 +39,6 @@ export function bindUI() {
   mmToPx.value = state.mmToPx;
   helperColor.value = state.helper.color;
   helperThickness.value = state.helper.thickness;
-
-  // Populate insigne dropdown
-  const insignes = getInsignes();
-  for (const insigne of insignes) {
-    const option = document.createElement('option');
-    option.value = insigne;
-    option.textContent = insigne.split('/').pop();
-    insigneSelect.appendChild(option);
-  }
 
 
   // Wire changes -> state -> notify()
@@ -94,58 +85,74 @@ export function bindUI() {
   addInsigneBtn.addEventListener('click', () => {
     const url = insigneSelect.value;
     const newInsigne = {
-        url,
-        x_mm: 10,
-        y_mm: 10,
-        heightPct: 0.5,
+      url,
+      x_mm: 10,
+      y_mm: 10,
     };
+
+    if (url.includes('/petit/') || url.includes('/min/')) {
+      newInsigne.height_mm = 10;
+    } else if (url.includes('/grand/') || url.includes('/maj/')) {
+      newInsigne.height_mm = 18;
+    } else {
+      newInsigne.heightPct = 0.5;
+    }
+
     addImage(newInsigne);
     state.selectedInsigne = newInsigne;
     notify();
   });
 
   insigneX.addEventListener('input', () => {
-      if(state.selectedInsigne) {
-          state.selectedInsigne.x_mm = insigneX.valueAsNumber;
-          notify();
-      }
+    if (state.selectedInsigne) {
+      state.selectedInsigne.x_mm = insigneX.valueAsNumber;
+      notify();
+    }
   });
 
-    insigneY.addEventListener('input', () => {
-        if(state.selectedInsigne) {
-            state.selectedInsigne.y_mm = insigneY.valueAsNumber;
-            notify();
-        }
-    });
-
-    insigneHeight.addEventListener('input', () => {
-        if(state.selectedInsigne) {
-            state.selectedInsigne.heightPct = insigneHeight.valueAsNumber / 100;
-            notify();
-        }
-    });
-
-    removeInsigneBtn.addEventListener('click', () => {
-        if (state.selectedInsigne) {
-            state.images = state.images.filter(img => img !== state.selectedInsigne);
-            state.selectedInsigne = null;
-            notify();
-        }
-    });
-
-
-    subscribe(updateInsigneControls);
-
-    function updateInsigneControls() {
-        if (state.selectedInsigne) {
-            insigneControls.style.display = 'flex';
-            insigneX.value = state.selectedInsigne.x_mm;
-            insigneY.value = state.selectedInsigne.y_mm;
-            insigneHeight.value = state.selectedInsigne.heightPct * 100;
-        } else {
-            insigneControls.style.display = 'none';
-        }
+  insigneY.addEventListener('input', () => {
+    if (state.selectedInsigne) {
+      state.selectedInsigne.y_mm = insigneY.valueAsNumber;
+      notify();
     }
+  });
+
+  insigneHeight.addEventListener('input', () => {
+    if (state.selectedInsigne && !insigneHeight.disabled) {
+      state.selectedInsigne.heightPct = insigneHeight.valueAsNumber / 100;
+      notify();
+    }
+  });
+
+  removeInsigneBtn.addEventListener('click', () => {
+    if (state.selectedInsigne) {
+      state.images = state.images.filter(img => img !== state.selectedInsigne);
+      state.selectedInsigne = null;
+      notify();
+    }
+  });
+
+
+  subscribe(updateInsigneControls);
+
+  function updateInsigneControls() {
+    if (state.selectedInsigne) {
+      insigneControls.style.display = 'flex';
+      insigneX.value = state.selectedInsigne.x_mm;
+      insigneY.value = state.selectedInsigne.y_mm;
+
+      if (state.selectedInsigne.height_mm) {
+        const heightInPct = (state.selectedInsigne.height_mm / state.gridHmm) * 100;
+        insigneHeight.value = heightInPct.toFixed(2);
+        insigneHeight.disabled = true;
+      } else if (state.selectedInsigne.heightPct) {
+        insigneHeight.value = state.selectedInsigne.heightPct * 100;
+        insigneHeight.disabled = false;
+      }
+    } else {
+      insigneControls.style.display = 'none';
+    }
+  }
 }
 
 function clampNum(v, min, max) {

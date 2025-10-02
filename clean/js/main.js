@@ -2,7 +2,7 @@ import { state, subscribe, notify } from './state.js';
 import { draw } from './renderer.js';
 import { bindUI } from './ui.js';
 import { loadImage } from './images.js';
-import  { fetchInsignes, initInsigneSelector } from './insignes.js';
+import  { initInsigneSelector } from './insignes.js';
 import { initDisciplines } from './disciplines.js';
 import { initDragAndDrop } from './drag-handler.js';
 

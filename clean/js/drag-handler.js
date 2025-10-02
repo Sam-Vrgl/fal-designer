@@ -37,7 +37,16 @@ export function initDragAndDrop(canvas) {
             if (!img) continue;
 
             const natAspect = img.naturalWidth / img.naturalHeight;
-            const h_mm = insigne.heightPct * state.gridHmm;
+            
+            let h_mm;
+            if (insigne.height_mm) {
+                h_mm = insigne.height_mm;
+            } else if (insigne.heightPct) {
+                h_mm = insigne.heightPct * state.gridHmm;
+            } else {
+                continue; 
+            }
+            
             const w_mm = h_mm * natAspect;
             
             const left_mm = insigne.x_mm;
