@@ -1,4 +1,5 @@
-import { state, notify } from './state.js';
+import { state, notify, subscribe } from './state.js';
+import { addImage, getInsignes } from './main.js';
 
 export function bindUI() {
   const $ = (id) => document.getElementById(id);
@@ -17,6 +18,16 @@ export function bindUI() {
   const helperColor = $('helperColorInput');
   const helperThickness = $('helperThicknessInput');
 
+  // Insigne controls
+  const insigneSelect = $('insigneSelect');
+  const addInsigneBtn = $('addInsigneBtn');
+  const insigneControls = $('insigneControls');
+  const insigneX = $('insigneX');
+  const insigneY = $('insigneY');
+  const insigneHeight = $('insigneHeight');
+  const removeInsigneBtn = $('removeInsigneBtn');
+
+
   // Initialize from state
   chkV.checked = state.helper.showV;
   chkH.checked = state.helper.showH;
@@ -28,6 +39,16 @@ export function bindUI() {
   mmToPx.value = state.mmToPx;
   helperColor.value = state.helper.color;
   helperThickness.value = state.helper.thickness;
+
+  // Populate insigne dropdown
+  const insignes = getInsignes();
+  for (const insigne of insignes) {
+    const option = document.createElement('option');
+    option.value = insigne;
+    option.textContent = insigne.split('/').pop();
+    insigneSelect.appendChild(option);
+  }
+
 
   // Wire changes -> state -> notify()
   chkV.addEventListener('change', () => { state.helper.showV = chkV.checked; notify(); });
@@ -69,6 +90,62 @@ export function bindUI() {
     state.helper.thickness = clampNum(helperThickness.valueAsNumber, 0.5, 50);
     notify();
   });
+
+  addInsigneBtn.addEventListener('click', () => {
+    const url = insigneSelect.value;
+    const newInsigne = {
+        url,
+        x_mm: 10,
+        y_mm: 10,
+        heightPct: 0.5,
+    };
+    addImage(newInsigne);
+    state.selectedInsigne = newInsigne;
+    notify();
+  });
+
+  insigneX.addEventListener('input', () => {
+      if(state.selectedInsigne) {
+          state.selectedInsigne.x_mm = insigneX.valueAsNumber;
+          notify();
+      }
+  });
+
+    insigneY.addEventListener('input', () => {
+        if(state.selectedInsigne) {
+            state.selectedInsigne.y_mm = insigneY.valueAsNumber;
+            notify();
+        }
+    });
+
+    insigneHeight.addEventListener('input', () => {
+        if(state.selectedInsigne) {
+            state.selectedInsigne.heightPct = insigneHeight.valueAsNumber / 100;
+            notify();
+        }
+    });
+
+    removeInsigneBtn.addEventListener('click', () => {
+        if (state.selectedInsigne) {
+            state.images = state.images.filter(img => img !== state.selectedInsigne);
+            state.selectedInsigne = null;
+            notify();
+        }
+    });
+
+
+    subscribe(updateInsigneControls);
+
+    function updateInsigneControls() {
+        if (state.selectedInsigne) {
+            insigneControls.style.display = 'flex';
+            insigneX.value = state.selectedInsigne.x_mm;
+            insigneY.value = state.selectedInsigne.y_mm;
+            insigneHeight.value = state.selectedInsigne.heightPct * 100;
+        } else {
+            insigneControls.style.display = 'none';
+        }
+    }
 }
 
 function clampNum(v, min, max) {

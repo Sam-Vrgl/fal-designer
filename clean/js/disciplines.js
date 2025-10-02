@@ -18,13 +18,13 @@ async function fetchDisciplines() {
 function populateDropdown(selector) {
   const select = document.getElementById(selector);
   const disciplineNames = Object.keys(disciplinesData);
-  const maxLength = 40; // Max character length before truncating
+  const maxLength = 40;
 
   for (const name of disciplineNames) {
     const discipline = disciplinesData[name];
     const option = document.createElement('option');
     option.value = name;
-    option.title = name; // Always set the full name as a tooltip
+    option.title = name;
 
     let displayText = name;
     if (displayText.length > maxLength) {
@@ -32,7 +32,6 @@ function populateDropdown(selector) {
     }
 
     if (discipline.custom === true) {
-      // Also truncate the text for custom disciplines
       const fullText = `${name} (**depends, unimplemented**)`;
       option.title = fullText;
       option.textContent = `${displayText} (**depends, ...**)`;
@@ -52,18 +51,16 @@ function populateDropdown(selector) {
       state.disciplineColors = colors;
       state.disciplineMaterial = discipline.matière;
     } else {
-      // Clear colors for unimplemented disciplines
       state.disciplineColors = [];
       state.disciplineMaterial = null;
     }
     notify();
   });
 
-  // Set initial state from the first *valid* discipline
   const firstValidDisciplineName = disciplineNames.find(name => !disciplinesData[name].custom);
   if (firstValidDisciplineName) {
       const firstDiscipline = disciplinesData[firstValidDisciplineName];
-      select.value = firstValidDisciplineName; // Set dropdown to the first valid option
+      select.value = firstValidDisciplineName;
       state.disciplineColors = firstDiscipline.couleursRGB.map(c => `rgb(${c})`);
       state.disciplineMaterial = firstDiscipline.matière;
   }

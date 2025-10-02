@@ -56,6 +56,18 @@
       <label>Helper color <input id="helperColorInput" type="color" value="#666666"></label>
       <label>Helper thickness <input id="helperThicknessInput" type="number" min="0.5" step="0.5" value="3"></label>
     </div>
+
+    <div class="row group">
+      <label>Add Insigne: <select id="insigneSelect"></select></label>
+      <button id="addInsigneBtn">Add</button>
+    </div>
+
+    <div id="insigneControls" class="row group" style="display: none;">
+      <label>X (mm): <input id="insigneX" type="number" value="10"></label>
+      <label>Y (mm): <input id="insigneY" type="number" value="10"></label>
+      <label>Height (%): <input id="insigneHeight" type="number" value="50"></label>
+      <button id="removeInsigneBtn">Remove</button>
+    </div>
   </div>
 
   <canvas id="myCanvas"></canvas>

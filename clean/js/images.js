@@ -1,4 +1,3 @@
-// js/images.js
 export function loadImage(url) {
   return new Promise((resolve, reject) => {
     const img = new Image();
