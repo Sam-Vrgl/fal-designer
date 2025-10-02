@@ -1,0 +1,50 @@
+{
+  "numbers": {
+    "small": {
+      "1": "./assets/insignes/chiffres/petit/1_min.png",
+      "2": "./assets/insignes/chiffres/petit/2_min.png",
+      "3": "./assets/insignes/chiffres/petit/3_min.png",
+      "4": "./assets/insignes/chiffres/petit/4_min.png",
+      "5": "./assets/insignes/chiffres/petit/5_min.png",
+      "6": "./assets/insignes/chiffres/petit/6_min.png",
+      "7": "./assets/insignes/chiffres/petit/7_min.png",
+      "8": "./assets/insignes/chiffres/petit/8_min.png",
+      "9": "./assets/insignes/chiffres/petit/9_min.png"
+    },
+    "big": {}
+  },
+  "letters": {
+    "small": {},
+    "big": {
+      "a": "./assets/insignes/lettres/maj/a_maj.png",
+      "b": "./assets/insignes/lettres/maj/b_maj.png",
+      "c": "./assets/insignes/lettres/maj/c_maj.png",
+      "d": "./assets/insignes/lettres/maj/d_maj.png",
+      "e": "./assets/insignes/lettres/maj/e_maj.png",
+      "f": "./assets/insignes/lettres/maj/f_maj.png",
+      "g": "./assets/insignes/lettres/maj/g_maj.png",
+      "h": "./assets/insignes/lettres/maj/h_maj.png",
+      "i": "./assets/insignes/lettres/maj/i_maj.png",
+      "j": "./assets/insignes/lettres/maj/j_maj.png",
+      "k": "./assets/insignes/lettres/maj/k_maj.png",
+      "l": "./assets/insignes/lettres/maj/l_maj.png",
+      "m": "./assets/insignes/lettres/maj/m_maj.png",
+      "n": "./assets/insignes/lettres/maj/n_maj.png",
+      "o": "./assets/insignes/lettres/maj/o_maj.png",
+      "p": "./assets/insignes/lettres/maj/p_maj.png",
+      "q": "./assets/insignes/lettres/maj/q_maj.png",
+      "r": "./assets/insignes/lettres/maj/r_maj.png",
+      "s": "./assets/insignes/lettres/maj/s_maj.png",
+      "t": "./assets/insignes/lettres/maj/t_maj.png",
+      "u": "./assets/insignes/lettres/maj/u_maj.png",
+      "v": "./assets/insignes/lettres/maj/v_maj.png",
+      "w": "./assets/insignes/lettres/maj/w_maj.png",
+      "x": "./assets/insignes/lettres/maj/x_maj.png",
+      "y": "./assets/insignes/lettres/maj/y_maj.png",
+      "z": "./assets/insignes/lettres/maj/z_maj.png"
+    }
+  },
+  "other": {
+    "ecole-ingenieur": "./assets/insignes/filiere/ecole-ingenieur.png"
+  }
+}
