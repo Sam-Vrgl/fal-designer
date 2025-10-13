@@ -1,4 +1,12 @@
+// Cache to store generated textures and avoid regenerating them on every frame
+const textureCache = new Map();
+
 export function createVelvetTexture(ctx, color) {
+  const cacheKey = `velvet-${color}`;
+  if (textureCache.has(cacheKey)) {
+    return textureCache.get(cacheKey);
+  }
+
   const patternCanvas = document.createElement('canvas');
   const patternCtx = patternCanvas.getContext('2d');
   const size = 40;
@@ -18,10 +26,17 @@ export function createVelvetTexture(ctx, color) {
   }
   patternCtx.putImageData(imageData, 0, 0);
 
-  return ctx.createPattern(patternCanvas, 'repeat');
+  const pattern = ctx.createPattern(patternCanvas, 'repeat');
+  textureCache.set(cacheKey, pattern); // Store the new pattern in the cache
+  return pattern;
 }
 
 export function createSatinTexture(ctx, color) {
+  const cacheKey = `satin-${color}`;
+  if (textureCache.has(cacheKey)) {
+    return textureCache.get(cacheKey);
+  }
+
   const patternCanvas = document.createElement('canvas');
   const patternCtx = patternCanvas.getContext('2d');
   const size = 12;
@@ -38,5 +53,7 @@ export function createSatinTexture(ctx, color) {
   patternCtx.lineTo(size + 2, -2);
   patternCtx.stroke();
 
-  return ctx.createPattern(patternCanvas, 'repeat');
+  const pattern = ctx.createPattern(patternCanvas, 'repeat');
+  textureCache.set(cacheKey, pattern); // Store the new pattern in the cache
+  return pattern;
 }

@@ -44,7 +44,37 @@
       "z": "./assets/insignes/lettres/maj/z_maj.png"
     }
   },
-  "other": {
-    "ecole-ingenieur": "./assets/insignes/filiere/ecole-ingenieur.png"
-  }
+  "filiere": {
+    "ecole ingenieur": {
+      "path": "./assets/insignes/filiere/ecole-ingenieur.png",
+      "size_mm": null
+    }
+  },
+  "annees": {
+    "etoile argent": {
+      "path": "./assets/insignes/annees/etoile-argent-12mm.png",
+      "size_mm": 12
+    },
+    "etoile or": {
+      "path": "./assets/insignes/annees/etoile-or-12mm.png",
+      "size_mm": 12
+    },
+    "palme double": {
+      "path": "./assets/insignes/annees/palme-double-28mm.png",
+      "size_mm": 28
+    },
+    "palme simple grande": {
+      "path": "./assets/insignes/annees/palme-simple-grande-36mm.png",
+      "size_mm": 36
+    },
+    "palme simple petit": {
+      "path": "./assets/insignes/annees/palme-simple-petit-12mm.png",
+      "size_mm": 12
+    },
+    "tete de mort": {
+      "path": "./assets/insignes/annees/tete-de-mort-15mm.png",
+      "size_mm": 15
+    }
+  },
+  "other": {}
 }

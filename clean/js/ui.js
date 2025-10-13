@@ -114,8 +114,6 @@ export function bindUI() {
     importFile.click();
   });
 
-  
-
   importFile.addEventListener('change', (event) => {
     importState(event.target.files[0]);
     // Reset the file input so the 'change' event fires even if the same file is selected again
@@ -123,16 +121,23 @@ export function bindUI() {
   });
 
   addInsigneBtn.addEventListener('click', async (event) => {
-    const url = insigneSelect.value;
+    const selectedOption = insigneSelect.options[insigneSelect.selectedIndex];
+    const url = selectedOption.value;
     if (!url) return;
 
     const newInsigne = { url, x_mm: -999, y_mm: -999 };
+    
+    // Check for explicit size from the data attribute first
+    const sizeMm = selectedOption.dataset.sizeMm;
 
-    if (url.includes('/petit/') || url.includes('/min/')) {
+    if (sizeMm) {
+      newInsigne.height_mm = parseInt(sizeMm, 10);
+    } else if (url.includes('/petit/') || url.includes('/min/')) {
       newInsigne.height_mm = 10;
     } else if (url.includes('/grand/') || url.includes('/maj/')) {
       newInsigne.height_mm = 18;
     } else {
+      // Fallback for items with no defined size
       newInsigne.heightPct = 0.5;
     }
 

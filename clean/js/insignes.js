@@ -4,7 +4,7 @@
  */
 async function fetchInsignes() {
   try {
-    const response = await fetch('./insignes-list.json'); // Assumes this is the new structured file
+    const response = await fetch('./insignes-list.json');
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -25,10 +25,9 @@ export async function initInsigneSelector(selectorId) {
 
     const insignes = await fetchInsignes();
 
-    // Helper to create an option group
-    const createOptGroup = (label, items) => {
-        if (Object.keys(items).length === 0) return; // Don't create empty groups
-
+    // Helper for simple path-based items (like letters and numbers)
+    const createSimpleOptGroup = (label, items) => {
+        if (!items || Object.keys(items).length === 0) return;
         const optgroup = document.createElement('optgroup');
         optgroup.label = label;
         for (const name in items) {
@@ -40,12 +39,32 @@ export async function initInsigneSelector(selectorId) {
         select.appendChild(optgroup);
     };
 
+    // Helper for object-based items (with size metadata, like filiere and annees)
+    const createObjectOptGroup = (label, items) => {
+        if (!items || Object.keys(items).length === 0) return;
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = label;
+        for (const name in items) {
+            const item = items[name];
+            const option = document.createElement('option');
+            option.value = item.path;
+            option.textContent = name;
+            if (item.size_mm) {
+                option.dataset.sizeMm = item.size_mm;
+            }
+            optgroup.appendChild(option);
+        }
+        select.appendChild(optgroup);
+    };
+
     // Create the option groups from the structured data
-    createOptGroup('Numbers (Small)', insignes.numbers.small);
-    createOptGroup('Numbers (Big)', insignes.numbers.big);
-    createOptGroup('Letters (Small)', insignes.letters.small);
-    createOptGroup('Letters (Big)', insignes.letters.big);
-    createOptGroup('Other', insignes.other);
+    createSimpleOptGroup('Numbers (Small)', insignes.numbers.small);
+    createSimpleOptGroup('Numbers (Big)', insignes.numbers.big);
+    createSimpleOptGroup('Letters (Small)', insignes.letters.small);
+    createSimpleOptGroup('Letters (Big)', insignes.letters.big);
+    createObjectOptGroup('Filière', insignes.filiere);
+    createObjectOptGroup('Années', insignes.annees);
+    createObjectOptGroup('Other', insignes.other);
 
     // Disable the select if no options were added
     if (select.children.length === 0) {

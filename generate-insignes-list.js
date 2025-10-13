@@ -15,6 +15,8 @@ function findAndStructureImageFiles(dir) {
     const structure = {
         numbers: { small: {}, big: {} },
         letters: { small: {}, big: {} },
+        filiere: {},
+        annees: {},
         other: {}
     };
 
@@ -25,45 +27,50 @@ function findAndStructureImageFiles(dir) {
             const categoryPath = path.join(dir, categoryName);
             if (!fs.statSync(categoryPath).isDirectory()) continue;
 
-            const items = fs.readdirSync(categoryPath);
-            let hasSizeSubDirs = items.some(item => fs.statSync(path.join(categoryPath, item)).isDirectory());
-
-            if (hasSizeSubDirs) {
+            // --- Logic to handle different category types ---
+            if (categoryName === 'chiffres' || categoryName === 'lettres') {
+                // Categories with size subdirectories (petit/grand)
+                const items = fs.readdirSync(categoryPath);
                 for (const sizeDirName of items) {
                     const sizePath = path.join(categoryPath, sizeDirName);
                     if (!fs.statSync(sizePath).isDirectory()) continue;
-
-                    // --- KEY CHANGE IS HERE ---
-                    // Map folder names ('min', 'maj') to JSON keys ('small', 'big')
+                    
                     let targetSizeKey;
-                    if (sizeDirName === 'petit' || sizeDirName === 'min') {
-                        targetSizeKey = 'small';
-                    } else if (sizeDirName === 'grand' || sizeDirName === 'maj') {
-                        targetSizeKey = 'big';
-                    } else {
-                        continue; // Ignore unrecognized size folders
-                    }
+                    if (sizeDirName === 'petit' || sizeDirName === 'min') targetSizeKey = 'small';
+                    else if (sizeDirName === 'grand' || sizeDirName === 'maj') targetSizeKey = 'big';
+                    else continue;
 
                     const files = fs.readdirSync(sizePath);
                     for (const file of files) {
                         if (!/\.(png|jpg|jpeg|gif|svg)$/i.test(file)) continue;
-
                         const webPath = './' + path.relative(WEB_ROOT, path.join(sizePath, file)).replace(/\\/g, '/');
                         const displayName = path.parse(file).name.replace(/_maj|_min/, '').replace(/_/g, ' ');
-
-                        if (categoryName === 'chiffres') {
-                            structure.numbers[targetSizeKey][displayName] = webPath;
-                        } else if (categoryName === 'lettres') {
-                             structure.letters[targetSizeKey][displayName] = webPath;
-                        }
+                        
+                        if (categoryName === 'chiffres') structure.numbers[targetSizeKey][displayName] = webPath;
+                        else structure.letters[targetSizeKey][displayName] = webPath;
                     }
                 }
-            } else { // This is a category without sizes, like 'filiere'
+            } else {
+                // Categories without size subdirectories (filiere, annees, other)
+                const items = fs.readdirSync(categoryPath);
                 for (const file of items) {
                      if (!/\.(png|jpg|jpeg|gif|svg)$/i.test(file)) continue;
+                     
                      const webPath = './' + path.relative(WEB_ROOT, path.join(categoryPath, file)).replace(/\\/g, '/');
-                     const displayName = path.parse(file).name.replace(/-10-mm$/, '').replace(/_/g, ' ');
-                     structure.other[displayName] = webPath;
+                     const match = file.match(/-(\d+)mm\./i);
+                     const size = match ? parseInt(match[1], 10) : null;
+                     const displayName = path.parse(file).name.replace(/-\d+mm$/, '').replace(/-/g, ' ');
+                     
+                     const insigneData = { path: webPath, size_mm: size };
+
+                     // Place the data in the correct category
+                     if (categoryName === 'filiere') {
+                        structure.filiere[displayName] = insigneData;
+                     } else if (categoryName === 'annees') {
+                        structure.annees[displayName] = insigneData;
+                     } else {
+                        structure.other[displayName] = insigneData;
+                     }
                 }
             }
         }
