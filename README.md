@@ -17,3 +17,9 @@ Outil pour planifier la création d'une faluche et les ruban et pins nécessaire
         - options d'insigne: moivre, filière différente, particularités PASS/LASS/prépa,
 
 ![Current POC preview](./Thumbnail.png)
+
+
+TODO:
+[] Ajouter insignes années aux options
+[] Créer images insignes de filières
+[] Ajouter fonctionnalité moivre

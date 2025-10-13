@@ -8,10 +8,10 @@
     :root { color-scheme: light; }
     body { margin:0; font:14px/1.35 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
     #controls{
-      /* position:fixed; top:8px; left:8px; z-index:10; */
       background:#fff; border:1px solid #ccc; border-radius:10px;
       padding:10px 12px; box-shadow:0 2px 10px rgba(0,0,0,.08);
       max-width: min(92vw, 520px);
+      margin: 10px auto; /* Added margin for spacing */
     }
     #controls .row{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:8px; }
     #controls label{ display:flex; gap:.5rem; align-items:center; white-space:nowrap; }
@@ -27,7 +27,17 @@
 </head>
 
 <body>
+
+  <canvas id="myCanvas"></canvas>
+
   <div id="controls">
+    <div class="row group">
+      <label>File: 
+        <button id="exportBtn">Export to JSON</button>
+        <button id="importBtn">Import from JSON</button>
+        <input type="file" id="importFile" accept=".json" style="display: none;" />
+      </label>
+    </div>
     <div class="row">
       <label>Discipline <select id="disciplineSelect"></select></label>
     </div>
@@ -62,15 +72,31 @@
       <button id="addInsigneBtn">Add</button>
     </div>
 
+    <div class="row group">
+        <label>Material: <select id="materialType"><option value="satin">Satin</option><option value="velours">Velvet</option></select></label>
+        <label>Color: <input type="color" id="materialColor" value="#ff0000"></label>
+        <label>X: <input type="number" id="materialX" value="10"></label>
+        <label>Y: <input type="number" id="materialY" value="10"></label>
+        <label>Width: <input type="number" id="materialWidth" value="150"></label>
+        <label>Height: <input type="number" id="materialHeight" value="18"></label>
+        <button id="addMaterialBtn">Add Material Section</button>
+    </div>
+    
     <div id="insigneControls" class="row group" style="display: none;">
       <label>X (mm): <input id="insigneX" type="number" value="10"></label>
       <label>Y (mm): <input id="insigneY" type="number" value="10"></label>
       <label>Height (%): <input id="insigneHeight" type="number" value="50"></label>
       <button id="removeInsigneBtn">Remove</button>
     </div>
-  </div>
 
-  <canvas id="myCanvas"></canvas>
+    <div id="materialControls" class="row group" style="display: none;">
+      <label>X (mm): <input id="selectedMaterialX" type="number" value="10"></label>
+      <label>Y (mm): <input id="selectedMaterialY" type="number" value="10"></label>
+      <label>Width (mm): <input id="selectedMaterialWidth" type="number" value="150"></label>
+      <label>Height (mm): <input id="selectedMaterialHeight" type="number" value="18"></label>
+      <button id="removeMaterialBtn">Remove</button>
+    </div>
+  </div>
 
   <script type="module" src="./js/main.js"></script>
 </body>

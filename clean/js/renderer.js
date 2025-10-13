@@ -81,7 +81,7 @@ export function draw(canvas, ctx, s) {
     ctx.lineWidth = 1.25;
     ctx.stroke();
 
-        if (s.disciplineColors && s.disciplineColors.length > 0) {
+    if (s.disciplineColors && s.disciplineColors.length > 0) {
       const fillStyles = s.disciplineColors.map(color => {
         if (s.disciplineMaterial === 'velours') {
           return createVelvetTexture(ctx, color);
@@ -100,14 +100,44 @@ export function draw(canvas, ctx, s) {
       }
     }
 
-    // --- Demo fills (kept for testing)
-    // colorRectGridMM(ctx, s, 0, 0, s.gridWmm, Math.min(19, s.gridHmm / 2), 'rgba(0,0,255)', { behind: false });
-    // colorRectGridMM(ctx, s, 0, Math.min(20, s.gridHmm / 2), s.gridWmm, s.gridHmm, 'rgba(0,0,0)', { behind: false });
+    // --- Draw Material Sections ---
+    for (const material of s.materials) {
+        let fillStyle;
+        if (material.material === 'velours') {
+            fillStyle = createVelvetTexture(ctx, material.color);
+        } else if (material.material === 'satin') {
+            fillStyle = createSatinTexture(ctx, material.color);
+        } else {
+            fillStyle = material.color; // Fallback to a solid color
+        }
+
+        colorRectGridMM(
+            ctx, s,
+            material.x_mm, material.y_mm,
+            material.x_mm + material.width_mm, material.y_mm + material.height_mm,
+            fillStyle
+        );
+    }
+
+    // --- Draw selected material outline ---
+    if (s.selectedMaterial) {
+        const originX = s.marginMm * s.mmToPx;
+        const originY = s.marginMm * s.mmToPx;
+        const x = originX + s.selectedMaterial.x_mm * s.mmToPx;
+        const y = originY + s.selectedMaterial.y_mm * s.mmToPx;
+        const width = s.selectedMaterial.width_mm * s.mmToPx;
+        const height = s.selectedMaterial.height_mm * s.mmToPx;
+
+        ctx.strokeStyle = 'rgba(255, 0, 0, 0.7)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, width, height);
+    }
+
+
     for (const it of s.images) {
         const img = getCachedImage(it.url);
         if (!img) continue;
         drawImgMM(ctx, s, img, it.x_mm, it.y_mm, it);
-        console.log('drawn', it.url);
     }
 
     const midX = totalCssW / 2;

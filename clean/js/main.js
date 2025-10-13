@@ -9,14 +9,12 @@ import { initDragAndDrop } from './drag-handler.js';
 const canvas = document.getElementById('myCanvas');
 const ctx = canvas.getContext('2d', { alpha: true });
 
-
-// simple in-memory cache: url -> HTMLImageElement
 const imgCache = new Map();
 export function getCachedImage(url) { return imgCache.get(url) || null; }
 
 
 
-async function preloadImages(list = state.images) {
+export async function preloadImages(list = state.images) {
   await Promise.allSettled(list.map(async (it) => {
     if (!imgCache.has(it.url)) {
       const img = await loadImage(it.url);
@@ -41,9 +39,6 @@ const rerender = () => draw(canvas, ctx, state);
 subscribe(rerender);
 window.addEventListener('resize', rerender);
 
-
-
-
 bindUI();
 
 initDragAndDrop(canvas);
@@ -52,6 +47,5 @@ Promise.all([
     initDisciplines('disciplineSelect'),
     initInsigneSelector('insigneSelect')
 ]).finally(() => {
-    // Preload initial images and do the first render after UI is ready
     preloadImages().finally(rerender);
 });

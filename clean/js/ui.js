@@ -1,8 +1,14 @@
 import { state, notify, subscribe } from './state.js';
 import { addImage, getCachedImage } from './main.js';
+import { exportState, importState } from './file-handler.js';
 
 export function bindUI() {
   const $ = (id) => document.getElementById(id);
+
+  // File controls
+  const exportBtn = $('exportBtn');
+  const importBtn = $('importBtn');
+  const importFile = $('importFile');
 
   // Toggles
   const chkV = $('toggleV');
@@ -26,6 +32,23 @@ export function bindUI() {
   const insigneY = $('insigneY');
   const insigneHeight = $('insigneHeight');
   const removeInsigneBtn = $('removeInsigneBtn');
+
+  // New material controls
+  const materialType = $('materialType');
+  const materialColor = $('materialColor');
+  const materialX = $('materialX');
+  const materialY = $('materialY');
+  const materialWidth = $('materialWidth');
+  const materialHeight = $('materialHeight');
+  const addMaterialBtn = $('addMaterialBtn');
+  
+  // Selected material controls
+  const materialControls = $('materialControls');
+  const selectedMaterialX = $('selectedMaterialX');
+  const selectedMaterialY = $('selectedMaterialY');
+  const selectedMaterialWidth = $('selectedMaterialWidth');
+  const selectedMaterialHeight = $('selectedMaterialHeight');
+  const removeMaterialBtn = $('removeMaterialBtn');
 
 
   // Initialize from state
@@ -82,6 +105,18 @@ export function bindUI() {
     notify();
   });
 
+  exportBtn.addEventListener('click', exportState);
+
+  importBtn.addEventListener('click', () => {
+    importFile.click();
+  });
+
+  importFile.addEventListener('change', (event) => {
+    importState(event.target.files[0]);
+    // Reset the file input so the 'change' event fires even if the same file is selected again
+    event.target.value = '';
+  });
+
   addInsigneBtn.addEventListener('click', async (event) => {
     const url = insigneSelect.value;
     if (!url) return;
@@ -117,6 +152,18 @@ export function bindUI() {
     notify();
   });
 
+  addMaterialBtn.addEventListener('click', () => {
+      state.materials.push({
+          x_mm: materialX.valueAsNumber,
+          y_mm: materialY.valueAsNumber,
+          width_mm: materialWidth.valueAsNumber,
+          height_mm: materialHeight.valueAsNumber,
+          material: materialType.value,
+          color: materialColor.value
+      });
+      notify();
+  });
+
   insigneX.addEventListener('input', () => {
     if (state.selectedInsigne) {
       state.selectedInsigne.x_mm = insigneX.valueAsNumber;
@@ -146,8 +193,45 @@ export function bindUI() {
     }
   });
 
+  selectedMaterialX.addEventListener('input', () => {
+    if (state.selectedMaterial) {
+      state.selectedMaterial.x_mm = selectedMaterialX.valueAsNumber;
+      notify();
+    }
+  });
+
+  selectedMaterialY.addEventListener('input', () => {
+    if (state.selectedMaterial) {
+      state.selectedMaterial.y_mm = selectedMaterialY.valueAsNumber;
+      notify();
+    }
+  });
+
+  selectedMaterialWidth.addEventListener('input', () => {
+    if (state.selectedMaterial) {
+      state.selectedMaterial.width_mm = selectedMaterialWidth.valueAsNumber;
+      notify();
+    }
+  });
+
+  selectedMaterialHeight.addEventListener('input', () => {
+    if (state.selectedMaterial) {
+      state.selectedMaterial.height_mm = selectedMaterialHeight.valueAsNumber;
+      notify();
+    }
+  });
+  
+  removeMaterialBtn.addEventListener('click', () => {
+    if (state.selectedMaterial) {
+      state.materials = state.materials.filter(m => m !== state.selectedMaterial);
+      state.selectedMaterial = null;
+      notify();
+    }
+  });
+
 
   subscribe(updateInsigneControls);
+  subscribe(updateMaterialControls);
 
   function updateInsigneControls() {
     if (state.selectedInsigne) {
@@ -165,6 +249,18 @@ export function bindUI() {
       }
     } else {
       insigneControls.style.display = 'none';
+    }
+  }
+
+  function updateMaterialControls() {
+    if (state.selectedMaterial) {
+      materialControls.style.display = 'flex';
+      selectedMaterialX.value = state.selectedMaterial.x_mm;
+      selectedMaterialY.value = state.selectedMaterial.y_mm;
+      selectedMaterialWidth.value = state.selectedMaterial.width_mm;
+      selectedMaterialHeight.value = state.selectedMaterial.height_mm;
+    } else {
+      materialControls.style.display = 'none';
     }
   }
 }
