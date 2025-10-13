@@ -2,32 +2,32 @@ import { state, subscribe } from './state.js';
 import { draw } from './renderer.js';
 import { bindUI } from './ui.js';
 import { loadImage } from './images.js';
-import { initInsignePalette } from './insignes.js';
+import  { initInsignePalette } from './insignes.js';
 import { initDisciplines } from './disciplines.js';
 import { initDragAndDrop } from './drag-handler.js';
 
 
 function main() {
-  const canvas = document.getElementById('myCanvas');
-  if (!canvas) {
-    console.error("Canvas element not found!");
-    return;
-  }
-  const ctx = canvas.getContext('2d', { alpha: true });
+    const canvas = document.getElementById('myCanvas');
+    if (!canvas) {
+        console.error("Canvas element not found!");
+        return;
+    }
+    const ctx = canvas.getContext('2d', { alpha: true });
 
-  const rerender = () => draw(canvas, ctx, state);
-  subscribe(rerender);
-  window.addEventListener('resize', rerender);
+    const rerender = () => draw(canvas, ctx, state);
+    subscribe(rerender);
+    window.addEventListener('resize', rerender);
 
-  bindUI();
-  initDragAndDrop(canvas);
+    bindUI();
+    initDragAndDrop(canvas);
 
-  Promise.all([
-    initDisciplines('disciplineSelect'),
-    initInsignePalette('insigne-list', 'insigne-search')
-  ]).finally(() => {
-    preloadImages().finally(rerender);
-  });
+    Promise.all([
+        initDisciplines('disciplineSelect'),
+        initInsignePalette('insigne-list', 'insigne-search')
+    ]).finally(() => {
+        preloadImages().finally(rerender);
+    });
 }
 
 const imgCache = new Map();
@@ -55,7 +55,7 @@ export async function addImage(placement) {
     }
   } catch (error) {
     console.error(`Could not load image at ${placement.url}. Removing it from the design.`, error);
-    state.images = state.images.filter(img => img !== placement);
+        state.images = state.images.filter(img => img !== placement);
   }
 }
 

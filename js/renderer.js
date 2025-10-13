@@ -17,7 +17,7 @@ export function draw(canvas, ctx, s, isLiveRender = true) {
         canvas.style.width = `${container.clientWidth}px`;
         canvas.style.height = `${container.clientHeight}px`;
     }
-
+    
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -25,13 +25,13 @@ export function draw(canvas, ctx, s, isLiveRender = true) {
     const offsetX = s.viewOffsetX * dpr;
     const offsetY = s.viewOffsetY * dpr;
     ctx.setTransform(scale, 0, 0, scale, offsetX, offsetY);
-
+    
     const TOTAL_W_MM = s.gridWmm + 2 * s.marginMm;
     const TOTAL_H_MM = s.gridHmm + 2 * s.marginMm;
 
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, TOTAL_W_MM, TOTAL_H_MM);
-
+    
     const baseLineWidth = 1 / (currentMmToPx * s.viewScale);
 
     ctx.strokeStyle = '#000';
@@ -59,7 +59,7 @@ export function draw(canvas, ctx, s, isLiveRender = true) {
         ctx.strokeStyle = 'lightgray';
         ctx.stroke();
     }
-
+    
     const major = Math.max(s.minorStepMm, s.majorStepMm);
     if (major * s.viewScale * currentMmToPx > 3) {
         ctx.beginPath();
@@ -73,20 +73,20 @@ export function draw(canvas, ctx, s, isLiveRender = true) {
         ctx.strokeStyle = '#c0c0c0';
         ctx.stroke();
     }
-
+    
     if (s.disciplineColors && s.disciplineColors.length > 0) {
-        const fillStyles = s.disciplineColors.map(color => {
-            if (s.disciplineMaterial === 'velours') return createVelvetTexture(ctx, color, currentMmToPx * s.viewScale);
-            if (s.disciplineMaterial === 'satin') return createSatinTexture(ctx, color, currentMmToPx * s.viewScale);
-            return color;
-        });
-        if (fillStyles.length === 1) {
-            colorRectGridMM(ctx, s, 0, 0, s.gridWmm, s.gridHmm, fillStyles[0]);
-        } else if (fillStyles.length > 1) {
-            const midY = s.gridHmm / 2;
-            colorRectGridMM(ctx, s, 0, 0, s.gridWmm, midY, fillStyles[0]);
-            colorRectGridMM(ctx, s, 0, midY, s.gridWmm, s.gridHmm, fillStyles[1]);
-        }
+      const fillStyles = s.disciplineColors.map(color => {
+        if (s.disciplineMaterial === 'velours') return createVelvetTexture(ctx, color, currentMmToPx * s.viewScale);
+        if (s.disciplineMaterial === 'satin') return createSatinTexture(ctx, color, currentMmToPx * s.viewScale);
+        return color;
+      });
+      if (fillStyles.length === 1) {
+        colorRectGridMM(ctx, s, 0, 0, s.gridWmm, s.gridHmm, fillStyles[0]);
+      } else if (fillStyles.length > 1) {
+        const midY = s.gridHmm / 2;
+        colorRectGridMM(ctx, s, 0, 0, s.gridWmm, midY, fillStyles[0]);
+        colorRectGridMM(ctx, s, 0, midY, s.gridWmm, s.gridHmm, fillStyles[1]);
+      }
     }
 
     s.materials.forEach(material => {
@@ -95,7 +95,7 @@ export function draw(canvas, ctx, s, isLiveRender = true) {
         else if (material.material === 'satin') fillStyle = createSatinTexture(ctx, material.color, currentMmToPx * s.viewScale);
         colorRectGridMM(ctx, s, material.x_mm, material.y_mm, material.x_mm + material.width_mm, material.y_mm + material.height_mm, fillStyle);
     });
-
+    
     ctx.save();
     ctx.beginPath(); ctx.rect(s.marginMm, s.marginMm, s.gridWmm, s.gridHmm); ctx.clip();
     const moivrePadding = 10;
@@ -111,7 +111,7 @@ export function draw(canvas, ctx, s, isLiveRender = true) {
         ctx.restore();
     });
     ctx.restore();
-
+    
     if (isLiveRender) {
         const outlineWidth = 2 * baseLineWidth;
         if (s.selectedMaterial) {
@@ -129,7 +129,7 @@ export function draw(canvas, ctx, s, isLiveRender = true) {
             ctx.restore();
         }
     }
-
+    
     s.images.forEach(it => {
         const img = getCachedImage(it.url);
         if (img) drawImgMM(ctx, s, img, it.x_mm, it.y_mm, it, currentMmToPx);
@@ -146,7 +146,7 @@ export function draw(canvas, ctx, s, isLiveRender = true) {
             ctx.strokeRect(s.marginMm + insigne.x_mm, s.marginMm + insigne.y_mm, w_mm, h_mm);
         }
     }
-
+    
     if (isLiveRender && s.isSnapping) {
         ctx.save();
         ctx.strokeStyle = 'rgba(255, 0, 255, 0.8)'; ctx.lineWidth = 1.5 * baseLineWidth;
@@ -187,16 +187,16 @@ export function colorRectGridMM(ctx, s, x1_mm, y1_mm, x2_mm, y2_mm, fillStyle, o
 }
 
 export function drawImgMM(ctx, s, img, x_mm, y_mm, opts = {}, mmToPxOverride = null) {
-    const { height_mm = null, heightPct = null } = opts;
-    if (!img.complete || img.naturalWidth === 0) return null;
-    const natAspect = img.naturalWidth / img.naturalHeight;
-    let h_mm = height_mm != null ? height_mm : (heightPct || 0.3) * s.gridHmm;
-    let w_mm = h_mm * natAspect;
-    const x_final = s.marginMm + x_mm;
-    const y_final = s.marginMm + y_mm;
-    ctx.save();
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(img, x_final, y_final, w_mm, h_mm);
-    ctx.restore();
+  const { height_mm = null, heightPct = null } = opts;
+  if (!img.complete || img.naturalWidth === 0) return null;
+  const natAspect = img.naturalWidth / img.naturalHeight;
+  let h_mm = height_mm != null ? height_mm : (heightPct || 0.3) * s.gridHmm;
+  let w_mm = h_mm * natAspect;
+  const x_final = s.marginMm + x_mm;
+  const y_final = s.marginMm + y_mm;
+  ctx.save();
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(img, x_final, y_final, w_mm, h_mm);
+  ctx.restore();
 }

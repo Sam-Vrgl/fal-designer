@@ -4,16 +4,16 @@ import { preloadImages } from './main.js';
 function sanitizeString(str) {
     if (!str) return '';
     return str.normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/['\s\W]/g, '')
-        .toLowerCase();
+              .replace(/[\u0300-\u036f]/g, '')
+              .replace(/['\s\W]/g, '')
+              .toLowerCase();
 }
 
 
 function getTimestamp() {
     const d = new Date();
     const pad = (n) => n.toString().padStart(2, '0');
-
+    
     const year = d.getFullYear();
     const month = pad(d.getMonth() + 1);
     const day = pad(d.getDate());
@@ -65,7 +65,7 @@ export function importState(file) {
             state.gridWmm = loadedState.gridWmm;
             state.gridHmm = loadedState.gridHmm;
             state.marginMm = loadedState.marginMm;
-
+            
             const disciplineSelect = document.getElementById('disciplineSelect');
             if (loadedState.discipline) {
                 disciplineSelect.value = loadedState.discipline;
@@ -75,7 +75,7 @@ export function importState(file) {
             state.materials = loadedState.materials || [];
             state.moivres = loadedState.moivres || [];
             state.images = loadedState.images || [];
-
+            
             state.selectedInsigne = null;
             state.selectedMaterial = null;
             state.selectedMoivre = null;

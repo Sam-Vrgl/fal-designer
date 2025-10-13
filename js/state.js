@@ -5,36 +5,36 @@ let redoStack = [];
 const HISTORY_LIMIT = 50;
 
 const defaultState = {
-    mmToPx: 3.7795275591,
-    gridWmm: 700,
-    gridHmm: 38,
-    marginMm: 10,
-    minorStepMm: 1,
-    majorStepMm: 10,
-    helper: { showV: true, showH: true, color: '#666666', thickness: 3 },
-    discipline: '',
-    disciplineColors: [],
-    disciplineMaterial: null,
-    materials: [],
-    moivres: [],
-    images: [],
-    viewScale: 1.0,
-    viewOffsetX: 0,
-    viewOffsetY: 0,
-    currentMode: 'select',
-    insigneToPlace: null,
-    isSnapping: false,
-    selectedInsigne: null,
-    isDragging: false,
-    dragOffsetX: 0,
-    dragOffsetY: 0,
-    selectedMaterial: null,
-    isDraggingMaterial: false,
-    dragMaterialOffsetX: 0,
-    dragMaterialOffsetY: 0,
-    selectedMoivre: null,
-    isDraggingMoivre: false,
-    dragMoivreOffsetX: 0,
+  mmToPx: 3.7795275591,
+  gridWmm: 700,
+  gridHmm: 38,
+  marginMm: 10,
+  minorStepMm: 1,
+  majorStepMm: 10,
+  helper: { showV: true, showH: true, color: '#666666', thickness: 3 },
+  discipline: '',
+  disciplineColors: [],
+  disciplineMaterial: null,
+  materials: [],
+  moivres: [],
+  images: [],
+  viewScale: 1.0,
+  viewOffsetX: 0,
+  viewOffsetY: 0,
+  currentMode: 'select',
+  insigneToPlace: null,
+  isSnapping: false,
+  selectedInsigne: null,
+  isDragging: false,
+  dragOffsetX: 0,
+  dragOffsetY: 0,
+  selectedMaterial: null,
+  isDraggingMaterial: false,
+  dragMaterialOffsetX: 0,
+  dragMaterialOffsetY: 0,
+  selectedMoivre: null,
+  isDraggingMoivre: false,
+  dragMoivreOffsetX: 0,
 };
 
 export let state = { ...defaultState };
@@ -52,7 +52,7 @@ function restoreFromSnapshot(snapshot) {
     state.materials = snapshot.materials;
     state.moivres = snapshot.moivres;
     state.images = snapshot.images;
-
+    
     state.selectedInsigne = null;
     state.selectedMaterial = null;
     state.selectedMoivre = null;
