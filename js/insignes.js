@@ -57,11 +57,12 @@ export async function initInsignePalette(paletteId, searchInputId) {
 
     createCategory('Filière', insignes.filiere, true);
     createCategory('Années', insignes.annees, true);
-    createCategory('Numbers (Small)', insignes.numbers.small, false);
-    createCategory('Letters (Small)', insignes.letters.small, false);
-    createCategory('Letters (Big)', insignes.letters.big, false);
-    createCategory('Other', insignes.other, true);
-    
+    createCategory('Chiffre (petits)', insignes.numbers.small, false);
+    createCategory('Chiffre (grands)', insignes.numbers.big, false);
+    createCategory('Lettres (petites)', insignes.letters.small, false);
+    createCategory('Lettres (grandes)', insignes.letters.big, false);
+    createCategory('Autres', insignes.other, true);
+
     searchInput.addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase();
         allInsigneElements.forEach(img => {

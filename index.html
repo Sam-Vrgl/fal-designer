@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fal Designer</title>
+  <title>FalDesigner V1</title>
   <style>
     :root { color-scheme: light; --toolbar-height: 40px; }
     body { 
@@ -15,7 +15,6 @@
       background-color: #f0f0f0;
     }
 
-    /* Main Layout */
     #app-container {
       display: flex;
       flex-grow: 1;
@@ -60,7 +59,6 @@
       cursor: default;
     }
 
-    /* Zoom Toolbar */
     #canvas-toolbar {
         height: var(--toolbar-height);
         flex-shrink: 0;
@@ -76,7 +74,6 @@
     #canvas-toolbar button { font-weight: bold; padding: 4px 8px; }
     #zoom-display { font-weight: 500; min-width: 50px; text-align: center; }
 
-    /* Modal Styles */
     #welcome-modal-overlay {
         position: fixed;
         top: 0;
@@ -101,7 +98,6 @@
     #welcome-modal p { line-height: 1.6; margin-bottom: 20px; }
     #welcome-modal button { padding: 10px 20px; border: none; background-color: #007bff; color: white; border-radius: 5px; cursor: pointer; font-size: 16px; }
 
-    /* Common Panel Styling */
     .panel {
       background: #fff;
       border: 1px solid #ccc;
@@ -117,7 +113,6 @@
     #toolbar button.active { background-color: #007bff; color: white; border-color: #007bff; }
     #resetBtn { background-color: #dc3545; color: white; border-color: #dc3545; }
     
-    /* Insigne Palette */
     #insigne-search { width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box; }
     #insigne-palette { display: flex; flex-direction: column; min-height: 300px; }
     #insigne-list { flex-grow: 1; overflow-y: auto; }
@@ -127,7 +122,6 @@
     #insigne-palette img { width: 100%; height: 100%; border: 2px solid transparent; border-radius: 4px; cursor: pointer; transition: all 0.2s ease; object-fit: contain; }
     #insigne-palette img:hover { border-color: #007bff; background-color: #f0f8ff; }
 
-    /* Inspector Panel & Tips Panel */
     #inspector-panel { flex-grow: 1; min-height: 0; overflow-y: auto; }
     #inspector-panel .prop-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
     #inspector-panel label { font-weight: 600; }
@@ -138,7 +132,6 @@
     #tips-panel li::before { content: "💡"; position: absolute; left: 0; top: 1px; }
     #tips-panel b { background-color: #eee; padding: 2px 5px; border-radius: 4px; font-family: monospace; }
     
-    /* Collapsible Sections */
     details summary { cursor: pointer; font-weight: 600; list-style: none; padding: 4px 0; }
     details summary::-webkit-details-marker { display: none; }
     details summary::before { content: '▶'; display: inline-block; margin-right: .5rem; transition: transform .2s ease; font-size: 0.8em; }
@@ -158,19 +151,19 @@
     <div id="palette-container">
       <div id="toolbar" class="panel">
         <div class="row">
-          <button id="selectModeBtn" class="active">Select</button>
-          <button id="resetBtn" title="Reset all data and start over">Reset Design</button>
+          <button id="selectModeBtn" class="active">Sélectionner</button>
+          <button id="resetBtn" title="Réinitialiser la création et toutes les données">Réinitialiser</button>
         </div>
          <div class="row" style="margin-top: 10px;">
-          <button id="exportBtn">Export JSON</button>
-          <button id="importBtn">Import JSON</button>
+          <button id="exportBtn">Exporter JSON</button>
+          <button id="importBtn">Importer JSON</button>
           <input type="file" id="importFile" accept=".json" style="display: none;" />
-          <button id="exportImageBtn">Export Image</button>
+          <button id="exportImageBtn">Exporter Image</button>
         </div>
       </div>
       <div class="panel">
         <details open>
-          <summary>Design & Materials</summary>
+          <summary>Conception & Matériaux</summary>
           <div class="details-content">
             <div class="row">
               <label for="disciplineSelect">Discipline</label>
@@ -178,103 +171,103 @@
             </div>
             <hr />
             <div class="row">
-               <label for="materialType">Material</label>
+               <label for="materialType">Matière</label>
                <select id="materialType">
                  <option value="satin">Satin</option>
-                 <option value="velours">Velvet</option>
+                 <option value="velours">Velours</option>
                </select>
-               <label for="materialColor">Color</label>
+               <label for="materialColor">Couleur</label>
                <input type="color" id="materialColor" value="#880000">
              </div>
              <div class="row">
-               <button id="addMaterialBtn" style="width: 100%;">Add Material Section</button>
+               <button id="addMaterialBtn" style="width: 100%;">Ajouter section</button>
              </div>
              <hr />
              <div class="row">
-               <label for="moivreColor">Moivre</label>
+               <label for="moivreColor">Moire</label>
                <select id="moivreColor">
-                   <option value="rgb(255, 255, 255)">White</option>
-                   <option value="rgb(0, 0, 139)">Blue</option>
-                   <option value="rgb(0, 0, 0)">Black</option>
+                   <option value="rgb(255, 255, 255)">Blanc</option>
+                   <option value="rgb(65, 105, 225)">Bleu</option>
+                   <option value="rgb(0, 0, 0)">Noir</option>
                </select>
-               <button id="addMoivreBtn">Add</button>
+               <button id="addMoivreBtn">Ajouter</button>
              </div>
           </div>
         </details>
       </div>
        <div class="panel">
         <details>
-          <summary>Settings</summary>
+          <summary>Réglages</summary>
           <div class="details-content">
              <div class="row">
-              <label><input id="toggleV" type="checkbox" checked> V Helper</label>
-              <label><input id="toggleH" type="checkbox" checked> H Helper</label>
+              <label><input id="toggleV" type="checkbox" checked> Guide V</label>
+              <label><input id="toggleH" type="checkbox" checked> Guide H</label>
             </div>
             <hr />
             <div class="row">
-               <label for="gridWInput">Grid W (mm)</label>
+               <label for="gridWInput">Largeur (mm)</label>
                <input id="gridWInput" type="number" min="1" step="1" value="700">
             </div>
             <div class="row">
-               <label for="gridHInput">Grid H (mm)</label>
+               <label for="gridHInput">Hauteur (mm)</label>
                <input id="gridHInput" type="number" min="1" step="1" value="38">
             </div>
             <div class="row">
-               <label for="marginInput">Margin (mm)</label>
+               <label for="marginInput">Marge (mm)</label>
                <input id="marginInput" type="number" min="0" step="1" value="10">
             </div>
           </div>
         </details>
       </div>
       <div id="insigne-palette" class="panel">
-        <input type="text" id="insigne-search" placeholder="Search insignes...">
+        <input type="text" id="insigne-search" placeholder="Rechercher un insigne...">
         <div id="insigne-list"></div>
       </div>
     </div>
 
     <div id="main-content-wrapper">
         <div id="canvas-toolbar">
-            <button id="zoomOutBtn" title="Zoom Out">-</button>
-            <button id="zoomInBtn" title="Zoom In">+</button>
-            <button id="zoomFitBtn" title="Fit to View">Fit</button>
+            <button id="zoomOutBtn" title="Zoom arrière">-</button>
+            <button id="zoomInBtn" title="Zoom avant">+</button>
+            <button id="zoomFitBtn" title="Ajuster à la vue">Ajuster</button>
             <span id="zoom-display">100%</span>
         </div>
-        <div id="canvas-container" title="Scroll to pan. Shift+Scroll to pan horizontally. Ctrl/Cmd+Scroll to zoom.">
+        <div id="canvas-container" title="Molette pour défiler. Maj+Molette pour défiler horizontalement. Ctrl/Cmd+Molette pour zoomer.">
           <canvas id="myCanvas"></canvas>
         </div>
     </div>
 
     <div id="inspector-container">
       <div id="inspector-panel" class="panel">
-        <h3>Properties</h3>
+        <h3>Propriétés</h3>
         <div id="inspector-content">
-          <div id="no-selection">Select an item on the canvas.</div>
+          <div id="no-selection">Sélectionnez un élément sur le canevas.</div>
           <div id="insigne-props" style="display: none;">
             <div class="prop-row"><label for="insigneX">X (mm)</label><input id="insigneX" type="number"></div>
             <div class="prop-row"><label for="insigneY">Y (mm)</label><input id="insigneY" type="number"></div>
-            <div class="prop-row"><label for="insigneHeight">Height (%)</label><input id="insigneHeight" type="number"></div>
-            <button id="removeInsigneBtn">Remove Insigne</button>
+            <div class="prop-row"><label for="insigneHeight">Hauteur (%)</label><input id="insigneHeight" type="number"></div>
+            <button id="removeInsigneBtn">Retirer l'insigne</button>
           </div>
           <div id="material-props" style="display: none;">
              <div class="prop-row"><label for="selectedMaterialX">X (mm)</label><input id="selectedMaterialX" type="number"></div>
              <div class="prop-row"><label for="selectedMaterialY">Y (mm)</label><input id="selectedMaterialY" type="number"></div>
-             <div class="prop-row"><label for="selectedMaterialWidth">Width (mm)</label><input id="selectedMaterialWidth" type="number"></div>
-             <div class="prop-row"><label for="selectedMaterialHeight">Height (mm)</label><input id="selectedMaterialHeight" type="number"></div>
-            <button id="removeMaterialBtn">Remove Section</button>
+             <div class="prop-row"><label for="selectedMaterialWidth">Largeur (mm)</label><input id="selectedMaterialWidth" type="number"></div>
+             <div class="prop-row"><label for="selectedMaterialHeight">Hauteur (mm)</label><input id="selectedMaterialHeight" type="number"></div>
+            <button id="removeMaterialBtn">Retirer la section</button>
           </div>
           <div id="moivre-props" style="display: none;">
-             <p>Moivre selected.</p>
-             <button id="removeMoivreBtn">Remove Moivre</button>
+             <p>Moire sélectionnée.</p>
+             <button id="removeMoivreBtn">Retirer la moire</button>
           </div>
         </div>
       </div>
       <div id="tips-panel" class="panel">
-          <h3>Tips</h3>
+          <h3>Astuces</h3>
           <ul>
-              <li><b>Scroll</b> to pan the canvas vertically.</li>
-              <li><b>Shift + Scroll</b> to pan horizontally.</li>
-              <li><b>Ctrl/Cmd + Scroll</b> to zoom the view.</li>
-              <li>Hold <b>Shift</b> while dragging an item to disable snapping.</li>
+              <li><b>Molette</b> pour défiler verticalement.</li>
+              <li><b>Maj + Molette</b> pour défiler horizontalement.</li>
+              <li><b>Ctrl/Cmd + Molette</b> pour zoomer.</li>
+              <li>Maintenir <b>Maj</b> en déplaçant un élément pour désactiver l'aimantation.</li>
           </ul>
       </div>
     </div>
@@ -282,12 +275,14 @@
 
   <div id="welcome-modal-overlay">
       <div id="welcome-modal">
-          <h2>Pre-Alpha Notice</h2>
+          <h2>OUTIL EN ALPHA</h2>
           <p>
-              Welcome to the Fal Designer! Please be aware that this tool is currently in a pre-alpha stage.
-              Features may change, and you may encounter bugs. Your feedback is valuable—please report any issues you find.
+              Bienvenue sur Fal Designer! <br/>
+              ATTENTION, cet outil est actuellement en phase d'alpha-testing! <br/>
+              Les fonctionnalités peuvent changer et des bugs peuvent survenir.
+              Vos retours sont précieux, n'hésitez pas à signaler les problèmes.
           </p>
-          <button id="close-modal-btn">Acknowledge</button>
+          <button id="close-modal-btn">Compris</button>
       </div>
   </div>
 

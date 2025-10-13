@@ -125,7 +125,7 @@ function loadState() {
 }
 
 export function resetState() {
-    if (confirm("Are you sure you want to reset your design? This will clear all saved data.")) {
+    if (confirm("Êtes-vous sûr de vouloir réinitialiser le circulaire? Toutes les données seront effacées.")) {
         localStorage.removeItem(LOCAL_STORAGE_KEY);
         window.location.reload();
     }
