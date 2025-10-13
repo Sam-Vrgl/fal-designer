@@ -6,7 +6,7 @@ const SNAP_THRESHOLD_MM = 5;
 export function initDragAndDrop(canvas) {
     const container = canvas.parentElement;
 
-    function getGridCoordsFromEvent(event) {
+    function getGridCoordsFromEvent(event, relativeToGrid = true) {
         const rect = container.getBoundingClientRect();
         const screenX = event.clientX - rect.left;
         const screenY = event.clientY - rect.top;
@@ -14,16 +14,38 @@ export function initDragAndDrop(canvas) {
         const worldX = (screenX - state.viewOffsetX) / state.viewScale;
         const worldY = (screenY - state.viewOffsetY) / state.viewScale;
 
+        if (!relativeToGrid) {
+            return { worldX: worldX / state.mmToPx, worldY: worldY / state.mmToPx };
+        }
+
         const gridX = (worldX / state.mmToPx) - state.marginMm;
         const gridY = (worldY / state.mmToPx) - state.marginMm;
 
         return { gridX, gridY };
     }
+
+    let panStartX, panStartY, didPan = false;
+
+    container.addEventListener('mousedown', (event) => {
+        if (event.target !== canvas) return;
+        
+        const { worldX, worldY } = getGridCoordsFromEvent(event, false);
+        const totalW_mm = state.gridWmm + 2 * state.marginMm;
+        const totalH_mm = state.gridHmm + 2 * state.marginMm;
+
+        if (worldX < 0 || worldX > totalW_mm || worldY < 0 || worldY > totalH_mm) {
+            state.isPanning = true;
+            panStartX = state.viewOffsetX - event.clientX;
+            panStartY = state.viewOffsetY - event.clientY;
+            didPan = false;
+        }
+    });
     
     canvas.addEventListener('mousedown', (event) => {
+        if (state.isPanning) return; 
+
         const { gridX, gridY } = getGridCoordsFromEvent(event);
 
-        // PLACE MODE
         if (state.currentMode === 'place' && state.insigneToPlace) {
             const { path, sizeMm, url } = state.insigneToPlace;
             const newInsigne = { url: path, x_mm: 0, y_mm: 0 };
@@ -50,7 +72,6 @@ export function initDragAndDrop(canvas) {
             return;
         }
 
-        // SELECT MODE
         if (state.currentMode === 'select') {
             let clickedItem = false;
             for (let i = state.images.length - 1; i >= 0; i--) {
@@ -91,16 +112,29 @@ export function initDragAndDrop(canvas) {
     });
 
     window.addEventListener('mousemove', (event) => {
+        if (state.isPanning) {
+            event.preventDefault();
+            state.viewOffsetX = event.clientX + panStartX;
+            state.viewOffsetY = event.clientY + panStartY;
+            didPan = true;
+            notify();
+            return;
+        }
+
         const { gridX, gridY } = getGridCoordsFromEvent(event);
         if (state.isDragging && state.selectedInsigne) {
             event.preventDefault();
             state.selectedInsigne.x_mm = gridX - state.dragOffsetX;
+            
             const img = getCachedImage(state.selectedInsigne.url);
             if (!img) return;
+            
             const h_mm = state.selectedInsigne.height_mm || (state.selectedInsigne.heightPct * state.gridHmm);
             const insigneCenterY = (gridY - state.dragOffsetY) + h_mm / 2;
             const gridCenterY = state.gridHmm / 2;
-            if (Math.abs(insigneCenterY - gridCenterY) < SNAP_THRESHOLD_MM) {
+            
+            // --- MODIFIED: Check for Shift key to disable snapping ---
+            if (Math.abs(insigneCenterY - gridCenterY) < SNAP_THRESHOLD_MM && !event.shiftKey) {
                 state.selectedInsigne.y_mm = gridCenterY - h_mm / 2;
                 state.isSnapping = true;
             } else {
@@ -108,6 +142,7 @@ export function initDragAndDrop(canvas) {
                 state.isSnapping = false;
             }
             notify();
+
         } else if (state.isDraggingMaterial && state.selectedMaterial) {
             event.preventDefault();
             state.selectedMaterial.x_mm = gridX - state.dragMaterialOffsetX;
@@ -117,6 +152,7 @@ export function initDragAndDrop(canvas) {
     });
 
     window.addEventListener('mouseup', () => {
+        state.isPanning = false;
         state.isDragging = false;
         state.isDraggingMaterial = false;
         state.isDraggingMoivre = false;
@@ -127,11 +163,9 @@ export function initDragAndDrop(canvas) {
     });
     
     container.addEventListener('contextmenu', e => e.preventDefault());
-
     container.addEventListener('wheel', (event) => {
         event.preventDefault();
 
-        // CTRL/CMD + Scroll to Zoom
         if (event.ctrlKey || event.metaKey) {
             const zoomIntensity = 0.1;
             const scroll = event.deltaY < 0 ? 1 : -1;
@@ -143,17 +177,22 @@ export function initDragAndDrop(canvas) {
             state.viewOffsetY = mouseY - (mouseY - state.viewOffsetY) * zoom;
             state.viewScale = Math.max(0.05, state.viewScale * zoom);
 
-        // Shift + Scroll to Pan Horizontally
         } else if (event.shiftKey) {
             const scrollSpeed = 1.0;
             state.viewOffsetX -= event.deltaY * scrollSpeed;
         
-        // Default Scroll to Pan Vertically
         } else {
             const scrollSpeed = 1.0;
             state.viewOffsetY -= event.deltaY * scrollSpeed;
         }
 
         notify();
-    }, { passive: false }); // passive: false is important to allow preventDefault
+    }, { passive: false });
+
+    container.addEventListener('click', (event) => {
+        if (didPan) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+    }, true);
 }

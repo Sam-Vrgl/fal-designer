@@ -4,7 +4,7 @@ let disciplinesData = {};
 
 async function fetchDisciplines() {
   try {
-    const response = await fetch('../disciplines.json');
+    const response = await fetch('./disciplines.json');
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
