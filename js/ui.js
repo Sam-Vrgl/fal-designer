@@ -1,4 +1,4 @@
-import { state, notify, subscribe } from './state.js';
+import { state, notify, subscribe, resetState } from './state.js';
 import { addImage } from './main.js';
 import { exportState, importState } from './file-handler.js';
 import { exportCanvasAsImage } from './image-exporter.js';
@@ -23,6 +23,7 @@ export function bindUI() {
 
     // --- Toolbar & Mode ---
     const selectModeBtn = $('selectModeBtn');
+    const resetBtn = $('resetBtn'); // Get the new reset button
     const exportBtn = $('exportBtn');
     const importBtn = $('importBtn');
     const importFile = $('importFile');
@@ -60,7 +61,7 @@ export function bindUI() {
     const removeMaterialBtn = $('removeMaterialBtn');
     const noSelectionDiv = $('no-selection');
 
-    // Initial State Hydration
+    // Initial State Hydration - Values are set from the loaded state
     chkV.checked = state.helper.showV;
     chkH.checked = state.helper.showH;
     gridW.value = state.gridWmm;
@@ -97,6 +98,7 @@ export function bindUI() {
         notify();
     };
     selectModeBtn.addEventListener('click', () => setMode('select'));
+    resetBtn.addEventListener('click', resetState); // Attach reset function
     window.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMode('select'); });
     exportBtn.addEventListener('click', exportState);
     exportImageBtn.addEventListener('click', exportCanvasAsImage);

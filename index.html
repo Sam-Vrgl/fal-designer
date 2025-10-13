@@ -97,23 +97,9 @@
         max-width: 500px;
         text-align: center;
     }
-    #welcome-modal h2 {
-        margin-top: 0;
-        color: #d9534f;
-    }
-    #welcome-modal p {
-        line-height: 1.6;
-        margin-bottom: 20px;
-    }
-    #welcome-modal button {
-        padding: 10px 20px;
-        border: none;
-        background-color: #007bff;
-        color: white;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 16px;
-    }
+    #welcome-modal h2 { margin-top: 0; color: #d9534f; }
+    #welcome-modal p { line-height: 1.6; margin-bottom: 20px; }
+    #welcome-modal button { padding: 10px 20px; border: none; background-color: #007bff; color: white; border-radius: 5px; cursor: pointer; font-size: 16px; }
 
     /* Common Panel Styling */
     .panel {
@@ -129,6 +115,7 @@
     label { display: flex; gap: .5rem; align-items: center; white-space: nowrap; }
     #toolbar { padding: 8px 12px; }
     #toolbar button.active { background-color: #007bff; color: white; border-color: #007bff; }
+    #resetBtn { background-color: #dc3545; color: white; border-color: #dc3545; }
     
     /* Insigne Palette */
     #insigne-search { width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box; }
@@ -141,11 +128,7 @@
     #insigne-palette img:hover { border-color: #007bff; background-color: #f0f8ff; }
 
     /* Inspector Panel & Tips Panel */
-    #inspector-panel {
-        flex-grow: 1;
-        min-height: 0;
-        overflow-y: auto;
-    }
+    #inspector-panel { flex-grow: 1; min-height: 0; overflow-y: auto; }
     #inspector-panel .prop-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
     #inspector-panel label { font-weight: 600; }
     #inspector-panel input, #inspector-panel select { width: 100%; padding: 6px; box-sizing: border-box; }
@@ -176,6 +159,7 @@
       <div id="toolbar" class="panel">
         <div class="row">
           <button id="selectModeBtn" class="active">Select</button>
+          <button id="resetBtn" title="Reset all data and start over">Reset Design</button>
         </div>
          <div class="row" style="margin-top: 10px;">
           <button id="exportBtn">Export JSON</button>
