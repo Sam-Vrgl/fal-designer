@@ -8,6 +8,13 @@ export function bindUI() {
     const canvas = $('myCanvas');
     const container = canvas.parentElement;
 
+    // --- Modal Controls ---
+    const modalOverlay = $('welcome-modal-overlay');
+    const closeModalBtn = $('close-modal-btn');
+    closeModalBtn.addEventListener('click', () => {
+        modalOverlay.style.display = 'none';
+    });
+
     // --- Zoom Controls ---
     const zoomInBtn = $('zoomInBtn');
     const zoomOutBtn = $('zoomOutBtn');
@@ -74,13 +81,11 @@ export function bindUI() {
         notify();
     });
     
-    // Update zoom display
     const updateZoomDisplay = () => {
         if(zoomDisplay) zoomDisplay.textContent = `${Math.round(state.viewScale * 100)}%`;
     };
     subscribe(updateZoomDisplay);
     
-    // Set initial view after a short delay to allow layout to settle
     setTimeout(() => zoomFitBtn.click(), 50);
 
     // Mode & File I/O
@@ -154,8 +159,7 @@ export function bindUI() {
     const updateModeUI = () => {
         const mode = state.currentMode;
         selectModeBtn.classList.toggle('active', mode === 'select');
-        // The container cursor is now the default for panning, so we only override for place mode
-        container.style.cursor = mode === 'place' && state.insigneToPlace ? 'copy' : 'grab';
+        container.style.cursor = mode === 'place' && state.insigneToPlace ? 'copy' : 'default';
     };
     
     subscribe(updateInspector);

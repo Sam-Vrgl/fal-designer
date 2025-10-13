@@ -76,6 +76,45 @@
     #canvas-toolbar button { font-weight: bold; padding: 4px 8px; }
     #zoom-display { font-weight: 500; min-width: 50px; text-align: center; }
 
+    /* Modal Styles */
+    #welcome-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        z-index: 1000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #welcome-modal {
+        background: #fff;
+        padding: 25px 30px;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        max-width: 500px;
+        text-align: center;
+    }
+    #welcome-modal h2 {
+        margin-top: 0;
+        color: #d9534f;
+    }
+    #welcome-modal p {
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+    #welcome-modal button {
+        padding: 10px 20px;
+        border: none;
+        background-color: #007bff;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
     /* Common Panel Styling */
     .panel {
       background: #fff;
@@ -111,32 +150,10 @@
     #inspector-panel label { font-weight: 600; }
     #inspector-panel input, #inspector-panel select { width: 100%; padding: 6px; box-sizing: border-box; }
     #inspector-panel #no-selection { color: #777; }
-
-    #tips-panel ul {
-        list-style: none;
-        padding-left: 0;
-        margin: 0;
-        font-size: 13px;
-        color: #333;
-    }
-    #tips-panel li {
-        margin-bottom: 8px;
-        padding-left: 22px;
-        position: relative;
-        line-height: 1.4;
-    }
-    #tips-panel li::before {
-        content: "💡";
-        position: absolute;
-        left: 0;
-        top: 1px;
-    }
-    #tips-panel b {
-        background-color: #eee;
-        padding: 2px 5px;
-        border-radius: 4px;
-        font-family: monospace;
-    }
+    #tips-panel ul { list-style: none; padding-left: 0; margin: 0; font-size: 13px; color: #333; }
+    #tips-panel li { margin-bottom: 8px; padding-left: 22px; position: relative; line-height: 1.4; }
+    #tips-panel li::before { content: "💡"; position: absolute; left: 0; top: 1px; }
+    #tips-panel b { background-color: #eee; padding: 2px 5px; border-radius: 4px; font-family: monospace; }
     
     /* Collapsible Sections */
     details summary { cursor: pointer; font-weight: 600; list-style: none; padding: 4px 0; }
@@ -273,6 +290,17 @@
           </ul>
       </div>
     </div>
+  </div>
+
+  <div id="welcome-modal-overlay">
+      <div id="welcome-modal">
+          <h2>Pre-Alpha Notice</h2>
+          <p>
+              Welcome to the Fal Designer! Please be aware that this tool is currently in a pre-alpha stage.
+              Features may change, and you may encounter bugs. Your feedback is valuable—please report any issues you find.
+          </p>
+          <button id="close-modal-btn">Acknowledge</button>
+      </div>
   </div>
 
   <script type="module" src="./js/main.js"></script>
