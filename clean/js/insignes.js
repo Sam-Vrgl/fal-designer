@@ -16,61 +16,79 @@ async function fetchInsignes() {
 }
 
 /**
- * Populates a <select> dropdown with categorized insignes using <optgroup>.
- * @param {string} selectorId - The ID of the <select> element.
+ * Populates the visual insigne palette.
+ * @param {string} paletteId - The ID of the container element for the palette.
+ * @param {string} searchInputId - The ID of the search input field.
  */
-export async function initInsigneSelector(selectorId) {
-    const select = document.getElementById(selectorId);
-    if (!select) return;
+export async function initInsignePalette(paletteId, searchInputId) {
+    const palette = document.getElementById(paletteId);
+    const searchInput = document.getElementById(searchInputId);
+    if (!palette) return;
 
     const insignes = await fetchInsignes();
+    let allInsigneElements = [];
 
-    // Helper for simple path-based items (like letters and numbers)
-    const createSimpleOptGroup = (label, items) => {
-        if (!items || Object.keys(items).length === 0) return;
-        const optgroup = document.createElement('optgroup');
-        optgroup.label = label;
-        for (const name in items) {
-            const option = document.createElement('option');
-            option.value = items[name];
-            option.textContent = name;
-            optgroup.appendChild(option);
+    const createInsigneElement = (name, itemData) => {
+        const img = document.createElement('img');
+        const path = itemData.path || itemData;
+        img.src = path;
+        img.title = name;
+        img.dataset.name = name;
+        img.dataset.path = path;
+        if (itemData.size_mm) {
+            img.dataset.sizeMm = itemData.size_mm;
         }
-        select.appendChild(optgroup);
+        return img;
     };
 
-    // Helper for object-based items (with size metadata, like filiere and annees)
-    const createObjectOptGroup = (label, items) => {
+    const createCategory = (label, items, isObjectBased) => {
         if (!items || Object.keys(items).length === 0) return;
-        const optgroup = document.createElement('optgroup');
-        optgroup.label = label;
+        
+        const categoryDiv = document.createElement('div');
+        categoryDiv.className = 'category';
+        
+        const title = document.createElement('h4');
+        title.textContent = label;
+        categoryDiv.appendChild(title);
+        
+        const itemsDiv = document.createElement('div');
+        itemsDiv.className = 'items';
+
         for (const name in items) {
-            const item = items[name];
-            const option = document.createElement('option');
-            option.value = item.path;
-            option.textContent = name;
-            if (item.size_mm) {
-                option.dataset.sizeMm = item.size_mm;
+            const item = isObjectBased ? items[name] : { path: items[name] };
+            const insigneEl = createInsigneElement(name, item);
+            itemsDiv.appendChild(insigneEl);
+            allInsigneElements.push(insigneEl);
+        }
+        categoryDiv.appendChild(itemsDiv);
+        palette.appendChild(categoryDiv);
+    };
+
+    // Create categories from the structured data
+    createCategory('Filière', insignes.filiere, true);
+    createCategory('Années', insignes.annees, true);
+    createCategory('Numbers (Small)', insignes.numbers.small, false);
+    createCategory('Letters (Small)', insignes.letters.small, false);
+    createCategory('Letters (Big)', insignes.letters.big, false);
+    createCategory('Other', insignes.other, true);
+    
+    // Search functionality
+    searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        allInsigneElements.forEach(img => {
+            const name = img.dataset.name.toLowerCase();
+            const category = img.closest('.category');
+            if (name.includes(searchTerm)) {
+                img.style.display = '';
+            } else {
+                img.style.display = 'none';
             }
-            optgroup.appendChild(option);
-        }
-        select.appendChild(optgroup);
-    };
+        });
 
-    // Create the option groups from the structured data
-    createSimpleOptGroup('Numbers (Small)', insignes.numbers.small);
-    createSimpleOptGroup('Numbers (Big)', insignes.numbers.big);
-    createSimpleOptGroup('Letters (Small)', insignes.letters.small);
-    createSimpleOptGroup('Letters (Big)', insignes.letters.big);
-    createObjectOptGroup('Filière', insignes.filiere);
-    createObjectOptGroup('Années', insignes.annees);
-    createObjectOptGroup('Other', insignes.other);
-
-    // Disable the select if no options were added
-    if (select.children.length === 0) {
-        const option = document.createElement('option');
-        option.textContent = "No insignes found";
-        option.disabled = true;
-        select.appendChild(option);
-    }
+        // Hide empty categories
+        palette.querySelectorAll('.category').forEach(cat => {
+            const visibleItems = cat.querySelectorAll('img:not([style*="display: none"])');
+            cat.style.display = visibleItems.length > 0 ? '' : 'none';
+        });
+    });
 }

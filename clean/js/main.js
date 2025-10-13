@@ -2,7 +2,7 @@ import { state, subscribe, notify } from './state.js';
 import { draw } from './renderer.js';
 import { bindUI } from './ui.js';
 import { loadImage } from './images.js';
-import  { initInsigneSelector } from './insignes.js';
+import { initInsignePalette } from './insignes.js';
 import { initDisciplines } from './disciplines.js';
 import { initDragAndDrop } from './drag-handler.js';
 
@@ -11,8 +11,6 @@ const ctx = canvas.getContext('2d', { alpha: true });
 
 const imgCache = new Map();
 export function getCachedImage(url) { return imgCache.get(url) || null; }
-
-
 
 export async function preloadImages(list = state.images) {
   await Promise.allSettled(list.map(async (it) => {
@@ -40,12 +38,11 @@ subscribe(rerender);
 window.addEventListener('resize', rerender);
 
 bindUI();
-
 initDragAndDrop(canvas);
 
 Promise.all([
-    initDisciplines('disciplineSelect'),
-    initInsigneSelector('insigneSelect')
+    initDisciplines('disciplineSelect'), // This can be repurposed or removed if discipline selection changes
+    initInsignePalette('insigne-list', 'insigne-search')
 ]).finally(() => {
     preloadImages().finally(rerender);
 });

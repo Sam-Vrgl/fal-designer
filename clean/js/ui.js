@@ -1,305 +1,175 @@
 import { state, notify, subscribe } from './state.js';
-import { addImage, getCachedImage } from './main.js';
+import { addImage } from './main.js';
 import { exportState, importState } from './file-handler.js';
 import { exportCanvasAsImage } from './image-exporter.js';
 
 export function bindUI() {
-  const $ = (id) => document.getElementById(id);
+    const $ = (id) => document.getElementById(id);
+    const canvas = $('myCanvas');
+    const container = canvas.parentElement;
 
-  // File controls
-  const exportBtn = $('exportBtn');
-  const importBtn = $('importBtn');
-  const importFile = $('importFile');
-  const exportImageBtn = $('exportImageBtn');
+    // --- Zoom Controls ---
+    const zoomInBtn = $('zoomInBtn');
+    const zoomOutBtn = $('zoomOutBtn');
+    const zoomFitBtn = $('zoomFitBtn');
+    const zoomDisplay = $('zoom-display');
 
-  // Toggles
-  const chkV = $('toggleV');
-  const chkH = $('toggleH');
-
-  // Numeric/color inputs
-  const gridW = $('gridWInput');
-  const gridH = $('gridHInput');
-  const margin = $('marginInput');
-  const minorStep = $('minorStepInput');
-  const majorStep = $('majorStepInput');
-  const mmToPx = $('mmToPxInput');
-  const helperColor = $('helperColorInput');
-  const helperThickness = $('helperThicknessInput');
-
-  // Insigne controls
-  const insigneSelect = $('insigneSelect');
-  const addInsigneBtn = $('addInsigneBtn');
-  const insigneControls = $('insigneControls');
-  const insigneX = $('insigneX');
-  const insigneY = $('insigneY');
-  const insigneHeight = $('insigneHeight');
-  const removeInsigneBtn = $('removeInsigneBtn');
-  const insigneLockCenter = $('insigneLockCenter');
-
-  // New material controls
-  const materialType = $('materialType');
-  const materialColor = $('materialColor');
-  const materialX = $('materialX');
-  const materialY = $('materialY');
-  const materialWidth = $('materialWidth');
-  const materialHeight = $('materialHeight');
-  const addMaterialBtn = $('addMaterialBtn');
-  
-  // Selected material controls
-  const materialControls = $('materialControls');
-  const selectedMaterialX = $('selectedMaterialX');
-  const selectedMaterialY = $('selectedMaterialY');
-  const selectedMaterialWidth = $('selectedMaterialWidth');
-  const selectedMaterialHeight = $('selectedMaterialHeight');
-  const removeMaterialBtn = $('removeMaterialBtn');
-
-  // Moivre controls
-  const moivreColor = $('moivreColor');
-  const addMoivreBtn = $('addMoivreBtn');
-
-
-  // Initialize from state
-  chkV.checked = state.helper.showV;
-  chkH.checked = state.helper.showH;
-  gridW.value = state.gridWmm;
-  gridH.value = state.gridHmm;
-  margin.value = state.marginMm;
-  minorStep.value = state.minorStepMm;
-  majorStep.value = state.majorStepMm;
-  mmToPx.value = state.mmToPx;
-  helperColor.value = state.helper.color;
-  helperThickness.value = state.helper.thickness;
-
-
-  // Wire changes -> state -> notify()
-  chkV.addEventListener('change', () => { state.helper.showV = chkV.checked; notify(); });
-  chkH.addEventListener('change', () => { state.helper.showH = chkH.checked; notify(); });
-
-  gridW.addEventListener('input', () => {
-    state.gridWmm = clampNum(gridW.valueAsNumber, 1, 50000);
-    notify();
-  });
-  gridH.addEventListener('input', () => {
-    state.gridHmm = clampNum(gridH.valueAsNumber, 1, 50000);
-    notify();
-  });
-  margin.addEventListener('input', () => {
-    state.marginMm = clampNum(margin.valueAsNumber, 0, 1000);
-    notify();
-  });
-  minorStep.addEventListener('input', () => {
-    state.minorStepMm = clampNum(minorStep.valueAsNumber, 0.1, 1000);
-    if (state.majorStepMm < state.minorStepMm) {
-      state.majorStepMm = state.minorStepMm;
-      majorStep.value = state.majorStepMm;
-    }
-    notify();
-  });
-  majorStep.addEventListener('input', () => {
-    state.majorStepMm = clampNum(majorStep.valueAsNumber, state.minorStepMm, 5000);
-    notify();
-  });
-  mmToPx.addEventListener('input', () => {
-    state.mmToPx = clampNum(mmToPx.valueAsNumber, 0.1, 1000);
-    notify();
-  });
-  helperColor.addEventListener('input', () => {
-    state.helper.color = helperColor.value || '#666666';
-    notify();
-  });
-  helperThickness.addEventListener('input', () => {
-    state.helper.thickness = clampNum(helperThickness.valueAsNumber, 0.5, 50);
-    notify();
-  });
-
-  exportBtn.addEventListener('click', exportState);
-  exportImageBtn.addEventListener('click', exportCanvasAsImage);
-
-  importBtn.addEventListener('click', () => {
-    importFile.click();
-  });
-
-  importFile.addEventListener('change', (event) => {
-    importState(event.target.files[0]);
-    event.target.value = '';
-  });
-
-  addInsigneBtn.addEventListener('click', async (event) => {
-    const selectedOption = insigneSelect.options[insigneSelect.selectedIndex];
-    const url = selectedOption.value;
-    if (!url) return;
-
-    const newInsigne = { url, x_mm: -999, y_mm: -999, lockToCenterline: false };
+    // --- Toolbar & Mode ---
+    const selectModeBtn = $('selectModeBtn');
+    const exportBtn = $('exportBtn');
+    const importBtn = $('importBtn');
+    const importFile = $('importFile');
+    const exportImageBtn = $('exportImageBtn');
     
-    const sizeMm = selectedOption.dataset.sizeMm;
+    // --- Settings ---
+    const chkV = $('toggleV');
+    const chkH = $('toggleH');
+    const gridW = $('gridWInput');
+    const gridH = $('gridHInput');
+    const margin = $('marginInput');
 
-    if (sizeMm) {
-      newInsigne.height_mm = parseInt(sizeMm, 10);
-    } else if (url.includes('/petit/') || url.includes('/min/')) {
-      newInsigne.height_mm = 10;
-    } else if (url.includes('/grand/') || url.includes('/maj/')) {
-      newInsigne.height_mm = 18;
-    } else {
-      newInsigne.heightPct = 0.5;
-    }
+    // --- Design & Materials ---
+    const materialType = $('materialType');
+    const materialColor = $('materialColor');
+    const addMaterialBtn = $('addMaterialBtn');
+    const moivreColor = $('moivreColor');
+    const addMoivreBtn = $('addMoivreBtn');
 
-    await addImage(newInsigne);
-    const img = getCachedImage(url);
-    if (!img) return;
+    // --- Palette ---
+    const insignePalette = $('insigne-list');
 
-    const natAspect = img.naturalWidth / img.naturalHeight;
-    let h_mm = newInsigne.height_mm || (newInsigne.heightPct || 0.5) * state.gridHmm;
-    const w_mm = h_mm * natAspect;
+    // --- Inspector Panel ---
+    const insignePropsDiv = $('insigne-props');
+    const insigneX = $('insigneX');
+    const insigneY = $('insigneY');
+    const insigneHeight = $('insigneHeight');
+    const removeInsigneBtn = $('removeInsigneBtn');
 
-    state.selectedInsigne = newInsigne;
-    state.isDragging = true;
-    state.dragOffsetX = w_mm / 2;
-    state.dragOffsetY = h_mm / 2;
+    const materialPropsDiv = $('material-props');
+    const selectedMaterialX = $('selectedMaterialX');
+    const selectedMaterialY = $('selectedMaterialY');
+    const selectedMaterialWidth = $('selectedMaterialWidth');
+    const selectedMaterialHeight = $('selectedMaterialHeight');
+    const removeMaterialBtn = $('removeMaterialBtn');
+    const noSelectionDiv = $('no-selection');
 
-    notify();
-  });
+    // Initial State Hydration
+    chkV.checked = state.helper.showV;
+    chkH.checked = state.helper.showH;
+    gridW.value = state.gridWmm;
+    gridH.value = state.gridHmm;
+    margin.value = state.marginMm;
 
-  addMaterialBtn.addEventListener('click', () => {
-      state.materials.push({
-          x_mm: materialX.valueAsNumber,
-          y_mm: materialY.valueAsNumber,
-          width_mm: materialWidth.valueAsNumber,
-          height_mm: materialHeight.valueAsNumber,
-          material: materialType.value,
-          color: materialColor.value
-      });
-      notify();
-  });
+    // Zoom button logic
+    zoomInBtn.addEventListener('click', () => { state.viewScale *= 1.25; notify(); });
+    zoomOutBtn.addEventListener('click', () => { state.viewScale /= 1.25; notify(); });
+    zoomFitBtn.addEventListener('click', () => {
+        const totalW_px = (state.gridWmm + 2 * state.marginMm) * state.mmToPx;
+        const totalH_px = (state.gridHmm + 2 * state.marginMm) * state.mmToPx;
+        const scaleX = container.clientWidth / totalW_px;
+        const scaleY = container.clientHeight / totalH_px;
+        state.viewScale = Math.min(scaleX, scaleY) * 0.95;
+        state.viewOffsetX = (container.clientWidth - (totalW_px * state.viewScale)) / 2;
+        state.viewOffsetY = (container.clientHeight - (totalH_px * state.viewScale)) / 2;
+        notify();
+    });
+    
+    // Update zoom display
+    const updateZoomDisplay = () => {
+        if(zoomDisplay) zoomDisplay.textContent = `${Math.round(state.viewScale * 100)}%`;
+    };
+    subscribe(updateZoomDisplay);
+    
+    // Set initial view after a short delay to allow layout to settle
+    setTimeout(() => zoomFitBtn.click(), 50);
 
-  insigneX.addEventListener('input', () => {
-    if (state.selectedInsigne) {
-      state.selectedInsigne.x_mm = insigneX.valueAsNumber;
-      notify();
-    }
-  });
-
-  insigneY.addEventListener('input', () => {
-    if (state.selectedInsigne && !state.selectedInsigne.lockToCenterline) {
-      state.selectedInsigne.y_mm = insigneY.valueAsNumber;
-      notify();
-    }
-  });
-
-  insigneHeight.addEventListener('input', () => {
-    if (state.selectedInsigne && !insigneHeight.disabled) {
-      state.selectedInsigne.heightPct = insigneHeight.valueAsNumber / 100;
-      notify();
-    }
-  });
-  
-  insigneLockCenter.addEventListener('change', () => {
-    if (state.selectedInsigne) {
-        state.selectedInsigne.lockToCenterline = insigneLockCenter.checked;
-        if (state.selectedInsigne.lockToCenterline) {
-            const img = getCachedImage(state.selectedInsigne.url);
-            if (img) {
-                let h_mm = state.selectedInsigne.height_mm || (state.selectedInsigne.heightPct * state.gridHmm);
-                state.selectedInsigne.y_mm = (state.gridHmm / 2) - (h_mm / 2);
-            }
+    // Mode & File I/O
+    const setMode = (mode) => {
+        state.currentMode = mode;
+        if (mode === 'select') {
+          state.insigneToPlace = null;
         }
         notify();
-    }
-  });
+    };
+    selectModeBtn.addEventListener('click', () => setMode('select'));
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMode('select'); });
+    exportBtn.addEventListener('click', exportState);
+    exportImageBtn.addEventListener('click', exportCanvasAsImage);
+    importBtn.addEventListener('click', () => importFile.click());
+    importFile.addEventListener('change', (e) => { importState(e.target.files[0]); e.target.value = ''; });
 
-  removeInsigneBtn.addEventListener('click', () => {
-    if (state.selectedInsigne) {
-      state.images = state.images.filter(img => img !== state.selectedInsigne);
-      state.selectedInsigne = null;
-      notify();
-    }
-  });
+    // Settings
+    chkV.addEventListener('change', () => { state.helper.showV = chkV.checked; notify(); });
+    chkH.addEventListener('change', () => { state.helper.showH = chkH.checked; notify(); });
+    gridW.addEventListener('input', () => { state.gridWmm = gridW.valueAsNumber; notify(); });
+    gridH.addEventListener('input', () => { state.gridHmm = gridH.valueAsNumber; notify(); });
+    margin.addEventListener('input', () => { state.marginMm = margin.valueAsNumber; notify(); });
 
-  selectedMaterialX.addEventListener('input', () => {
-    if (state.selectedMaterial) {
-      state.selectedMaterial.x_mm = selectedMaterialX.valueAsNumber;
-      notify();
-    }
-  });
-
-  selectedMaterialY.addEventListener('input', () => {
-    if (state.selectedMaterial) {
-      state.selectedMaterial.y_mm = selectedMaterialY.valueAsNumber;
-      notify();
-    }
-  });
-
-  selectedMaterialWidth.addEventListener('input', () => {
-    if (state.selectedMaterial) {
-      state.selectedMaterial.width_mm = selectedMaterialWidth.valueAsNumber;
-      notify();
-    }
-  });
-
-  selectedMaterialHeight.addEventListener('input', () => {
-    if (state.selectedMaterial) {
-      state.selectedMaterial.height_mm = selectedMaterialHeight.valueAsNumber;
-      notify();
-    }
-  });
-  
-  removeMaterialBtn.addEventListener('click', () => {
-    if (state.selectedMaterial) {
-      state.materials = state.materials.filter(m => m !== state.selectedMaterial);
-      state.selectedMaterial = null;
-      notify();
-    }
-  });
-
-  addMoivreBtn.addEventListener('click', () => {
-    state.moivres.push({
-        x_mm: 50,
-        y_mm: 0,
-        width_mm: 5,
-        height_mm: state.gridHmm,
-        color: moivreColor.value,
+    // Design & Materials
+    addMaterialBtn.addEventListener('click', () => {
+        state.materials.push({ x_mm: 10, y_mm: 10, width_mm: 100, height_mm: 20, material: materialType.value, color: materialColor.value });
+        notify();
     });
-    notify();
-  });
+    addMoivreBtn.addEventListener('click', () => {
+        state.moivres.push({ x_mm: 50, y_mm: 0, width_mm: 5, height_mm: state.gridHmm, color: moivreColor.value });
+        notify();
+    });
 
+    // Palette Interaction
+    insignePalette.addEventListener('click', (e) => {
+        if (e.target.tagName === 'IMG') {
+            const { path, sizeMm } = e.target.dataset;
+            state.insigneToPlace = { path, sizeMm, url: e.target.src };
+            setMode('place');
+        }
+    });
 
-  subscribe(updateInsigneControls);
-  subscribe(updateMaterialControls);
+    // Inspector Logic
+    const updateInspector = () => {
+        const hasSelection = state.selectedInsigne || state.selectedMaterial || state.selectedMoivre;
+        noSelectionDiv.style.display = hasSelection ? 'none' : 'block';
+        insignePropsDiv.style.display = state.selectedInsigne ? 'block' : 'none';
+        materialPropsDiv.style.display = state.selectedMaterial ? 'block' : 'none';
 
-  function updateInsigneControls() {
-    if (state.selectedInsigne) {
-      insigneControls.style.display = 'flex';
-      insigneX.value = state.selectedInsigne.x_mm;
-      insigneY.value = state.selectedInsigne.y_mm;
-      insigneLockCenter.checked = state.selectedInsigne.lockToCenterline;
-      insigneY.disabled = state.selectedInsigne.lockToCenterline;
+        if (state.selectedInsigne) {
+            insigneX.value = state.selectedInsigne.x_mm;
+            insigneY.value = state.selectedInsigne.y_mm;
+            if (state.selectedInsigne.height_mm) {
+                insigneHeight.value = ((state.selectedInsigne.height_mm / state.gridHmm) * 100).toFixed(2);
+                insigneHeight.disabled = true;
+            } else if (state.selectedInsigne.heightPct) {
+                insigneHeight.value = state.selectedInsigne.heightPct * 100;
+                insigneHeight.disabled = false;
+            }
+        }
+        if (state.selectedMaterial) {
+            selectedMaterialX.value = state.selectedMaterial.x_mm;
+            selectedMaterialY.value = state.selectedMaterial.y_mm;
+            selectedMaterialWidth.value = state.selectedMaterial.width_mm;
+            selectedMaterialHeight.value = state.selectedMaterial.height_mm;
+        }
+    };
+    
+    // Reactive UI updater for Mode
+    const updateModeUI = () => {
+        const mode = state.currentMode;
+        selectModeBtn.classList.toggle('active', mode === 'select');
+        // The container cursor is now the default for panning, so we only override for place mode
+        container.style.cursor = mode === 'place' && state.insigneToPlace ? 'copy' : 'grab';
+    };
+    
+    subscribe(updateInspector);
+    subscribe(updateModeUI);
 
-      if (state.selectedInsigne.height_mm) {
-        const heightInPct = (state.selectedInsigne.height_mm / state.gridHmm) * 100;
-        insigneHeight.value = heightInPct.toFixed(2);
-        insigneHeight.disabled = true;
-      } else if (state.selectedInsigne.heightPct) {
-        insigneHeight.value = state.selectedInsigne.heightPct * 100;
-        insigneHeight.disabled = false;
-      }
-    } else {
-      insigneControls.style.display = 'none';
-    }
-  }
-
-  function updateMaterialControls() {
-    if (state.selectedMaterial) {
-      materialControls.style.display = 'flex';
-      selectedMaterialX.value = state.selectedMaterial.x_mm;
-      selectedMaterialY.value = state.selectedMaterial.y_mm;
-      selectedMaterialWidth.value = state.selectedMaterial.width_mm;
-      selectedMaterialHeight.value = state.selectedMaterial.height_mm;
-    } else {
-      materialControls.style.display = 'none';
-    }
-  }
-}
-
-function clampNum(v, min, max) {
-  if (!Number.isFinite(v)) return min;
-  return Math.max(min, Math.min(max, v));
+    // Bind Inspector Inputs
+    insigneX.addEventListener('input', () => { if (state.selectedInsigne) { state.selectedInsigne.x_mm = insigneX.valueAsNumber; notify(); }});
+    insigneY.addEventListener('input', () => { if (state.selectedInsigne) { state.selectedInsigne.y_mm = insigneY.valueAsNumber; notify(); }});
+    insigneHeight.addEventListener('input', () => { if (state.selectedInsigne && !insigneHeight.disabled) { state.selectedInsigne.heightPct = insigneHeight.valueAsNumber / 100; notify(); }});
+    removeInsigneBtn.addEventListener('click', () => { if (state.selectedInsigne) { state.images = state.images.filter(i => i !== state.selectedInsigne); state.selectedInsigne = null; notify(); }});
+    
+    selectedMaterialX.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.x_mm = selectedMaterialX.valueAsNumber; notify(); }});
+    selectedMaterialY.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.y_mm = selectedMaterialY.valueAsNumber; notify(); }});
+    selectedMaterialWidth.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.width_mm = selectedMaterialWidth.valueAsNumber; notify(); }});
+    selectedMaterialHeight.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.height_mm = selectedMaterialHeight.valueAsNumber; notify(); }});
+    removeMaterialBtn.addEventListener('click', () => { if (state.selectedMaterial) { state.materials = state.materials.filter(m => m !== state.selectedMaterial); state.selectedMaterial = null; notify(); }});
 }

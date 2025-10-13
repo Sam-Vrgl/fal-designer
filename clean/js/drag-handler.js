@@ -1,174 +1,159 @@
 import { state, notify } from './state.js';
-import { getCachedImage } from './main.js';
+import { getCachedImage, addImage } from './main.js';
+
+const SNAP_THRESHOLD_MM = 5;
 
 export function initDragAndDrop(canvas) {
+    const container = canvas.parentElement;
 
     function getGridCoordsFromEvent(event) {
-        const rect = canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
+        const rect = container.getBoundingClientRect();
+        const screenX = event.clientX - rect.left;
+        const screenY = event.clientY - rect.top;
 
-        const totalCssW = (state.gridWmm + 2 * state.marginMm) * state.mmToPx;
-        const scaleCss = Math.min(
-            window.innerWidth / totalCssW,
-            window.innerHeight / ((state.gridHmm + 2 * state.marginMm) * state.mmToPx)
-        );
-        
-        const canvasX = x / scaleCss;
-        const canvasY = y / scaleCss;
+        const worldX = (screenX - state.viewOffsetX) / state.viewScale;
+        const worldY = (screenY - state.viewOffsetY) / state.viewScale;
 
-        const originX = state.marginMm * state.mmToPx;
-        const originY = state.marginMm * state.mmToPx;
-
-        const gridX = (canvasX - originX) / state.mmToPx;
-        const gridY = (canvasY - originY) / state.mmToPx;
+        const gridX = (worldX / state.mmToPx) - state.marginMm;
+        const gridY = (worldY / state.mmToPx) - state.marginMm;
 
         return { gridX, gridY };
     }
-
+    
     canvas.addEventListener('mousedown', (event) => {
         const { gridX, gridY } = getGridCoordsFromEvent(event);
 
-        // --- Check for Insigne click (TOPMOST ITEM) ---
-        let clickedInsigne = null;
-        let insigneIndex = -1;
-        for (let i = state.images.length - 1; i >= 0; i--) {
-            const insigne = state.images[i];
-            const img = getCachedImage(insigne.url);
-            if (!img) continue;
-
-            const natAspect = img.naturalWidth / img.naturalHeight;
-            let h_mm = insigne.height_mm || (insigne.heightPct * state.gridHmm);
-            if (!h_mm) continue;
+        // PLACE MODE
+        if (state.currentMode === 'place' && state.insigneToPlace) {
+            const { path, sizeMm, url } = state.insigneToPlace;
+            const newInsigne = { url: path, x_mm: 0, y_mm: 0 };
             
-            const w_mm = h_mm * natAspect;
-            const left_mm = insigne.x_mm;
-            const top_mm = insigne.y_mm;
-
-            if (gridX >= left_mm && gridX <= left_mm + w_mm && gridY >= top_mm && gridY <= top_mm + h_mm) {
-                clickedInsigne = insigne;
-                insigneIndex = i;
-                break;
-            }
-        }
-        
-        if (clickedInsigne) {
-            state.selectedInsigne = clickedInsigne;
-            state.isDragging = true;
-            state.dragOffsetX = gridX - clickedInsigne.x_mm;
-            state.dragOffsetY = gridY - clickedInsigne.y_mm;
-
-            if (insigneIndex < state.images.length - 1) {
-                const [item] = state.images.splice(insigneIndex, 1);
-                state.images.push(item);
-            }
+            if (sizeMm) newInsigne.height_mm = parseInt(sizeMm, 10);
+            else if (url.includes('/petit/') || url.includes('/min/')) newInsigne.height_mm = 10;
+            else if (url.includes('/grand/') || url.includes('/maj/')) newInsigne.height_mm = 18;
+            else newInsigne.heightPct = 0.5;
             
-            state.selectedMaterial = null;
-            state.selectedMoivre = null;
+            addImage(newInsigne).then(() => {
+                const img = getCachedImage(newInsigne.url);
+                if (!img) return;
+                const natAspect = img.naturalWidth / img.naturalHeight;
+                let h_mm = newInsigne.height_mm || (newInsigne.heightPct * state.gridHmm);
+                const w_mm = h_mm * natAspect;
+                newInsigne.x_mm = gridX - w_mm / 2;
+                newInsigne.y_mm = gridY - h_mm / 2;
+                notify();
+            });
+
+            state.currentMode = 'select';
+            state.insigneToPlace = null;
             notify();
             return;
         }
 
-        // --- Check for Moivre click ---
-        let clickedMoivre = null;
-        const angleRad = 15 * Math.PI / 180;
-        const cosAngle = Math.cos(-angleRad); // Use negative angle to un-rotate
-        const sinAngle = Math.sin(-angleRad);
-
-        for (let i = state.moivres.length - 1; i >= 0; i--) {
-            const moivre = state.moivres[i];
-            const centerX = moivre.x_mm + moivre.width_mm / 2;
-            const centerY = moivre.y_mm + moivre.height_mm / 2;
-
-            const translatedX = gridX - centerX;
-            const translatedY = gridY - centerY;
-            
-            const unrotatedX = translatedX * cosAngle - translatedY * sinAngle;
-            const unrotatedY = translatedX * sinAngle + translatedY * cosAngle;
-
-            if (Math.abs(unrotatedX) < moivre.width_mm / 2 && Math.abs(unrotatedY) < moivre.height_mm / 2) {
-                clickedMoivre = moivre;
-                break;
+        // SELECT MODE
+        if (state.currentMode === 'select') {
+            let clickedItem = false;
+            for (let i = state.images.length - 1; i >= 0; i--) {
+                const insigne = state.images[i];
+                const img = getCachedImage(insigne.url);
+                if (!img) continue;
+                const h_mm = insigne.height_mm || (insigne.heightPct * state.gridHmm);
+                const w_mm = h_mm * (img.naturalWidth / img.naturalHeight);
+                if (gridX >= insigne.x_mm && gridX <= insigne.x_mm + w_mm && gridY >= insigne.y_mm && gridY <= insigne.y_mm + h_mm) {
+                    state.selectedInsigne = insigne;
+                    state.isDragging = true;
+                    state.dragOffsetX = gridX - insigne.x_mm;
+                    state.dragOffsetY = gridY - insigne.y_mm;
+                    state.selectedMaterial = state.selectedMoivre = null;
+                    clickedItem = true;
+                    break;
+                }
             }
-        }
-        
-        if (clickedMoivre) {
-            state.selectedMoivre = clickedMoivre;
-            state.isDraggingMoivre = true;
-            state.dragMoivreOffsetX = gridX - clickedMoivre.x_mm;
-            
-            state.selectedInsigne = null;
-            state.selectedMaterial = null;
-            notify();
-            return;
-        }
+            if(clickedItem) { notify(); return; }
 
-        // --- Check for Material click ---
-        let clickedMaterial = null;
-        for (let i = state.materials.length - 1; i >= 0; i--) {
-            const material = state.materials[i];
-            if (gridX >= material.x_mm && gridX <= material.x_mm + material.width_mm &&
-                gridY >= material.y_mm && gridY <= material.y_mm + material.height_mm) {
-                clickedMaterial = material;
-                break;
+            for (let i = state.materials.length - 1; i >= 0; i--) {
+                const m = state.materials[i];
+                if (gridX >= m.x_mm && gridX <= m.x_mm + m.width_mm && gridY >= m.y_mm && gridY <= m.y_mm + m.height_mm) {
+                    state.selectedMaterial = m;
+                    state.isDraggingMaterial = true;
+                    state.dragMaterialOffsetX = gridX - m.x_mm;
+                    state.dragMaterialOffsetY = gridY - m.y_mm;
+                    state.selectedInsigne = state.selectedMoivre = null;
+                    clickedItem = true;
+                    break;
+                }
             }
-        }
-
-        if (clickedMaterial) {
-            state.selectedMaterial = clickedMaterial;
-            state.isDraggingMaterial = true;
-            state.dragMaterialOffsetX = gridX - clickedMaterial.x_mm;
-            state.dragMaterialOffsetY = gridY - clickedMaterial.y_mm;
-
-            state.selectedInsigne = null;
-            state.selectedMoivre = null;
+            if(clickedItem) { notify(); return; }
+            
+            state.selectedInsigne = state.selectedMaterial = state.selectedMoivre = null;
             notify();
-            return;
         }
-
-        // If we get here, nothing was clicked on
-        state.selectedInsigne = null;
-        state.selectedMaterial = null;
-        state.selectedMoivre = null;
-        notify();
     });
 
     window.addEventListener('mousemove', (event) => {
         const { gridX, gridY } = getGridCoordsFromEvent(event);
-
-        // Handle Moivre dragging (horizontal only)
-        if (state.isDraggingMoivre && state.selectedMoivre) {
-            event.preventDefault();
-            state.selectedMoivre.x_mm = gridX - state.dragMoivreOffsetX;
-            notify();
-            return;
-        }
-
-        // Handle Material dragging
-        if (state.isDraggingMaterial && state.selectedMaterial) {
-            event.preventDefault();
-            state.selectedMaterial.x_mm = gridX - state.dragMaterialOffsetX;
-            state.selectedMaterial.y_mm = gridY - state.dragMaterialOffsetY;
-            notify();
-            return;
-        }
-
-        // Handle Insigne dragging
         if (state.isDragging && state.selectedInsigne) {
             event.preventDefault();
             state.selectedInsigne.x_mm = gridX - state.dragOffsetX;
-
-            if (!state.selectedInsigne.lockToCenterline) {
+            const img = getCachedImage(state.selectedInsigne.url);
+            if (!img) return;
+            const h_mm = state.selectedInsigne.height_mm || (state.selectedInsigne.heightPct * state.gridHmm);
+            const insigneCenterY = (gridY - state.dragOffsetY) + h_mm / 2;
+            const gridCenterY = state.gridHmm / 2;
+            if (Math.abs(insigneCenterY - gridCenterY) < SNAP_THRESHOLD_MM) {
+                state.selectedInsigne.y_mm = gridCenterY - h_mm / 2;
+                state.isSnapping = true;
+            } else {
                 state.selectedInsigne.y_mm = gridY - state.dragOffsetY;
+                state.isSnapping = false;
             }
-            
+            notify();
+        } else if (state.isDraggingMaterial && state.selectedMaterial) {
+            event.preventDefault();
+            state.selectedMaterial.x_mm = gridX - state.dragMaterialOffsetX;
+            state.selectedMaterial.y_mm = gridY - state.dragMaterialOffsetY;
             notify();
         }
     });
 
     window.addEventListener('mouseup', () => {
-        if (state.isDragging) state.isDragging = false;
-        if (state.isDraggingMaterial) state.isDraggingMaterial = false;
-        if (state.isDraggingMoivre) state.isDraggingMoivre = false;
+        state.isDragging = false;
+        state.isDraggingMaterial = false;
+        state.isDraggingMoivre = false;
+        if (state.isSnapping) {
+            state.isSnapping = false;
+            notify();
+        }
     });
+    
+    container.addEventListener('contextmenu', e => e.preventDefault());
+
+    container.addEventListener('wheel', (event) => {
+        event.preventDefault();
+
+        // CTRL/CMD + Scroll to Zoom
+        if (event.ctrlKey || event.metaKey) {
+            const zoomIntensity = 0.1;
+            const scroll = event.deltaY < 0 ? 1 : -1;
+            const zoom = Math.exp(scroll * zoomIntensity);
+            const rect = container.getBoundingClientRect();
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+            state.viewOffsetX = mouseX - (mouseX - state.viewOffsetX) * zoom;
+            state.viewOffsetY = mouseY - (mouseY - state.viewOffsetY) * zoom;
+            state.viewScale = Math.max(0.05, state.viewScale * zoom);
+
+        // Shift + Scroll to Pan Horizontally
+        } else if (event.shiftKey) {
+            const scrollSpeed = 1.0;
+            state.viewOffsetX -= event.deltaY * scrollSpeed;
+        
+        // Default Scroll to Pan Vertically
+        } else {
+            const scrollSpeed = 1.0;
+            state.viewOffsetY -= event.deltaY * scrollSpeed;
+        }
+
+        notify();
+    }, { passive: false }); // passive: false is important to allow preventDefault
 }

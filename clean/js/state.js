@@ -16,9 +16,17 @@ export const state = {
   disciplineMaterial: null,
   materials: [],
   moivres: [],
-  images: [
-    // Example: { url: '...', x_mm: 10, y_mm: 10, height_mm: 12, lockToCenterline: false }
-  ],
+  images: [],
+
+  // --- View Transform State ---
+  viewScale: 1.0,
+  viewOffsetX: 0,
+  viewOffsetY: 0,
+  
+  // --- Interaction State ---
+  currentMode: 'select',
+  insigneToPlace: null,
+  isSnapping: false,
   selectedInsigne: null,
   isDragging: false,
   dragOffsetX: 0,

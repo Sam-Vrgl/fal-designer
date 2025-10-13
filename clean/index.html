@@ -3,143 +3,235 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Canvas testing</title>
+  <title>Fal Designer</title>
   <style>
-    :root { color-scheme: light; }
-    body { margin:0; font:14px/1.35 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
-
-    #controls{
-      background:#fff; border:1px solid #ccc; border-radius:10px;
-      padding:10px 12px; box-shadow:0 2px 10px rgba(0,0,0,.08);
-      max-width: min(92vw, 520px);
-      margin: 10px auto;
+    :root { color-scheme: light; --toolbar-height: 40px; }
+    body { 
+      margin: 0; 
+      font: 14px/1.35 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; 
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background-color: #f0f0f0;
     }
 
-    #controls .row{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:8px; }
-    #controls label{ display:flex; gap:.5rem; align-items:center; white-space:nowrap; }
-    #controls .group{ border-top:1px solid #e6e6e6; padding-top:8px; margin-top:8px; }
-    #controls input[type="number"]{ width:6.5rem; }
-    #controls input[type="color"]{ width:2.5rem; height:1.75rem; padding:0; border:0; background:transparent; }
-    #controls select { flex-grow: 1; min-width: 0; }
-    canvas { display:block; margin:0 auto; border:1px solid #000; }
+    /* Main Layout */
+    #app-container {
+      display: flex;
+      flex-grow: 1;
+      overflow: hidden;
+      padding: 10px;
+      gap: 10px;
+    }
+    #palette-container {
+      width: 280px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+    }
+    #main-content-wrapper {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-width: 0; /* Prevents flexbox overflow issues */
+    }
+    #canvas-container {
+      flex-grow: 1;
+      position: relative;
+      overflow: hidden;
+      background-color: #e9e9e9;
+      border-radius: 10px;
+      /* Remove grab cursors, default is fine */
+    }
+    #inspector-container {
+      width: 240px;
+      flex-shrink: 0;
+    }
+    canvas { 
+      display: block; 
+      position: absolute;
+      top: 0;
+      left: 0;
+      cursor: default;
+    }
 
-    /* Collapsible "Settings" section */
-    #settingsSection summary {
-      display:flex; align-items:center; gap:.5rem;
-      cursor:pointer; user-select:none;
-      padding:8px 12px; margin:-8px -12px 8px;
-      font-weight:600;
-      list-style:none;
+    /* Zoom Toolbar */
+    #canvas-toolbar {
+        height: var(--toolbar-height);
+        flex-shrink: 0;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        padding: 0 12px;
+        box-shadow: 0 1px 4px rgba(0,0,0,.05);
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
-    #settingsSection summary::-webkit-details-marker { display:none; }
-    #settingsSection summary::before {
-      content:"▶";
-      display:inline-block;
-      transform:translateY(1px);
-      transition:transform .2s ease;
+    #canvas-toolbar button {
+        font-weight: bold;
+        padding: 4px 8px;
     }
-    #settingsSection[open] summary::before { transform:translateY(1px) rotate(90deg); }
+    #zoom-display {
+        font-weight: 500;
+        min-width: 50px;
+        text-align: center;
+    }
+
+    /* Common Panel Styling */
+    .panel {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.08);
+      flex-shrink: 0;
+    }
+    .panel h3 { margin: 0 0 10px 0; padding-bottom: 8px; border-bottom: 1px solid #e6e6e6; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+    label { display: flex; gap: .5rem; align-items: center; white-space: nowrap; }
+    #toolbar { padding: 8px 12px; }
+    #toolbar button.active { background-color: #007bff; color: white; border-color: #007bff; }
+    #insigne-search { width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box; }
+    #insigne-palette { display: flex; flex-direction: column; min-height: 300px; }
+    #insigne-list { flex-grow: 1; overflow-y: auto; }
+    #insigne-palette .category { margin-bottom: 15px; }
+    #insigne-palette h4 { margin: 0 0 8px 0; }
+    #insigne-palette .items { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 8px; grid-auto-rows: 50px; }
+    #insigne-palette img { width: 100%; height: 100%; border: 2px solid transparent; border-radius: 4px; cursor: pointer; transition: all 0.2s ease; object-fit: contain; }
+    #insigne-palette img:hover { border-color: #007bff; background-color: #f0f8ff; }
+    #inspector-panel .prop-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+    #inspector-panel label { font-weight: 600; }
+    #inspector-panel input, #inspector-panel select { width: 100%; padding: 6px; box-sizing: border-box; }
+    #inspector-panel #no-selection { color: #777; }
+    details summary { cursor: pointer; font-weight: 600; list-style: none; padding: 4px 0; }
+    details summary::-webkit-details-marker { display: none; }
+    details summary::before { content: '▶'; display: inline-block; margin-right: .5rem; transition: transform .2s ease; font-size: 0.8em; }
+    details[open] > summary::before { transform: rotate(90deg); }
+    .details-content { padding-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .details-content .row { flex-wrap: nowrap; align-items: center; margin-bottom: 0; }
+    .details-content .row label { flex-shrink: 0; }
+    .details-content .row input, .details-content .row select { flex-grow: 1; min-width: 0; }
+    .details-content .row input[type="number"] { max-width: 80px; }
+    .details-content .row input[type="color"] { flex-grow: 0; width: 40px; height: 30px; padding: 2px; }
+    .details-content hr { border: none; border-top: 1px solid #eee; margin: 4px 0; }
   </style>
 </head>
 
 <body>
-
-  <canvas id="myCanvas"></canvas>
-
-  <div id="controls">
-
-    <!-- File Controls -->
-    <div class="row group">
-      <label>File: 
-        <button id="exportBtn">Export to JSON</button>
-        <button id="importBtn">Import from JSON</button>
-        <input type="file" id="importFile" accept=".json" style="display: none;" />
-        <button id="exportImageBtn">Export as Image</button>
-      </label>
-    </div>
-
-    <!-- Collapsible Settings Controls -->
-    <details class="group" id="settingsSection">
-      <summary>Settings (Technical, probably don't touch)</summary>
-
-      <div class="row">
-        <label><input id="toggleV" type="checkbox" checked /> Mid vertical</label>
-        <label><input id="toggleH" type="checkbox" checked /> Mid horizontal</label>
+  <div id="app-container">
+    <div id="palette-container">
+      <div id="toolbar" class="panel">
+        <div class="row">
+          <button id="selectModeBtn" class="active">Select</button>
+        </div>
+         <div class="row" style="margin-top: 10px;">
+          <button id="exportBtn">Export JSON</button>
+          <button id="importBtn">Import JSON</button>
+          <input type="file" id="importFile" accept=".json" style="display: none;" />
+          <button id="exportImageBtn">Export Image</button>
+        </div>
       </div>
-
-      <div class="row">
-        <label>Grid W (mm) <input id="gridWInput" type="number" min="1" step="1" value="700" ></label>
-        <label>Grid H (mm) <input id="gridHInput" type="number" min="1" step="1" value="38" ></label>
-        <label>Margin (mm) <input id="marginInput" type="number" min="0" step="1" value="10" ></label>
+      <div class="panel">
+        <details open>
+          <summary>Design & Materials</summary>
+          <div class="details-content">
+            <div class="row">
+              <label for="disciplineSelect">Discipline</label>
+              <select id="disciplineSelect"></select>
+            </div>
+            <hr />
+            <div class="row">
+               <label for="materialType">Material</label>
+               <select id="materialType">
+                 <option value="satin">Satin</option>
+                 <option value="velours">Velvet</option>
+               </select>
+               <label for="materialColor">Color</label>
+               <input type="color" id="materialColor" value="#880000">
+             </div>
+             <div class="row">
+               <button id="addMaterialBtn" style="width: 100%;">Add Material Section</button>
+             </div>
+             <hr />
+             <div class="row">
+               <label for="moivreColor">Moivre</label>
+               <select id="moivreColor">
+                   <option value="rgb(255, 255, 255)">White</option>
+                   <option value="rgb(65, 105, 225)">Blue</option>
+                   <option value="rgb(0, 0, 0)">Black</option>
+               </select>
+               <button id="addMoivreBtn">Add</button>
+             </div>
+          </div>
+        </details>
       </div>
-
-      <div class="row">
-        <label>Minor step (mm) <input id="minorStepInput" type="number" min="0.1" step="0.1" value="1" ></label>
-        <label>Major step (mm) <input id="majorStepInput" type="number" min="0.5" step="0.5" value="10" ></label>
+       <div class="panel">
+        <details>
+          <summary>Settings</summary>
+          <div class="details-content">
+             <div class="row">
+              <label><input id="toggleV" type="checkbox" checked> V Helper</label>
+              <label><input id="toggleH" type="checkbox" checked> H Helper</label>
+            </div>
+            <hr />
+            <div class="row">
+               <label for="gridWInput">Grid W (mm)</label>
+               <input id="gridWInput" type="number" min="1" step="1" value="700">
+            </div>
+            <div class="row">
+               <label for="gridHInput">Grid H (mm)</label>
+               <input id="gridHInput" type="number" min="1" step="1" value="38">
+            </div>
+            <div class="row">
+               <label for="marginInput">Margin (mm)</label>
+               <input id="marginInput" type="number" min="0" step="1" value="10">
+            </div>
+          </div>
+        </details>
       </div>
-
-      <div class="row">
-        <label>px per mm <input id="mmToPxInput" type="number" min="0.1" step="0.0001" value="3.7795"/></label>
-        <small title="96 DPI ≈ 3.7795 px/mm">Tip: 96 DPI ≈ 3.7795 px/mm</small>
+      <div id="insigne-palette" class="panel">
+        <input type="text" id="insigne-search" placeholder="Search insignes...">
+        <div id="insigne-list"></div>
       </div>
+    </div>
 
-      <div class="row">
-        <label>Helper color <input id="helperColorInput" type="color" value="#666666"></label>
-        <label>Helper thickness <input id="helperThicknessInput" type="number" min="0.5" step="0.5" value="3"></label>
+    <div id="main-content-wrapper">
+        <div id="canvas-toolbar">
+            <button id="zoomOutBtn" title="Zoom Out">-</button>
+            <button id="zoomInBtn" title="Zoom In">+</button>
+            <button id="zoomFitBtn" title="Fit to View">Fit</button>
+            <span id="zoom-display">100%</span>
+        </div>
+        <div id="canvas-container" title="Scroll to pan. Shift+Scroll to pan horizontally. Ctrl/Cmd+Scroll to zoom.">
+          <canvas id="myCanvas"></canvas>
+        </div>
+    </div>
+
+    <div id="inspector-container">
+      <div id="inspector-panel" class="panel">
+        <h3>Properties</h3>
+        <div id="inspector-content">
+          <div id="no-selection">Select an item on the canvas.</div>
+          <div id="insigne-props" style="display: none;">
+            <div class="prop-row"><label for="insigneX">X (mm)</label><input id="insigneX" type="number"></div>
+            <div class="prop-row"><label for="insigneY">Y (mm)</label><input id="insigneY" type="number"></div>
+            <div class="prop-row"><label for="insigneHeight">Height (%)</label><input id="insigneHeight" type="number"></div>
+            <button id="removeInsigneBtn">Remove Insigne</button>
+          </div>
+          <div id="material-props" style="display: none;">
+             <div class="prop-row"><label for="selectedMaterialX">X (mm)</label><input id="selectedMaterialX" type="number"></div>
+             <div class="prop-row"><label for="selectedMaterialY">Y (mm)</label><input id="selectedMaterialY" type="number"></div>
+             <div class="prop-row"><label for="selectedMaterialWidth">Width (mm)</label><input id="selectedMaterialWidth" type="number"></div>
+             <div class="prop-row"><label for="selectedMaterialHeight">Height (mm)</label><input id="selectedMaterialHeight" type="number"></div>
+            <button id="removeMaterialBtn">Remove Section</button>
+          </div>
+        </div>
       </div>
-    </details>
-
-    <!-- Design Controls -->
-    <div class="row group">
-      <label>Discipline <select id="disciplineSelect"></select></label>
     </div>
-    <div class="row">
-      <label>Add Insigne: <select id="insigneSelect"></select></label>
-      <button id="addInsigneBtn">Add</button>
-    </div>
-
-    <div class="row">
-        <label>Material: 
-          <select id="materialType">
-            <option value="satin">Satin</option>
-            <option value="velours">Velvet</option>
-          </select>
-        </label>
-        <label>Color: <input type="color" id="materialColor" value="#0f0f0f"></label>
-        <label>X: <input type="number" id="materialX" value="10"></label>
-        <label>Y: <input type="number" id="materialY" value="10"></label>
-        <label>Width: <input type="number" id="materialWidth" value="100"></label>
-        <label>Height: <input type="number" id="materialHeight" value="40"></label>
-        <button id="addMaterialBtn">Add Material Section</button>
-    </div>
-
-    <div class="row">
-        <label>Add Moivre:
-            <select id="moivreColor">
-                <option value="rgb(255, 255, 255)">White</option>
-                <option value="rgb(65, 105, 225)">Blue</option>
-                <option value="rgb(0, 0, 0)">Black</option>
-            </select>
-        </label>
-        <button id="addMoivreBtn">Add Moivre</button>
-    </div>
-
-    <div id="insigneControls" class="row group" style="display: none;">
-      <label>X (mm): <input id="insigneX" type="number" value="10"></label>
-      <label>Y (mm): <input id="insigneY" type="number" value="10"></label>
-      <label>Height (%): <input id="insigneHeight" type="number" value="50"></label>
-      <label><input type="checkbox" id="insigneLockCenter" /> Lock to Center</label>
-      <button id="removeInsigneBtn">Remove</button>
-    </div>
-
-    <div id="materialControls" class="row group" style="display: none;">
-      <label>X (mm): <input id="selectedMaterialX" type="number" value="10"></label>
-      <label>Y (mm): <input id="selectedMaterialY" type="number" value="10"></label>
-      <label>Width (mm): <input id="selectedMaterialWidth" type="number" value="150"></label>
-      <label>Height (mm): <input id="selectedMaterialHeight" type="number" value="18"></label>
-      <button id="removeMaterialBtn">Remove</button>
-    </div>
-
   </div>
 
   <script type="module" src="./js/main.js"></script>
