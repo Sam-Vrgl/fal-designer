@@ -14,7 +14,10 @@
     "big": {}
   },
   "letters": {
-    "small": {},
+    "small": {
+      "a": "./assets/insignes/lettres/min/a_min.png",
+      "i": "./assets/insignes/lettres/min/i_min.png"
+    },
     "big": {
       "a": "./assets/insignes/lettres/maj/a_maj.png",
       "b": "./assets/insignes/lettres/maj/b_maj.png",
@@ -55,6 +58,10 @@
     }
   },
   "annees": {
+    "epsilon": {
+      "path": "./assets/insignes/annees/epsilon-24mm.png",
+      "size_mm": 24
+    },
     "etoile argent": {
       "path": "./assets/insignes/annees/etoile-argent-12mm.png",
       "size_mm": 12
@@ -84,5 +91,10 @@
       "size_mm": 18
     }
   },
-  "other": {}
+  "other": {
+    "drapeau UK": {
+      "path": "./assets/insignes/pays/drapeau-UK-10mm.png",
+      "size_mm": 10
+    }
+  }
 }

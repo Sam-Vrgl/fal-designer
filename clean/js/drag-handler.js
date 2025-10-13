@@ -29,6 +29,46 @@ export function initDragAndDrop(canvas) {
     canvas.addEventListener('mousedown', (event) => {
         const { gridX, gridY } = getGridCoordsFromEvent(event);
 
+        // --- Check for Insigne click (TOPMOST ITEM) ---
+        let clickedInsigne = null;
+        let insigneIndex = -1;
+        for (let i = state.images.length - 1; i >= 0; i--) {
+            const insigne = state.images[i];
+            const img = getCachedImage(insigne.url);
+            if (!img) continue;
+
+            const natAspect = img.naturalWidth / img.naturalHeight;
+            let h_mm = insigne.height_mm || (insigne.heightPct * state.gridHmm);
+            if (!h_mm) continue;
+            
+            const w_mm = h_mm * natAspect;
+            const left_mm = insigne.x_mm;
+            const top_mm = insigne.y_mm;
+
+            if (gridX >= left_mm && gridX <= left_mm + w_mm && gridY >= top_mm && gridY <= top_mm + h_mm) {
+                clickedInsigne = insigne;
+                insigneIndex = i;
+                break;
+            }
+        }
+        
+        if (clickedInsigne) {
+            state.selectedInsigne = clickedInsigne;
+            state.isDragging = true;
+            state.dragOffsetX = gridX - clickedInsigne.x_mm;
+            state.dragOffsetY = gridY - clickedInsigne.y_mm;
+
+            if (insigneIndex < state.images.length - 1) {
+                const [item] = state.images.splice(insigneIndex, 1);
+                state.images.push(item);
+            }
+            
+            state.selectedMaterial = null;
+            state.selectedMoivre = null;
+            notify();
+            return;
+        }
+
         // --- Check for Moivre click ---
         let clickedMoivre = null;
         const angleRad = 15 * Math.PI / 180;
@@ -40,15 +80,12 @@ export function initDragAndDrop(canvas) {
             const centerX = moivre.x_mm + moivre.width_mm / 2;
             const centerY = moivre.y_mm + moivre.height_mm / 2;
 
-            // Translate click point to be relative to the moivre's center
             const translatedX = gridX - centerX;
             const translatedY = gridY - centerY;
             
-            // Un-rotate the click point
             const unrotatedX = translatedX * cosAngle - translatedY * sinAngle;
             const unrotatedY = translatedX * sinAngle + translatedY * cosAngle;
 
-            // Check if the un-rotated point is within the moivre's bounds
             if (Math.abs(unrotatedX) < moivre.width_mm / 2 && Math.abs(unrotatedY) < moivre.height_mm / 2) {
                 clickedMoivre = moivre;
                 break;
@@ -89,28 +126,15 @@ export function initDragAndDrop(canvas) {
             return;
         }
 
-        // --- Check for Insigne click ---
-        let clickedInsigne = null;
-        let insigneIndex = -1;
-        // ... (rest of insigne click detection is the same)
-        
-        if (clickedInsigne) {
-            state.selectedInsigne = clickedInsigne;
-            // ...
-            state.selectedMaterial = null;
-            state.selectedMoivre = null;
-        } else {
-            // Clicked on empty space
-            state.selectedInsigne = null;
-            state.selectedMaterial = null;
-            state.selectedMoivre = null;
-        }
-
+        // If we get here, nothing was clicked on
+        state.selectedInsigne = null;
+        state.selectedMaterial = null;
+        state.selectedMoivre = null;
         notify();
     });
 
     window.addEventListener('mousemove', (event) => {
-        const { gridX } = getGridCoordsFromEvent(event);
+        const { gridX, gridY } = getGridCoordsFromEvent(event);
 
         // Handle Moivre dragging (horizontal only)
         if (state.isDraggingMoivre && state.selectedMoivre) {
@@ -123,7 +147,6 @@ export function initDragAndDrop(canvas) {
         // Handle Material dragging
         if (state.isDraggingMaterial && state.selectedMaterial) {
             event.preventDefault();
-            const { gridX, gridY } = getGridCoordsFromEvent(event); // Need Y for material
             state.selectedMaterial.x_mm = gridX - state.dragMaterialOffsetX;
             state.selectedMaterial.y_mm = gridY - state.dragMaterialOffsetY;
             notify();
@@ -133,9 +156,12 @@ export function initDragAndDrop(canvas) {
         // Handle Insigne dragging
         if (state.isDragging && state.selectedInsigne) {
             event.preventDefault();
-            const { gridX, gridY } = getGridCoordsFromEvent(event); // Need Y for insigne
             state.selectedInsigne.x_mm = gridX - state.dragOffsetX;
-            state.selectedInsigne.y_mm = gridY - state.dragOffsetY;
+
+            if (!state.selectedInsigne.lockToCenterline) {
+                state.selectedInsigne.y_mm = gridY - state.dragOffsetY;
+            }
+            
             notify();
         }
     });

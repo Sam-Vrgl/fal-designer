@@ -17,7 +17,7 @@ export const state = {
   materials: [],
   moivres: [],
   images: [
-    // ... initial images ...
+    // Example: { url: '...', x_mm: 10, y_mm: 10, height_mm: 12, lockToCenterline: false }
   ],
   selectedInsigne: null,
   isDragging: false,

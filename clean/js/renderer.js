@@ -161,6 +161,21 @@ export function draw(canvas, ctx, s, useDevicePixelRatio = true) {
         drawImgMM(ctx, s, img, it.x_mm, it.y_mm, it);
     }
 
+    // --- Draw selected insigne outline ---
+    if (s.selectedInsigne) {
+        const insigne = s.selectedInsigne;
+        const img = getCachedImage(insigne.url);
+        if (img) {
+            const natAspect = img.naturalWidth / img.naturalHeight;
+            let h_mm = insigne.height_mm || (insigne.heightPct * s.gridHmm);
+            const w_mm = h_mm * natAspect;
+
+            ctx.strokeStyle = 'rgba(255, 0, 0, 0.7)';
+            ctx.lineWidth = 2 / s.mmToPx;
+            ctx.strokeRect(s.marginMm + insigne.x_mm, s.marginMm + insigne.y_mm, w_mm, h_mm);
+        }
+    }
+
     // --- Helper lines ---
     const midX = TOTAL_W_MM / 2;
     const midY = TOTAL_H_MM / 2;

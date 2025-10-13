@@ -34,6 +34,7 @@ export function bindUI() {
   const insigneY = $('insigneY');
   const insigneHeight = $('insigneHeight');
   const removeInsigneBtn = $('removeInsigneBtn');
+  const insigneLockCenter = $('insigneLockCenter');
 
   // New material controls
   const materialType = $('materialType');
@@ -120,7 +121,6 @@ export function bindUI() {
 
   importFile.addEventListener('change', (event) => {
     importState(event.target.files[0]);
-    // Reset the file input so the 'change' event fires even if the same file is selected again
     event.target.value = '';
   });
 
@@ -129,9 +129,8 @@ export function bindUI() {
     const url = selectedOption.value;
     if (!url) return;
 
-    const newInsigne = { url, x_mm: -999, y_mm: -999 };
+    const newInsigne = { url, x_mm: -999, y_mm: -999, lockToCenterline: false };
     
-    // Check for explicit size from the data attribute first
     const sizeMm = selectedOption.dataset.sizeMm;
 
     if (sizeMm) {
@@ -141,7 +140,6 @@ export function bindUI() {
     } else if (url.includes('/grand/') || url.includes('/maj/')) {
       newInsigne.height_mm = 18;
     } else {
-      // Fallback for items with no defined size
       newInsigne.heightPct = 0.5;
     }
 
@@ -150,12 +148,7 @@ export function bindUI() {
     if (!img) return;
 
     const natAspect = img.naturalWidth / img.naturalHeight;
-    let h_mm;
-    if (newInsigne.height_mm) {
-      h_mm = newInsigne.height_mm;
-    } else {
-      h_mm = (newInsigne.heightPct || 0.5) * state.gridHmm;
-    }
+    let h_mm = newInsigne.height_mm || (newInsigne.heightPct || 0.5) * state.gridHmm;
     const w_mm = h_mm * natAspect;
 
     state.selectedInsigne = newInsigne;
@@ -186,7 +179,7 @@ export function bindUI() {
   });
 
   insigneY.addEventListener('input', () => {
-    if (state.selectedInsigne) {
+    if (state.selectedInsigne && !state.selectedInsigne.lockToCenterline) {
       state.selectedInsigne.y_mm = insigneY.valueAsNumber;
       notify();
     }
@@ -196,6 +189,20 @@ export function bindUI() {
     if (state.selectedInsigne && !insigneHeight.disabled) {
       state.selectedInsigne.heightPct = insigneHeight.valueAsNumber / 100;
       notify();
+    }
+  });
+  
+  insigneLockCenter.addEventListener('change', () => {
+    if (state.selectedInsigne) {
+        state.selectedInsigne.lockToCenterline = insigneLockCenter.checked;
+        if (state.selectedInsigne.lockToCenterline) {
+            const img = getCachedImage(state.selectedInsigne.url);
+            if (img) {
+                let h_mm = state.selectedInsigne.height_mm || (state.selectedInsigne.heightPct * state.gridHmm);
+                state.selectedInsigne.y_mm = (state.gridHmm / 2) - (h_mm / 2);
+            }
+        }
+        notify();
     }
   });
 
@@ -243,11 +250,11 @@ export function bindUI() {
     }
   });
 
-    addMoivreBtn.addEventListener('click', () => {
+  addMoivreBtn.addEventListener('click', () => {
     state.moivres.push({
-        x_mm: 50, // Default starting X position
+        x_mm: 50,
         y_mm: 0,
-        width_mm: 5, // Default width
+        width_mm: 5,
         height_mm: state.gridHmm,
         color: moivreColor.value,
     });
@@ -263,6 +270,8 @@ export function bindUI() {
       insigneControls.style.display = 'flex';
       insigneX.value = state.selectedInsigne.x_mm;
       insigneY.value = state.selectedInsigne.y_mm;
+      insigneLockCenter.checked = state.selectedInsigne.lockToCenterline;
+      insigneY.disabled = state.selectedInsigne.lockToCenterline;
 
       if (state.selectedInsigne.height_mm) {
         const heightInPct = (state.selectedInsigne.height_mm / state.gridHmm) * 100;

@@ -20,6 +20,7 @@ Outil pour planifier la création d'une faluche et les ruban et pins nécessaire
 
 
 TODO:
-[] Ajouter insignes années aux options
+[x] Ajouter insignes années aux options
+[] Ajouter insignes BAC
 [] Créer images insignes de filières
 [] Ajouter fonctionnalité moivre
