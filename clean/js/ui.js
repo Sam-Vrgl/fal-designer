@@ -1,6 +1,7 @@
 import { state, notify, subscribe } from './state.js';
 import { addImage, getCachedImage } from './main.js';
 import { exportState, importState } from './file-handler.js';
+import { exportCanvasAsImage } from './image-exporter.js';
 
 export function bindUI() {
   const $ = (id) => document.getElementById(id);
@@ -9,6 +10,7 @@ export function bindUI() {
   const exportBtn = $('exportBtn');
   const importBtn = $('importBtn');
   const importFile = $('importFile');
+  const exportImageBtn = $('exportImageBtn');
 
   // Toggles
   const chkV = $('toggleV');
@@ -106,10 +108,13 @@ export function bindUI() {
   });
 
   exportBtn.addEventListener('click', exportState);
+  exportImageBtn.addEventListener('click', exportCanvasAsImage);
 
   importBtn.addEventListener('click', () => {
     importFile.click();
   });
+
+  
 
   importFile.addEventListener('change', (event) => {
     importState(event.target.files[0]);

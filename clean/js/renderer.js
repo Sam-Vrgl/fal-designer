@@ -3,41 +3,47 @@ import { createVelvetTexture, createSatinTexture } from './textures.js';
 
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
-export function draw(canvas, ctx, s) {
+export function draw(canvas, ctx, s, useDevicePixelRatio = true) {
     const TOTAL_W_MM = s.gridWmm + 2 * s.marginMm;
     const TOTAL_H_MM = s.gridHmm + 2 * s.marginMm;
 
-    const dpr = window.devicePixelRatio || 1;
-    const totalCssW = TOTAL_W_MM * s.mmToPx;
-    const totalCssH = TOTAL_H_MM * s.mmToPx;
+    if (useDevicePixelRatio) {
+        const dpr = window.devicePixelRatio || 1;
+        const totalCssW = TOTAL_W_MM * s.mmToPx;
+        const totalCssH = TOTAL_H_MM * s.mmToPx;
 
-    const scaleCss = Math.min(
-        window.innerWidth / totalCssW,
-        window.innerHeight / totalCssH
-    );
+        const scaleCss = Math.min(
+            window.innerWidth / totalCssW,
+            window.innerHeight / totalCssH
+        );
 
-    const cssW = totalCssW * scaleCss;
-    const cssH = totalCssH * scaleCss;
+        const cssW = totalCssW * scaleCss;
+        const cssH = totalCssH * scaleCss;
 
-    canvas.style.width = cssW + 'px';
-    canvas.style.height = cssH + 'px';
-    canvas.width = Math.round(cssW * dpr);
-    canvas.height = Math.round(cssH * dpr);
+        canvas.style.width = cssW + 'px';
+        canvas.style.height = cssH + 'px';
+        canvas.width = Math.round(cssW * dpr);
+        canvas.height = Math.round(cssH * dpr);
 
-    ctx.setTransform(dpr * scaleCss, 0, 0, dpr * scaleCss, 0, 0);
-    ctx.clearRect(0, 0, totalCssW, totalCssH);
+        ctx.setTransform(dpr * scaleCss, 0, 0, dpr * scaleCss, 0, 0);
+    } else {
+        ctx.setTransform(s.mmToPx, 0, 0, s.mmToPx, 0, 0);
+    }
 
+    const totalCssW_render = TOTAL_W_MM;
+    const totalCssH_render = TOTAL_H_MM;
+
+    ctx.clearRect(0, 0, totalCssW_render, totalCssH_render);
     ctx.strokeStyle = '#000';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(0, 0, totalCssW, totalCssH);
+    ctx.lineWidth = 1 / s.mmToPx;
+    ctx.strokeRect(0, 0, totalCssW_render, totalCssH_render);
 
-    const left = s.marginMm * s.mmToPx;
-    const top = s.marginMm * s.mmToPx;
-    const right = (s.marginMm + s.gridWmm) * s.mmToPx;
-    const bottom = (s.marginMm + s.gridHmm) * s.mmToPx;
+    const left = s.marginMm;
+    const top = s.marginMm;
+    const right = s.marginMm + s.gridWmm;
+    const bottom = s.marginMm + s.gridHmm;
 
     ctx.strokeStyle = '#a0a0a0';
-    ctx.lineWidth = 1;
     ctx.strokeRect(left, top, right - left, bottom - top);
 
     const minor = Math.max(0.1, s.minorStepMm);
