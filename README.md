@@ -20,7 +20,19 @@ Outil pour planifier la création d'une faluche et les ruban et pins nécessaire
 
 
 TODO:
-[x] Ajouter insignes années aux options
-[] Ajouter insignes BAC
-[] Créer images insignes de filières
-[] Ajouter fonctionnalité moivre
+- [x] Ajouter fonctionnalité moivre
+- [x] Ajouter fonctionnalité multidisciplines
+- [x] Ajouter export/import JSON
+- [x] Ajouter export image PNG
+- [x] Ajouter Lettres majuscules
+- [ ] Ajouter Lettres minuscules
+- [ ] Ajouter Chiffres grands
+- [x] Ajouter Chiffres petits
+- [x] Ajouter insignes années aux options
+- [ ] Ajouter toutes les insignes BAC
+- [ ] Ajouter toutes les insignes de filières
+- [ ] Ajouter toutes les insignes options (international, drapeaux etc)
+- [ ] Ajouter Helper pour les cursus multidisciplinaires et particuliers (PASS, LASS, prépa etc)
+- [ ] Ajouter fonctionnalité de sauvegarde locale (localStorage)
+- [ ] Ajouter les disciplines dont le ruban n'est pas fixe
+- [ ] Améliorer l'UI/UX
