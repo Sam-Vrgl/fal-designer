@@ -7,22 +7,38 @@
   <style>
     :root { color-scheme: light; }
     body { margin:0; font:14px/1.35 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+
     #controls{
       background:#fff; border:1px solid #ccc; border-radius:10px;
       padding:10px 12px; box-shadow:0 2px 10px rgba(0,0,0,.08);
       max-width: min(92vw, 520px);
-      margin: 10px auto; /* Added margin for spacing */
+      margin: 10px auto;
     }
+
     #controls .row{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:8px; }
     #controls label{ display:flex; gap:.5rem; align-items:center; white-space:nowrap; }
     #controls .group{ border-top:1px solid #e6e6e6; padding-top:8px; margin-top:8px; }
     #controls input[type="number"]{ width:6.5rem; }
     #controls input[type="color"]{ width:2.5rem; height:1.75rem; padding:0; border:0; background:transparent; }
-    #controls select {
-      flex-grow: 1;
-      min-width: 0;
-    }
+    #controls select { flex-grow: 1; min-width: 0; }
     canvas { display:block; margin:0 auto; border:1px solid #000; }
+
+    /* Collapsible "Settings" section */
+    #settingsSection summary {
+      display:flex; align-items:center; gap:.5rem;
+      cursor:pointer; user-select:none;
+      padding:8px 12px; margin:-8px -12px 8px;
+      font-weight:600;
+      list-style:none;
+    }
+    #settingsSection summary::-webkit-details-marker { display:none; }
+    #settingsSection summary::before {
+      content:"▶";
+      display:inline-block;
+      transform:translateY(1px);
+      transition:transform .2s ease;
+    }
+    #settingsSection[open] summary::before { transform:translateY(1px) rotate(90deg); }
   </style>
 </head>
 
@@ -31,6 +47,8 @@
   <canvas id="myCanvas"></canvas>
 
   <div id="controls">
+
+    <!-- File Controls -->
     <div class="row group">
       <label>File: 
         <button id="exportBtn">Export to JSON</button>
@@ -39,60 +57,73 @@
         <button id="exportImageBtn">Export as Image</button>
       </label>
     </div>
-    <div class="row">
+
+    <!-- Collapsible Settings Controls -->
+    <details class="group" id="settingsSection">
+      <summary>Settings (Technical, probably don't touch)</summary>
+
+      <div class="row">
+        <label><input id="toggleV" type="checkbox" checked /> Mid vertical</label>
+        <label><input id="toggleH" type="checkbox" checked /> Mid horizontal</label>
+      </div>
+
+      <div class="row">
+        <label>Grid W (mm) <input id="gridWInput" type="number" min="1" step="1" value="700" ></label>
+        <label>Grid H (mm) <input id="gridHInput" type="number" min="1" step="1" value="38" ></label>
+        <label>Margin (mm) <input id="marginInput" type="number" min="0" step="1" value="10" ></label>
+      </div>
+
+      <div class="row">
+        <label>Minor step (mm) <input id="minorStepInput" type="number" min="0.1" step="0.1" value="1" ></label>
+        <label>Major step (mm) <input id="majorStepInput" type="number" min="0.5" step="0.5" value="10" ></label>
+      </div>
+
+      <div class="row">
+        <label>px per mm <input id="mmToPxInput" type="number" min="0.1" step="0.0001" value="3.7795"/></label>
+        <small title="96 DPI ≈ 3.7795 px/mm">Tip: 96 DPI ≈ 3.7795 px/mm</small>
+      </div>
+
+      <div class="row">
+        <label>Helper color <input id="helperColorInput" type="color" value="#666666"></label>
+        <label>Helper thickness <input id="helperThicknessInput" type="number" min="0.5" step="0.5" value="3"></label>
+      </div>
+    </details>
+
+    <!-- Design Controls -->
+    <div class="row group">
       <label>Discipline <select id="disciplineSelect"></select></label>
     </div>
     <div class="row">
-      <label><input id="toggleV" type="checkbox" checked /> Mid vertical</label>
-      <label><input id="toggleH" type="checkbox" checked /> Mid horizontal</label>
-    </div>
-
-    <div class="row">
-      <label>Grid W (mm) <input id="gridWInput" type="number" min="1" step="1" value="700"></label>
-      <label>Grid H (mm) <input id="gridHInput" type="number" min="1" step="1" value="38"></label>
-      <label>Margin (mm) <input id="marginInput" type="number" min="0" step="1" value="10"></label>
-    </div>
-
-    <div class="row">
-      <label>Minor step (mm) <input id="minorStepInput" type="number" min="0.1" step="0.1" value="1"></label>
-      <label>Major step (mm) <input id="majorStepInput" type="number" min="0.5" step="0.5" value="10"></label>
-    </div>
-
-    <div class="row group">
-      <label>px per mm <input id="mmToPxInput" type="number" min="0.1" step="0.0001" value="3.7795275591" /></label>
-      <small title="96 DPI ≈ 3.7795 px/mm">Tip: 96 DPI ≈ 3.7795 px/mm</small>
-    </div>
-
-    <div class="row group">
-      <label>Helper color <input id="helperColorInput" type="color" value="#666666"></label>
-      <label>Helper thickness <input id="helperThicknessInput" type="number" min="0.5" step="0.5" value="3"></label>
-    </div>
-
-    <div class="row group">
       <label>Add Insigne: <select id="insigneSelect"></select></label>
       <button id="addInsigneBtn">Add</button>
     </div>
 
-    <div class="row group">
-        <label>Material: <select id="materialType"><option value="satin">Satin</option><option value="velours">Velvet</option></select></label>
-        <label>Color: <input type="color" id="materialColor" value="#ff0000"></label>
+    <div class="row">
+        <label>Material: 
+          <select id="materialType">
+            <option value="satin">Satin</option>
+            <option value="velours">Velvet</option>
+          </select>
+        </label>
+        <label>Color: <input type="color" id="materialColor" value="#0f0f0f"></label>
         <label>X: <input type="number" id="materialX" value="10"></label>
         <label>Y: <input type="number" id="materialY" value="10"></label>
-        <label>Width: <input type="number" id="materialWidth" value="150"></label>
-        <label>Height: <input type="number" id="materialHeight" value="18"></label>
+        <label>Width: <input type="number" id="materialWidth" value="100"></label>
+        <label>Height: <input type="number" id="materialHeight" value="40"></label>
         <button id="addMaterialBtn">Add Material Section</button>
     </div>
 
-    <div class="row group">
+    <div class="row">
         <label>Add Moivre:
             <select id="moivreColor">
                 <option value="rgb(255, 255, 255)">White</option>
                 <option value="rgb(65, 105, 225)">Blue</option>
+                <option value="rgb(0, 0, 0)">Black</option>
             </select>
         </label>
         <button id="addMoivreBtn">Add Moivre</button>
     </div>
-    
+
     <div id="insigneControls" class="row group" style="display: none;">
       <label>X (mm): <input id="insigneX" type="number" value="10"></label>
       <label>Y (mm): <input id="insigneY" type="number" value="10"></label>
@@ -108,6 +139,7 @@
       <label>Height (mm): <input id="selectedMaterialHeight" type="number" value="18"></label>
       <button id="removeMaterialBtn">Remove</button>
     </div>
+
   </div>
 
   <script type="module" src="./js/main.js"></script>
