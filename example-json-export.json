@@ -1,0 +1,258 @@
+{
+  "gridWmm": 700,
+  "gridHmm": 38,
+  "marginMm": 10,
+  "discipline": "Écoles d'ingénieurs",
+  "materials": [
+    {
+      "x_mm": 228.48275862068965,
+      "y_mm": -1.1724137931034662,
+      "width_mm": 79,
+      "height_mm": 40,
+      "material": "satin",
+      "color": "#8f00ff"
+    }
+  ],
+  "moivres": [
+    {
+      "x_mm": 268.48275862068965,
+      "y_mm": 0,
+      "width_mm": 5,
+      "height_mm": 38,
+      "color": "rgb(255, 255, 255)"
+    },
+    {
+      "x_mm": 384.551724137931,
+      "y_mm": 0,
+      "width_mm": 5,
+      "height_mm": 38,
+      "color": "rgb(255, 255, 255)"
+    }
+  ],
+  "images": [
+    {
+      "url": "./assets/insignes/filiere/ecole-ingenieur.png",
+      "x_mm": 330.4810073042345,
+      "y_mm": 9.5,
+      "lockToCenterline": true,
+      "heightPct": 0.5
+    },
+    {
+      "url": "./assets/insignes/lettres/maj/s_maj.png",
+      "x_mm": 13.230930720783771,
+      "y_mm": 10,
+      "lockToCenterline": true,
+      "height_mm": 18
+    },
+    {
+      "url": "./assets/insignes/lettres/maj/u_maj.png",
+      "x_mm": 27.400372399293516,
+      "y_mm": 10,
+      "lockToCenterline": true,
+      "height_mm": 18
+    },
+    {
+      "url": "./assets/insignes/lettres/maj/r_maj.png",
+      "x_mm": 42.48409955274287,
+      "y_mm": 10,
+      "lockToCenterline": true,
+      "height_mm": 18
+    },
+    {
+      "url": "./assets/insignes/lettres/maj/n_maj.png",
+      "x_mm": 59.51923501896799,
+      "y_mm": 10,
+      "lockToCenterline": true,
+      "height_mm": 18
+    },
+    {
+      "url": "./assets/insignes/lettres/maj/o_maj.png",
+      "x_mm": 75.4344271939657,
+      "y_mm": 10,
+      "lockToCenterline": true,
+      "height_mm": 18
+    },
+    {
+      "url": "./assets/insignes/lettres/maj/m_maj.png",
+      "x_mm": 91.82158103660599,
+      "y_mm": 10,
+      "lockToCenterline": true,
+      "height_mm": 18
+    },
+    {
+      "url": "./assets/insignes/lettres/maj/s_maj.png",
+      "x_mm": 133.65080475857243,
+      "y_mm": 10,
+      "lockToCenterline": true,
+      "height_mm": 18
+    },
+    {
+      "url": "./assets/insignes/lettres/maj/v_maj.png",
+      "x_mm": 147.2284077934514,
+      "y_mm": 10,
+      "lockToCenterline": true,
+      "height_mm": 18
+    },
+    {
+      "url": "./assets/insignes/annees/epsilon-24mm.png",
+      "x_mm": 174.1959182736982,
+      "y_mm": 7,
+      "lockToCenterline": true,
+      "height_mm": 24
+    },
+    {
+      "url": "./assets/insignes/chiffres/petit/1_min.png",
+      "x_mm": 188.05108467459763,
+      "y_mm": 25.811756473058086,
+      "lockToCenterline": false,
+      "height_mm": 10
+    },
+    {
+      "url": "./assets/insignes/chiffres/petit/9_min.png",
+      "x_mm": 195.6088173547936,
+      "y_mm": 26.31560531840448,
+      "lockToCenterline": false,
+      "height_mm": 10
+    },
+    {
+      "url": "./assets/insignes/lettres/min/i_min.png",
+      "x_mm": 193.7371647509579,
+      "y_mm": 13.551724137931036,
+      "lockToCenterline": false,
+      "height_mm": 10
+    },
+    {
+      "url": "./assets/insignes/filiere/palme-sciences-30mm.png",
+      "x_mm": 230.85845820545228,
+      "y_mm": 4,
+      "lockToCenterline": true,
+      "height_mm": 30
+    },
+    {
+      "url": "./assets/insignes/lettres/maj/i_maj.png",
+      "x_mm": 244.5062068965518,
+      "y_mm": 6.896551724137932,
+      "lockToCenterline": false,
+      "height_mm": 18
+    },
+    {
+      "url": "./assets/insignes/annees/etoile-or-12mm.png",
+      "x_mm": 265.38401253918494,
+      "y_mm": 13,
+      "lockToCenterline": true,
+      "height_mm": 12
+    },
+    {
+      "url": "./assets/insignes/annees/etoile-or-12mm.png",
+      "x_mm": 280.28056426332284,
+      "y_mm": 13,
+      "lockToCenterline": true,
+      "height_mm": 12
+    },
+    {
+      "url": "./assets/insignes/annees/tete-de-mort-15mm.png",
+      "x_mm": 295.7953044754219,
+      "y_mm": 11.5,
+      "lockToCenterline": true,
+      "height_mm": 15
+    },
+    {
+      "url": "./assets/insignes/lettres/maj/o_maj.png",
+      "x_mm": 307.2300884955753,
+      "y_mm": 10,
+      "lockToCenterline": true,
+      "height_mm": 18
+    },
+    {
+      "url": "./assets/insignes/annees/etoile-or-12mm.png",
+      "x_mm": 380.21159874608145,
+      "y_mm": 13,
+      "lockToCenterline": true,
+      "height_mm": 12
+    },
+    {
+      "url": "./assets/insignes/annees/tete-de-vache-18mm.png",
+      "x_mm": 394.8045977011494,
+      "y_mm": 10,
+      "lockToCenterline": true,
+      "height_mm": 18
+    },
+    {
+      "url": "./assets/insignes/annees/etoile-or-12mm.png",
+      "x_mm": 410.62539184952976,
+      "y_mm": 13,
+      "lockToCenterline": true,
+      "height_mm": 12
+    },
+    {
+      "url": "./assets/insignes/annees/tete-de-vache-18mm.png",
+      "x_mm": 424.59770114942535,
+      "y_mm": 10,
+      "lockToCenterline": true,
+      "height_mm": 18
+    },
+    {
+      "url": "./assets/insignes/annees/etoile-or-12mm.png",
+      "x_mm": 440.4184952978056,
+      "y_mm": 13,
+      "lockToCenterline": true,
+      "height_mm": 12
+    },
+    {
+      "url": "./assets/insignes/annees/palme-double-28mm.png",
+      "x_mm": 456.2931034482758,
+      "y_mm": 5,
+      "lockToCenterline": true,
+      "height_mm": 28
+    },
+    {
+      "url": "./assets/insignes/annees/etoile-or-12mm.png",
+      "x_mm": 479.5219435736677,
+      "y_mm": 13,
+      "lockToCenterline": true,
+      "height_mm": 12
+    },
+    {
+      "url": "./assets/insignes/pays/drapeau-UK-10mm.png",
+      "x_mm": 203.5609959370768,
+      "y_mm": 25.965517241379313,
+      "lockToCenterline": false,
+      "height_mm": 10
+    },
+    {
+      "url": "./assets/insignes/pays/drapeau-UK-10mm.png",
+      "x_mm": 264.38858214397334,
+      "y_mm": 26.58620689655172,
+      "lockToCenterline": false,
+      "height_mm": 10
+    },
+    {
+      "url": "./assets/insignes/pays/drapeau-UK-10mm.png",
+      "x_mm": 280.52651317845607,
+      "y_mm": 26.58620689655172,
+      "lockToCenterline": false,
+      "height_mm": 10
+    },
+    {
+      "url": "./assets/insignes/pays/drapeau-UK-10mm.png",
+      "x_mm": 307.21616835086985,
+      "y_mm": 29.068965517241374,
+      "lockToCenterline": false,
+      "height_mm": 10
+    },
+    {
+      "url": "./assets/insignes/lettres/min/a_min.png",
+      "x_mm": 446.6168582375479,
+      "y_mm": 24.72413793103448,
+      "lockToCenterline": false,
+      "height_mm": 10
+    },
+    {
+      "url": "./assets/insignes/lettres/min/a_min.png",
+      "x_mm": 488.8237547892721,
+      "y_mm": 25.344827586206897,
+      "lockToCenterline": false,
+      "height_mm": 10
+    }
+  ]
+}
