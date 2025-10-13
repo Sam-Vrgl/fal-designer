@@ -52,6 +52,10 @@ export function bindUI() {
   const selectedMaterialHeight = $('selectedMaterialHeight');
   const removeMaterialBtn = $('removeMaterialBtn');
 
+  // Moivre controls
+  const moivreColor = $('moivreColor');
+  const addMoivreBtn = $('addMoivreBtn');
+
 
   // Initialize from state
   chkV.checked = state.helper.showV;
@@ -237,6 +241,17 @@ export function bindUI() {
       state.selectedMaterial = null;
       notify();
     }
+  });
+
+    addMoivreBtn.addEventListener('click', () => {
+    state.moivres.push({
+        x_mm: 50, // Default starting X position
+        y_mm: 0,
+        width_mm: 5, // Default width
+        height_mm: state.gridHmm,
+        color: moivreColor.value,
+    });
+    notify();
   });
 
 

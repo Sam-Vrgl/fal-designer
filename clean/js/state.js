@@ -15,6 +15,7 @@ export const state = {
   disciplineColors: [],
   disciplineMaterial: null,
   materials: [],
+  moivres: [],
   images: [
     // ... initial images ...
   ],
@@ -26,6 +27,9 @@ export const state = {
   isDraggingMaterial: false,
   dragMaterialOffsetX: 0,
   dragMaterialOffsetY: 0,
+  selectedMoivre: null,
+  isDraggingMoivre: false,
+  dragMoivreOffsetX: 0,
 };
 
 const listeners = new Set();

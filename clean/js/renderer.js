@@ -104,22 +104,64 @@ export function draw(canvas, ctx, s, useDevicePixelRatio = true) {
 
         colorRectGridMM(ctx, s, material.x_mm, material.y_mm, material.x_mm + material.width_mm, material.y_mm + material.height_mm, fillStyle);
     }
+
+    // --- Draw Moivre Ribbons (with clipping) ---
+    ctx.save(); // Save state before applying clipping mask
+    ctx.beginPath();
+    ctx.rect(s.marginMm, s.marginMm, s.gridWmm, s.gridHmm);
+    ctx.clip(); // Apply clipping mask
+
+    const moivrePadding = 10;
+    for (const moivre of s.moivres) {
+        const satinPattern = createSatinTexture(ctx, moivre.color);
+        const extendedHeight = moivre.height_mm + moivrePadding * 2;
+        
+        const centerX = s.marginMm + moivre.x_mm + (moivre.width_mm / 2);
+        const centerY = s.marginMm + moivre.y_mm + (moivre.height_mm / 2);
+        
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(15 * Math.PI / 180);
+        
+        ctx.fillStyle = satinPattern;
+        ctx.fillRect(-moivre.width_mm / 2, -extendedHeight / 2, moivre.width_mm, extendedHeight);
+        
+        ctx.restore();
+    }
+    ctx.restore(); // Restore state to remove clipping mask
     
-    // Selected material outline
+    // --- Draw selected material outline ---
     if (s.selectedMaterial) {
         ctx.strokeStyle = 'rgba(255, 0, 0, 0.7)';
         ctx.lineWidth = 2 / s.mmToPx;
         ctx.strokeRect(s.marginMm + s.selectedMaterial.x_mm, s.marginMm + s.selectedMaterial.y_mm, s.selectedMaterial.width_mm, s.selectedMaterial.height_mm);
     }
 
-    // Images (insignes)
+    // --- Draw selected moivre outline ---
+    if (s.selectedMoivre) {
+        const moivre = s.selectedMoivre;
+        const centerX = s.marginMm + moivre.x_mm + (moivre.width_mm / 2);
+        const centerY = s.marginMm + moivre.y_mm + (moivre.height_mm / 2);
+
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(15 * Math.PI / 180);
+        
+        ctx.strokeStyle = 'rgba(255, 0, 0, 0.7)';
+        ctx.lineWidth = 2 / s.mmToPx;
+        ctx.strokeRect(-moivre.width_mm / 2, -moivre.height_mm / 2, moivre.width_mm, moivre.height_mm);
+        
+        ctx.restore();
+    }
+
+    // --- Images (insignes) ---
     for (const it of s.images) {
         const img = getCachedImage(it.url);
         if (!img) continue;
         drawImgMM(ctx, s, img, it.x_mm, it.y_mm, it);
     }
 
-    // Helper lines
+    // --- Helper lines ---
     const midX = TOTAL_W_MM / 2;
     const midY = TOTAL_H_MM / 2;
 

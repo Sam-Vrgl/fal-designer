@@ -46,6 +46,7 @@ export function exportState() {
         marginMm: state.marginMm,
         discipline: disciplineSelect.value,
         materials: state.materials,
+        moivres: state.moivres,
         images: state.images,
     };
 
@@ -83,10 +84,12 @@ export function importState(file) {
             }
 
             state.materials = loadedState.materials || [];
+            state.moivres = loadedState.moivres || [];
             state.images = loadedState.images || [];
             
             state.selectedInsigne = null;
             state.selectedMaterial = null;
+            state.selectedMoivre = null;
 
             await preloadImages(state.images);
             notify();
