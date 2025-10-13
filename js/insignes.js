@@ -1,14 +1,14 @@
 async function fetchInsignes() {
-  try {
-    const response = await fetch('./insignes-list.json');
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    try {
+        const response = await fetch('./insignes-list.json');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (e) {
+        console.error("Could not load insignes-list.json:", e);
+        return {};
     }
-    return await response.json();
-  } catch (e) {
-    console.error("Could not load insignes-list.json:", e);
-    return {};
-  }
 }
 
 export async function initInsignePalette(paletteId, searchInputId) {
@@ -34,14 +34,14 @@ export async function initInsignePalette(paletteId, searchInputId) {
 
     const createCategory = (label, items, isObjectBased) => {
         if (!items || Object.keys(items).length === 0) return;
-        
+
         const categoryDiv = document.createElement('div');
         categoryDiv.className = 'category';
-        
+
         const title = document.createElement('h4');
         title.textContent = label;
         categoryDiv.appendChild(title);
-        
+
         const itemsDiv = document.createElement('div');
         itemsDiv.className = 'items';
 
@@ -61,7 +61,7 @@ export async function initInsignePalette(paletteId, searchInputId) {
     createCategory('Letters (Small)', insignes.letters.small, false);
     createCategory('Letters (Big)', insignes.letters.big, false);
     createCategory('Other', insignes.other, true);
-    
+
     searchInput.addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase();
         allInsigneElements.forEach(img => {

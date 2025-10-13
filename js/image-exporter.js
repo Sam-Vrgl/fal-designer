@@ -4,9 +4,9 @@ import { draw } from './renderer.js';
 function sanitizeString(str) {
     if (!str) return '';
     return str.normalize('NFD')
-              .replace(/[\u0300-\u036f]/g, '')
-              .replace(/['\s\W]/g, '')
-              .toLowerCase();
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/['\s\W]/g, '')
+        .toLowerCase();
 }
 
 function getTimestamp() {
@@ -25,13 +25,13 @@ export function exportCanvasAsImage() {
     const exportCanvas = document.createElement('canvas');
     const dpi = 300;
     const pxPerMm = dpi / 25.4;
-    
+
     const totalW_mm = state.gridWmm;
     const totalH_mm = state.gridHmm;
 
     exportCanvas.width = Math.round(totalW_mm * pxPerMm);
     exportCanvas.height = Math.round(totalH_mm * pxPerMm);
-    
+
     const exportCtx = exportCanvas.getContext('2d');
 
     const exportState = {
@@ -53,7 +53,7 @@ export function exportCanvasAsImage() {
     const filename = `fal-design-${discipline}-${timestamp}.png`;
 
     const dataUrl = exportCanvas.toDataURL('image/png');
-    
+
     const a = document.createElement('a');
     a.href = dataUrl;
     a.download = filename;

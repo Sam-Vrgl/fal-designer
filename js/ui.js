@@ -24,7 +24,7 @@ export function bindUI() {
     const importBtn = $('importBtn');
     const importFile = $('importFile');
     const exportImageBtn = $('exportImageBtn');
-    
+
     const chkV = $('toggleV');
     const chkH = $('toggleH');
     const gridW = $('gridWInput');
@@ -71,23 +71,23 @@ export function bindUI() {
         state.viewOffsetY = (container.clientHeight - (totalH_px * state.viewScale)) / 2;
         notify();
     });
-    
+
     const updateZoomDisplay = () => {
-        if(zoomDisplay) zoomDisplay.textContent = `${Math.round(state.viewScale * 100)}%`;
+        if (zoomDisplay) zoomDisplay.textContent = `${Math.round(state.viewScale * 100)}%`;
     };
     subscribe(updateZoomDisplay);
-    
+
     setTimeout(() => zoomFitBtn.click(), 50);
 
     const setMode = (mode) => {
         state.currentMode = mode;
         if (mode === 'select') {
-          state.insigneToPlace = null;
+            state.insigneToPlace = null;
         }
         notify();
     };
     selectModeBtn.addEventListener('click', () => setMode('select'));
-    
+
     window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             setMode('select');
@@ -163,19 +163,19 @@ export function bindUI() {
             selectedMaterialHeight.value = state.selectedMaterial.height_mm;
         }
     };
-    
+
     const updateModeUI = () => {
         const mode = state.currentMode;
         selectModeBtn.classList.toggle('active', mode === 'select');
         container.style.cursor = mode === 'place' && state.insigneToPlace ? 'copy' : 'default';
     };
-    
+
     subscribe(updateInspector);
     subscribe(updateModeUI);
 
-    insigneX.addEventListener('input', () => { if (state.selectedInsigne) { state.selectedInsigne.x_mm = insigneX.valueAsNumber; notify(); }});
-    insigneY.addEventListener('input', () => { if (state.selectedInsigne) { state.selectedInsigne.y_mm = insigneY.valueAsNumber; notify(); }});
-    insigneHeight.addEventListener('input', () => { if (state.selectedInsigne && !insigneHeight.disabled) { state.selectedInsigne.heightPct = insigneHeight.valueAsNumber / 100; notify(); }});
+    insigneX.addEventListener('input', () => { if (state.selectedInsigne) { state.selectedInsigne.x_mm = insigneX.valueAsNumber; notify(); } });
+    insigneY.addEventListener('input', () => { if (state.selectedInsigne) { state.selectedInsigne.y_mm = insigneY.valueAsNumber; notify(); } });
+    insigneHeight.addEventListener('input', () => { if (state.selectedInsigne && !insigneHeight.disabled) { state.selectedInsigne.heightPct = insigneHeight.valueAsNumber / 100; notify(); } });
     removeInsigneBtn.addEventListener('click', () => {
         if (state.selectedInsigne) {
             state.images = state.images.filter(i => i !== state.selectedInsigne);
@@ -184,11 +184,11 @@ export function bindUI() {
             notify();
         }
     });
-    
-    selectedMaterialX.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.x_mm = selectedMaterialX.valueAsNumber; notify(); }});
-    selectedMaterialY.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.y_mm = selectedMaterialY.valueAsNumber; notify(); }});
-    selectedMaterialWidth.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.width_mm = selectedMaterialWidth.valueAsNumber; notify(); }});
-    selectedMaterialHeight.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.height_mm = selectedMaterialHeight.valueAsNumber; notify(); }});
+
+    selectedMaterialX.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.x_mm = selectedMaterialX.valueAsNumber; notify(); } });
+    selectedMaterialY.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.y_mm = selectedMaterialY.valueAsNumber; notify(); } });
+    selectedMaterialWidth.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.width_mm = selectedMaterialWidth.valueAsNumber; notify(); } });
+    selectedMaterialHeight.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.height_mm = selectedMaterialHeight.valueAsNumber; notify(); } });
     removeMaterialBtn.addEventListener('click', () => {
         if (state.selectedMaterial) {
             state.materials = state.materials.filter(m => m !== state.selectedMaterial);

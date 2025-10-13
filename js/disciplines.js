@@ -62,7 +62,7 @@ function populateDropdown(selector) {
   } else {
     const firstValidDisciplineName = disciplineNames.find(name => !disciplinesData[name].custom);
     if (firstValidDisciplineName) {
-        select.value = firstValidDisciplineName;
+      select.value = firstValidDisciplineName;
     }
   }
 

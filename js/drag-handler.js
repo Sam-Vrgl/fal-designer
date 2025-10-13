@@ -30,7 +30,7 @@ export function initDragAndDrop(canvas) {
 
     container.addEventListener('mousedown', (event) => {
         if (event.target !== canvas) return;
-        
+
         const { worldX, worldY } = getGridCoordsFromEvent(event, false);
         const totalW_mm = state.gridWmm + 2 * state.marginMm;
         const totalH_mm = state.gridHmm + 2 * state.marginMm;
@@ -42,21 +42,21 @@ export function initDragAndDrop(canvas) {
             didPan = false;
         }
     });
-    
+
     canvas.addEventListener('mousedown', (event) => {
-        if (state.isPanning) return; 
+        if (state.isPanning) return;
 
         const { gridX, gridY } = getGridCoordsFromEvent(event);
 
         if (state.currentMode === 'place' && state.insigneToPlace) {
             const { path, sizeMm, url } = state.insigneToPlace;
             const newInsigne = { url: path, x_mm: 0, y_mm: 0 };
-            
+
             if (sizeMm) newInsigne.height_mm = parseInt(sizeMm, 10);
             else if (url.includes('/petit/') || url.includes('/min/')) newInsigne.height_mm = 10;
             else if (url.includes('/grand/') || url.includes('/maj/')) newInsigne.height_mm = 18;
             else newInsigne.heightPct = 0.5;
-            
+
             addImage(newInsigne).then(() => {
                 const img = getCachedImage(newInsigne.url);
                 if (!img) return;
@@ -93,7 +93,7 @@ export function initDragAndDrop(canvas) {
                     break;
                 }
             }
-            if(clickedItem) { notify(); return; }
+            if (clickedItem) { notify(); return; }
 
             for (let i = state.materials.length - 1; i >= 0; i--) {
                 const m = state.materials[i];
@@ -107,8 +107,8 @@ export function initDragAndDrop(canvas) {
                     break;
                 }
             }
-            if(clickedItem) { notify(); return; }
-            
+            if (clickedItem) { notify(); return; }
+
             for (let i = state.moivres.length - 1; i >= 0; i--) {
                 const m = state.moivres[i];
                 const centerX = m.x_mm + m.width_mm / 2;
@@ -129,7 +129,7 @@ export function initDragAndDrop(canvas) {
                 }
             }
             if (clickedItem) { notify(); return; }
-            
+
             state.selectedInsigne = state.selectedMaterial = state.selectedMoivre = null;
             notify();
         }
@@ -149,14 +149,14 @@ export function initDragAndDrop(canvas) {
         if (state.isDragging && state.selectedInsigne) {
             event.preventDefault();
             state.selectedInsigne.x_mm = gridX - state.dragOffsetX;
-            
+
             const img = getCachedImage(state.selectedInsigne.url);
             if (!img) return;
-            
+
             const h_mm = state.selectedInsigne.height_mm || (state.selectedInsigne.heightPct * state.gridHmm);
             const insigneCenterY = (gridY - state.dragOffsetY) + h_mm / 2;
             const gridCenterY = state.gridHmm / 2;
-            
+
             if (Math.abs(insigneCenterY - gridCenterY) < SNAP_THRESHOLD_MM && !event.shiftKey) {
                 state.selectedInsigne.y_mm = gridCenterY - h_mm / 2;
                 state.isSnapping = true;
@@ -192,7 +192,7 @@ export function initDragAndDrop(canvas) {
             notify();
         }
     });
-    
+
     container.addEventListener('contextmenu', e => e.preventDefault());
     container.addEventListener('wheel', (event) => {
         event.preventDefault();
@@ -211,7 +211,7 @@ export function initDragAndDrop(canvas) {
         } else if (event.shiftKey) {
             const scrollSpeed = 1.0;
             state.viewOffsetX -= event.deltaY * scrollSpeed;
-        
+
         } else {
             const scrollSpeed = 1.0;
             state.viewOffsetY -= event.deltaY * scrollSpeed;
