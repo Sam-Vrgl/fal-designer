@@ -2,9 +2,11 @@ const fs = require('fs');
 const path = require('path');
 
 // --- Configuration ---
-const ASSETS_DIR = path.join(__dirname, 'clean', 'assets', 'insignes');
-const OUTPUT_FILE = path.join(__dirname, 'clean', 'insignes-list.json');
-const WEB_ROOT = path.join(__dirname, 'clean');
+// MODIFIED: Paths are now relative to the script's location inside the 'extras' folder.
+// '..' is used to navigate up one level to the project root.
+const PROJECT_ROOT = path.join(__dirname, '..');
+const ASSETS_DIR = path.join(PROJECT_ROOT, 'assets', 'insignes');
+const OUTPUT_FILE = path.join(PROJECT_ROOT, 'insignes-list.json');
 
 /**
  * Recursively finds and categorizes all image files.
@@ -43,7 +45,8 @@ function findAndStructureImageFiles(dir) {
                     const files = fs.readdirSync(sizePath);
                     for (const file of files) {
                         if (!/\.(png|jpg|jpeg|gif|svg)$/i.test(file)) continue;
-                        const webPath = './' + path.relative(WEB_ROOT, path.join(sizePath, file)).replace(/\\/g, '/');
+                        // MODIFIED: Correctly calculate the web path relative to the project root
+                        const webPath = './' + path.relative(PROJECT_ROOT, path.join(sizePath, file)).replace(/\\/g, '/');
                         const displayName = path.parse(file).name.replace(/_maj|_min/, '').replace(/_/g, ' ');
                         
                         if (categoryName === 'chiffres') structure.numbers[targetSizeKey][displayName] = webPath;
@@ -56,7 +59,8 @@ function findAndStructureImageFiles(dir) {
                 for (const file of items) {
                      if (!/\.(png|jpg|jpeg|gif|svg)$/i.test(file)) continue;
                      
-                     const webPath = './' + path.relative(WEB_ROOT, path.join(categoryPath, file)).replace(/\\/g, '/');
+                     // MODIFIED: Correctly calculate the web path relative to the project root
+                     const webPath = './' + path.relative(PROJECT_ROOT, path.join(categoryPath, file)).replace(/\\/g, '/');
                      const match = file.match(/-(\d+)mm\./i);
                      const size = match ? parseInt(match[1], 10) : null;
                      const displayName = path.parse(file).name.replace(/-\d+mm$/, '').replace(/-/g, ' ');
@@ -69,7 +73,11 @@ function findAndStructureImageFiles(dir) {
                      } else if (categoryName === 'annees') {
                         structure.annees[displayName] = insigneData;
                      } else {
-                        structure.other[displayName] = insigneData;
+                        // All other folders (like 'pays') are considered 'other'
+                         if (!structure.other[categoryName]) {
+                            structure.other[categoryName] = {};
+                        }
+                        structure.other[categoryName][displayName] = insigneData;
                      }
                 }
             }

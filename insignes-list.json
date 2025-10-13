@@ -11,12 +11,46 @@
       "8": "./assets/insignes/chiffres/petit/8_min.png",
       "9": "./assets/insignes/chiffres/petit/9_min.png"
     },
-    "big": {}
+    "big": {
+      "1": "./assets/insignes/chiffres/grand/1_maj.png",
+      "2": "./assets/insignes/chiffres/grand/2_maj.png",
+      "3": "./assets/insignes/chiffres/grand/3_maj.png",
+      "4": "./assets/insignes/chiffres/grand/4_maj.png",
+      "5": "./assets/insignes/chiffres/grand/5_maj.png",
+      "6": "./assets/insignes/chiffres/grand/6_maj.png",
+      "7": "./assets/insignes/chiffres/grand/7_maj.png",
+      "8": "./assets/insignes/chiffres/grand/8_maj.png",
+      "9": "./assets/insignes/chiffres/grand/9_maj.png"
+    }
   },
   "letters": {
     "small": {
       "a": "./assets/insignes/lettres/min/a_min.png",
-      "i": "./assets/insignes/lettres/min/i_min.png"
+      "b": "./assets/insignes/lettres/min/b_min.png",
+      "c": "./assets/insignes/lettres/min/c_min.png",
+      "d": "./assets/insignes/lettres/min/d_min.png",
+      "e": "./assets/insignes/lettres/min/e_min.png",
+      "f": "./assets/insignes/lettres/min/f_min.png",
+      "g": "./assets/insignes/lettres/min/g_min.png",
+      "h": "./assets/insignes/lettres/min/h_min.png",
+      "i": "./assets/insignes/lettres/min/i_min.png",
+      "j": "./assets/insignes/lettres/min/j_min.png",
+      "k": "./assets/insignes/lettres/min/k_min.png",
+      "l": "./assets/insignes/lettres/min/l_min.png",
+      "m": "./assets/insignes/lettres/min/m_min.png",
+      "n": "./assets/insignes/lettres/min/n_min.png",
+      "o": "./assets/insignes/lettres/min/o_min.png",
+      "p": "./assets/insignes/lettres/min/p_min.png",
+      "q": "./assets/insignes/lettres/min/q_min.png",
+      "r": "./assets/insignes/lettres/min/r_min.png",
+      "s": "./assets/insignes/lettres/min/s_min.png",
+      "t": "./assets/insignes/lettres/min/t_min.png",
+      "u": "./assets/insignes/lettres/min/u_min.png",
+      "v": "./assets/insignes/lettres/min/v_min.png",
+      "w": "./assets/insignes/lettres/min/w_min.png",
+      "x": "./assets/insignes/lettres/min/x_min.png",
+      "y": "./assets/insignes/lettres/min/y_min.png",
+      "z": "./assets/insignes/lettres/min/z_min.png"
     },
     "big": {
       "a": "./assets/insignes/lettres/maj/a_maj.png",

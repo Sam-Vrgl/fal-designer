@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>FalDesigner V1</title>
+  <link rel="icon" type="image/png" href="./favicon.png">
   <style>
     :root { color-scheme: light; --toolbar-height: 40px; }
     body { 
@@ -163,7 +164,7 @@
       </div>
       <div class="panel">
         <details open>
-          <summary>Conception & Matériaux</summary>
+          <summary>Parcours/Discipline(s)</summary>
           <div class="details-content">
             <div class="row">
               <label for="disciplineSelect">Discipline</label>
@@ -180,11 +181,11 @@
                <input type="color" id="materialColor" value="#880000">
              </div>
              <div class="row">
-               <button id="addMaterialBtn" style="width: 100%;">Ajouter section</button>
+               <button id="addMaterialBtn" style="width: 100%;">Ajouter section custom</button>
              </div>
              <hr />
              <div class="row">
-               <label for="moivreColor">Moire</label>
+               <label for="moivreColor">Moivre</label>
                <select id="moivreColor">
                    <option value="rgb(255, 255, 255)">Blanc</option>
                    <option value="rgb(65, 105, 225)">Bleu</option>
@@ -256,8 +257,8 @@
             <button id="removeMaterialBtn">Retirer la section</button>
           </div>
           <div id="moivre-props" style="display: none;">
-             <p>Moire sélectionnée.</p>
-             <button id="removeMoivreBtn">Retirer la moire</button>
+             <p>Moivre sélectionné.</p>
+             <button id="removeMoivreBtn">Retirer le moivre</button>
           </div>
         </div>
       </div>
