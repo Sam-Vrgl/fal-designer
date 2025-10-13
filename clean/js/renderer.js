@@ -7,93 +7,82 @@ export function draw(canvas, ctx, s, useDevicePixelRatio = true) {
     const TOTAL_W_MM = s.gridWmm + 2 * s.marginMm;
     const TOTAL_H_MM = s.gridHmm + 2 * s.marginMm;
 
+    // --- Setup canvas and transform ---
     if (useDevicePixelRatio) {
+        // For screen display, we scale to fit the window
         const dpr = window.devicePixelRatio || 1;
-        const totalCssW = TOTAL_W_MM * s.mmToPx;
-        const totalCssH = TOTAL_H_MM * s.mmToPx;
-
-        const scaleCss = Math.min(
-            window.innerWidth / totalCssW,
-            window.innerHeight / totalCssH
-        );
-
-        const cssW = totalCssW * scaleCss;
-        const cssH = totalCssH * scaleCss;
+        const totalCssW_at_1_to_1 = TOTAL_W_MM * s.mmToPx;
+        const totalCssH_at_1_to_1 = TOTAL_H_MM * s.mmToPx;
+        const scaleCss = Math.min(window.innerWidth / totalCssW_at_1_to_1, window.innerHeight / totalCssH_at_1_to_1);
+        
+        const cssW = totalCssW_at_1_to_1 * scaleCss;
+        const cssH = totalCssH_at_1_to_1 * scaleCss;
 
         canvas.style.width = cssW + 'px';
         canvas.style.height = cssH + 'px';
         canvas.width = Math.round(cssW * dpr);
         canvas.height = Math.round(cssH * dpr);
 
-        ctx.setTransform(dpr * scaleCss, 0, 0, dpr * scaleCss, 0, 0);
+        ctx.setTransform(dpr * scaleCss * s.mmToPx, 0, 0, dpr * scaleCss * s.mmToPx, 0, 0);
     } else {
+        // For image export, we use the high-resolution mm-to-px ratio directly
         ctx.setTransform(s.mmToPx, 0, 0, s.mmToPx, 0, 0);
     }
 
-    const totalCssW_render = TOTAL_W_MM;
-    const totalCssH_render = TOTAL_H_MM;
+    // --- Start Drawing (all coordinates are now in MM) ---
+    ctx.clearRect(0, 0, TOTAL_W_MM, TOTAL_H_MM);
 
-    ctx.clearRect(0, 0, totalCssW_render, totalCssH_render);
+    // Outer border
     ctx.strokeStyle = '#000';
-    ctx.lineWidth = 1 / s.mmToPx;
-    ctx.strokeRect(0, 0, totalCssW_render, totalCssH_render);
+    ctx.lineWidth = 1 / s.mmToPx; // Maintain a 1px line width regardless of scale
+    ctx.strokeRect(0, 0, TOTAL_W_MM, TOTAL_H_MM);
 
     const left = s.marginMm;
     const top = s.marginMm;
-    const right = s.marginMm + s.gridWmm;
-    const bottom = s.marginMm + s.gridHmm;
+    const gridW = s.gridWmm;
+    const gridH = s.gridHmm;
 
+    // Margin rectangle
     ctx.strokeStyle = '#a0a0a0';
-    ctx.strokeRect(left, top, right - left, bottom - top);
+    ctx.strokeRect(left, top, gridW, gridH);
 
+    // Grid lines
     const minor = Math.max(0.1, s.minorStepMm);
     const major = Math.max(minor, s.majorStepMm);
-
+    
+    // Minor grid
     ctx.beginPath();
-    {
-        const count = Math.floor(s.gridWmm / minor + 1e-9);
-        for (let i = 0; i <= count; i++) {
-            const x = left + (i * minor) * s.mmToPx;
-            ctx.moveTo(x, top); ctx.lineTo(x, bottom);
-        }
+    ctx.lineWidth = 1 / s.mmToPx;
+    for (let i = 0; i <= Math.floor(gridW / minor + 1e-9); i++) {
+        const x = left + i * minor;
+        ctx.moveTo(x, top); ctx.lineTo(x, top + gridH);
     }
-    {
-        const count = Math.floor(s.gridHmm / minor + 1e-9);
-        for (let i = 0; i <= count; i++) {
-            const y = top + (i * minor) * s.mmToPx;
-            ctx.moveTo(left, y); ctx.lineTo(right, y);
-        }
+    for (let i = 0; i <= Math.floor(gridH / minor + 1e-9); i++) {
+        const y = top + i * minor;
+        ctx.moveTo(left, y); ctx.lineTo(left + gridW, y);
     }
     ctx.strokeStyle = 'lightgray';
-    ctx.lineWidth = 1;
     ctx.stroke();
 
+    // Major grid
     ctx.beginPath();
-    {
-        const count = Math.floor(s.gridWmm / major + 1e-9);
-        for (let i = 0; i <= count; i++) {
-            const x = left + (i * major) * s.mmToPx;
-            ctx.moveTo(x, top); ctx.lineTo(x, bottom);
-        }
+    ctx.lineWidth = 1.25 / s.mmToPx;
+    for (let i = 0; i <= Math.floor(gridW / major + 1e-9); i++) {
+        const x = left + i * major;
+        ctx.moveTo(x, top); ctx.lineTo(x, top + gridH);
     }
-    {
-        const count = Math.floor(s.gridHmm / major + 1e-9);
-        for (let i = 0; i <= count; i++) {
-            const y = top + (i * major) * s.mmToPx;
-            ctx.moveTo(left, y); ctx.lineTo(right, y);
-        }
+    for (let i = 0; i <= Math.floor(gridH / major + 1e-9); i++) {
+        const y = top + i * major;
+        ctx.moveTo(left, y); ctx.lineTo(left + gridW, y);
     }
     ctx.strokeStyle = '#c0c0c0';
-    ctx.lineWidth = 1.25;
     ctx.stroke();
 
+    // Discipline background
     if (s.disciplineColors && s.disciplineColors.length > 0) {
       const fillStyles = s.disciplineColors.map(color => {
-        if (s.disciplineMaterial === 'velours') {
-          return createVelvetTexture(ctx, color);
-        } else if (s.disciplineMaterial === 'satin') {
-          return createSatinTexture(ctx, color);
-        }
+        if (s.disciplineMaterial === 'velours') return createVelvetTexture(ctx, color);
+        if (s.disciplineMaterial === 'satin') return createSatinTexture(ctx, color);
         return color;
       });
 
@@ -106,61 +95,45 @@ export function draw(canvas, ctx, s, useDevicePixelRatio = true) {
       }
     }
 
-    // --- Draw Material Sections ---
+    // Material sections
     for (const material of s.materials) {
         let fillStyle;
-        if (material.material === 'velours') {
-            fillStyle = createVelvetTexture(ctx, material.color);
-        } else if (material.material === 'satin') {
-            fillStyle = createSatinTexture(ctx, material.color);
-        } else {
-            fillStyle = material.color; // Fallback to a solid color
-        }
+        if (material.material === 'velours') fillStyle = createVelvetTexture(ctx, material.color);
+        else if (material.material === 'satin') fillStyle = createSatinTexture(ctx, material.color);
+        else fillStyle = material.color;
 
-        colorRectGridMM(
-            ctx, s,
-            material.x_mm, material.y_mm,
-            material.x_mm + material.width_mm, material.y_mm + material.height_mm,
-            fillStyle
-        );
+        colorRectGridMM(ctx, s, material.x_mm, material.y_mm, material.x_mm + material.width_mm, material.y_mm + material.height_mm, fillStyle);
     }
-
-    // --- Draw selected material outline ---
+    
+    // Selected material outline
     if (s.selectedMaterial) {
-        const originX = s.marginMm * s.mmToPx;
-        const originY = s.marginMm * s.mmToPx;
-        const x = originX + s.selectedMaterial.x_mm * s.mmToPx;
-        const y = originY + s.selectedMaterial.y_mm * s.mmToPx;
-        const width = s.selectedMaterial.width_mm * s.mmToPx;
-        const height = s.selectedMaterial.height_mm * s.mmToPx;
-
         ctx.strokeStyle = 'rgba(255, 0, 0, 0.7)';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(x, y, width, height);
+        ctx.lineWidth = 2 / s.mmToPx;
+        ctx.strokeRect(s.marginMm + s.selectedMaterial.x_mm, s.marginMm + s.selectedMaterial.y_mm, s.selectedMaterial.width_mm, s.selectedMaterial.height_mm);
     }
 
-
+    // Images (insignes)
     for (const it of s.images) {
         const img = getCachedImage(it.url);
         if (!img) continue;
         drawImgMM(ctx, s, img, it.x_mm, it.y_mm, it);
     }
 
-    const midX = totalCssW / 2;
-    const midY = totalCssH / 2;
+    // Helper lines
+    const midX = TOTAL_W_MM / 2;
+    const midY = TOTAL_H_MM / 2;
 
     ctx.save();
     ctx.strokeStyle = s.helper.color;
-    ctx.lineWidth = s.helper.thickness;
-
+    ctx.lineWidth = s.helper.thickness / s.mmToPx;
     if (s.helper.showV) {
         ctx.beginPath();
-        ctx.moveTo(midX, 0); ctx.lineTo(midX, totalCssH);
+        ctx.moveTo(midX, 0); ctx.lineTo(midX, TOTAL_H_MM);
         ctx.stroke();
     }
     if (s.helper.showH) {
         ctx.beginPath();
-        ctx.moveTo(0, midY); ctx.lineTo(totalCssW, midY);
+        ctx.moveTo(0, midY); ctx.lineTo(TOTAL_W_MM, midY);
         ctx.stroke();
     }
     ctx.restore();
@@ -174,18 +147,10 @@ export function colorRectGridMM(ctx, s, x1_mm, y1_mm, x2_mm, y2_mm, fillStyle, o
     const gx2 = doClamp ? clamp(x2_mm, 0, s.gridWmm) : x2_mm;
     const gy2 = doClamp ? clamp(y2_mm, 0, s.gridHmm) : y2_mm;
 
-    const originX = s.marginMm * s.mmToPx;
-    const originY = s.marginMm * s.mmToPx;
-
-    const x1 = originX + gx1 * s.mmToPx;
-    const y1 = originY + gy1 * s.mmToPx;
-    const x2 = originX + gx2 * s.mmToPx;
-    const y2 = originY + gy2 * s.mmToPx;
-
-    const left = Math.min(x1, x2);
-    const top = Math.min(y1, y2);
-    const width = Math.abs(x2 - x1);
-    const height = Math.abs(y2 - y1);
+    const left = s.marginMm + Math.min(gx1, gx2);
+    const top = s.marginMm + Math.min(gy1, gy2);
+    const width = Math.abs(gx2 - gx1);
+    const height = Math.abs(gy2 - gy1);
 
     ctx.save();
     ctx.globalCompositeOperation = behind ? 'destination-over' : 'source-over';
@@ -193,6 +158,7 @@ export function colorRectGridMM(ctx, s, x1_mm, y1_mm, x2_mm, y2_mm, fillStyle, o
     ctx.fillRect(left, top, width, height);
     ctx.restore();
 }
+
 export function drawImgMM(ctx, s, img, x_mm, y_mm, opts = {}) {
   const {
     height_mm = null,
@@ -253,21 +219,19 @@ export function drawImgMM(ctx, s, img, x_mm, y_mm, opts = {}) {
     left_mm = Math.max(0, Math.min(left_mm, maxLeft));
     top_mm  = Math.max(0, Math.min(top_mm,  maxTop));
   }
+  
+  const originX = s.marginMm;
+  const originY = s.marginMm;
 
-  const originX = s.marginMm * s.mmToPx;
-  const originY = s.marginMm * s.mmToPx;
-
-  const x_px = originX + left_mm * s.mmToPx;
-  const y_px = originY + top_mm  * s.mmToPx;
-  const w_px = w_mm * s.mmToPx;
-  const h_px = h_mm * s.mmToPx;
-
+  const x_final = originX + left_mm;
+  const y_final = originY + top_mm;
+  
   ctx.save();
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
   ctx.globalCompositeOperation = behind ? 'destination-over' : 'source-over';
-  ctx.drawImage(img, x_px, y_px, w_px, h_px);
+  ctx.drawImage(img, x_final, y_final, w_mm, h_mm);
   ctx.restore();
-
-  return { x_px, y_px, w_px, h_px };
+  
+  return { x_final, y_final, w_mm, h_mm };
 }
