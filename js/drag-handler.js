@@ -95,20 +95,6 @@ export function initDragAndDrop(canvas) {
             }
             if(clickedItem) { notify(); return; }
 
-            for (let i = state.materials.length - 1; i >= 0; i--) {
-                const m = state.materials[i];
-                if (gridX >= m.x_mm && gridX <= m.x_mm + m.width_mm && gridY >= m.y_mm && gridY <= m.y_mm + m.height_mm) {
-                    state.selectedMaterial = m;
-                    state.isDraggingMaterial = true;
-                    state.dragMaterialOffsetX = gridX - m.x_mm;
-                    state.dragMaterialOffsetY = gridY - m.y_mm;
-                    state.selectedInsigne = state.selectedMoivre = null;
-                    clickedItem = true;
-                    break;
-                }
-            }
-            if(clickedItem) { notify(); return; }
-            
             for (let i = state.moivres.length - 1; i >= 0; i--) {
                 const m = state.moivres[i];
                 const centerX = m.x_mm + m.width_mm / 2;
@@ -129,6 +115,20 @@ export function initDragAndDrop(canvas) {
                 }
             }
             if (clickedItem) { notify(); return; }
+            
+            for (let i = state.materials.length - 1; i >= 0; i--) {
+                const m = state.materials[i];
+                if (gridX >= m.x_mm && gridX <= m.x_mm + m.width_mm && gridY >= m.y_mm && gridY <= m.y_mm + m.height_mm) {
+                    state.selectedMaterial = m;
+                    state.isDraggingMaterial = true;
+                    state.dragMaterialOffsetX = gridX - m.x_mm;
+                    state.dragMaterialOffsetY = gridY - m.y_mm;
+                    state.selectedInsigne = state.selectedMoivre = null;
+                    clickedItem = true;
+                    break;
+                }
+            }
+            if(clickedItem) { notify(); return; }
             
             state.selectedInsigne = state.selectedMaterial = state.selectedMoivre = null;
             notify();

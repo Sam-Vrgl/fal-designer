@@ -51,6 +51,10 @@ export function bindUI() {
     const selectedMaterialWidth = $('selectedMaterialWidth');
     const selectedMaterialHeight = $('selectedMaterialHeight');
     const removeMaterialBtn = $('removeMaterialBtn');
+    
+    const moivrePropsDiv = $('moivre-props');
+    const removeMoivreBtn = $('removeMoivreBtn');
+
     const noSelectionDiv = $('no-selection');
 
     chkV.checked = state.helper.showV;
@@ -144,6 +148,7 @@ export function bindUI() {
         noSelectionDiv.style.display = hasSelection ? 'none' : 'block';
         insignePropsDiv.style.display = state.selectedInsigne ? 'block' : 'none';
         materialPropsDiv.style.display = state.selectedMaterial ? 'block' : 'none';
+        moivrePropsDiv.style.display = state.selectedMoivre ? 'block' : 'none';
 
         if (state.selectedInsigne) {
             insigneX.value = state.selectedInsigne.x_mm;
@@ -193,6 +198,15 @@ export function bindUI() {
         if (state.selectedMaterial) {
             state.materials = state.materials.filter(m => m !== state.selectedMaterial);
             state.selectedMaterial = null;
+            recordStateForUndo();
+            notify();
+        }
+    });
+
+    removeMoivreBtn.addEventListener('click', () => {
+        if (state.selectedMoivre) {
+            state.moivres = state.moivres.filter(m => m !== state.selectedMoivre);
+            state.selectedMoivre = null;
             recordStateForUndo();
             notify();
         }
