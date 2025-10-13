@@ -6,10 +6,7 @@ import  { initInsignePalette } from './insignes.js';
 import { initDisciplines } from './disciplines.js';
 import { initDragAndDrop } from './drag-handler.js';
 
-/**
- * The main function to initialize the application.
- * This will only be called after the DOM is fully loaded.
- */
+
 function main() {
     const canvas = document.getElementById('myCanvas');
     if (!canvas) {
@@ -29,12 +26,10 @@ function main() {
         initDisciplines('disciplineSelect'),
         initInsignePalette('insigne-list', 'insigne-search')
     ]).finally(() => {
-        // Preload images from state (e.g., loaded from localStorage)
         preloadImages().finally(rerender);
     });
 }
 
-// --- Image Management ---
 const imgCache = new Map();
 export function getCachedImage(url) { return imgCache.get(url) || null; }
 
@@ -58,11 +53,10 @@ export async function addImage(placement) {
       const img = await loadImage(placement.url);
       imgCache.set(placement.url, img);
     }
-  } finally {
-    // A redraw will be triggered by the state update (notify)
+  } catch (error) {
+    console.error(`Could not load image at ${placement.url}. Removing it from the design.`, error);
+        state.images = state.images.filter(img => img !== placement);
   }
 }
 
-// --- Application Entry Point ---
-// Wait for the HTML to be fully parsed before running the main script.
 window.addEventListener('DOMContentLoaded', main);

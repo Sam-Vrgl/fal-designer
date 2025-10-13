@@ -1,5 +1,4 @@
-import { state, notify, subscribe, resetState } from './state.js';
-import { addImage } from './main.js';
+import { state, notify, subscribe, resetState, recordStateForUndo, undo, redo } from './state.js';
 import { exportState, importState } from './file-handler.js';
 import { exportCanvasAsImage } from './image-exporter.js';
 
@@ -8,45 +7,38 @@ export function bindUI() {
     const canvas = $('myCanvas');
     const container = canvas.parentElement;
 
-    // --- Modal Controls ---
     const modalOverlay = $('welcome-modal-overlay');
     const closeModalBtn = $('close-modal-btn');
     closeModalBtn.addEventListener('click', () => {
         modalOverlay.style.display = 'none';
     });
 
-    // --- Zoom Controls ---
     const zoomInBtn = $('zoomInBtn');
     const zoomOutBtn = $('zoomOutBtn');
     const zoomFitBtn = $('zoomFitBtn');
     const zoomDisplay = $('zoom-display');
 
-    // --- Toolbar & Mode ---
     const selectModeBtn = $('selectModeBtn');
-    const resetBtn = $('resetBtn'); // Get the new reset button
+    const resetBtn = $('resetBtn');
     const exportBtn = $('exportBtn');
     const importBtn = $('importBtn');
     const importFile = $('importFile');
     const exportImageBtn = $('exportImageBtn');
     
-    // --- Settings ---
     const chkV = $('toggleV');
     const chkH = $('toggleH');
     const gridW = $('gridWInput');
     const gridH = $('gridHInput');
     const margin = $('marginInput');
 
-    // --- Design & Materials ---
     const materialType = $('materialType');
     const materialColor = $('materialColor');
     const addMaterialBtn = $('addMaterialBtn');
     const moivreColor = $('moivreColor');
     const addMoivreBtn = $('addMoivreBtn');
 
-    // --- Palette ---
     const insignePalette = $('insigne-list');
 
-    // --- Inspector Panel ---
     const insignePropsDiv = $('insigne-props');
     const insigneX = $('insigneX');
     const insigneY = $('insigneY');
@@ -61,14 +53,12 @@ export function bindUI() {
     const removeMaterialBtn = $('removeMaterialBtn');
     const noSelectionDiv = $('no-selection');
 
-    // Initial State Hydration - Values are set from the loaded state
     chkV.checked = state.helper.showV;
     chkH.checked = state.helper.showH;
     gridW.value = state.gridWmm;
     gridH.value = state.gridHmm;
     margin.value = state.marginMm;
 
-    // Zoom button logic
     zoomInBtn.addEventListener('click', () => { state.viewScale *= 1.25; notify(); });
     zoomOutBtn.addEventListener('click', () => { state.viewScale /= 1.25; notify(); });
     zoomFitBtn.addEventListener('click', () => {
@@ -89,7 +79,6 @@ export function bindUI() {
     
     setTimeout(() => zoomFitBtn.click(), 50);
 
-    // Mode & File I/O
     const setMode = (mode) => {
         state.currentMode = mode;
         if (mode === 'select') {
@@ -98,31 +87,50 @@ export function bindUI() {
         notify();
     };
     selectModeBtn.addEventListener('click', () => setMode('select'));
-    resetBtn.addEventListener('click', resetState); // Attach reset function
-    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMode('select'); });
+    
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            setMode('select');
+        }
+
+        if (e.ctrlKey || e.metaKey) {
+            let handled = false;
+            if (e.key === 'z') {
+                e.shiftKey ? redo() : undo();
+                handled = true;
+            } else if (e.key === 'y') {
+                redo();
+                handled = true;
+            }
+            if (handled) {
+                e.preventDefault();
+            }
+        }
+    });
+
+    resetBtn.addEventListener('click', resetState);
     exportBtn.addEventListener('click', exportState);
     exportImageBtn.addEventListener('click', exportCanvasAsImage);
     importBtn.addEventListener('click', () => importFile.click());
     importFile.addEventListener('change', (e) => { importState(e.target.files[0]); e.target.value = ''; });
 
-    // Settings
     chkV.addEventListener('change', () => { state.helper.showV = chkV.checked; notify(); });
     chkH.addEventListener('change', () => { state.helper.showH = chkH.checked; notify(); });
     gridW.addEventListener('input', () => { state.gridWmm = gridW.valueAsNumber; notify(); });
     gridH.addEventListener('input', () => { state.gridHmm = gridH.valueAsNumber; notify(); });
     margin.addEventListener('input', () => { state.marginMm = margin.valueAsNumber; notify(); });
 
-    // Design & Materials
     addMaterialBtn.addEventListener('click', () => {
         state.materials.push({ x_mm: 10, y_mm: 10, width_mm: 100, height_mm: 20, material: materialType.value, color: materialColor.value });
+        recordStateForUndo();
         notify();
     });
     addMoivreBtn.addEventListener('click', () => {
         state.moivres.push({ x_mm: 50, y_mm: 0, width_mm: 5, height_mm: state.gridHmm, color: moivreColor.value });
+        recordStateForUndo();
         notify();
     });
 
-    // Palette Interaction
     insignePalette.addEventListener('click', (e) => {
         if (e.target.tagName === 'IMG') {
             const { path, sizeMm } = e.target.dataset;
@@ -131,7 +139,6 @@ export function bindUI() {
         }
     });
 
-    // Inspector Logic
     const updateInspector = () => {
         const hasSelection = state.selectedInsigne || state.selectedMaterial || state.selectedMoivre;
         noSelectionDiv.style.display = hasSelection ? 'none' : 'block';
@@ -157,7 +164,6 @@ export function bindUI() {
         }
     };
     
-    // Reactive UI updater for Mode
     const updateModeUI = () => {
         const mode = state.currentMode;
         selectModeBtn.classList.toggle('active', mode === 'select');
@@ -167,15 +173,28 @@ export function bindUI() {
     subscribe(updateInspector);
     subscribe(updateModeUI);
 
-    // Bind Inspector Inputs
     insigneX.addEventListener('input', () => { if (state.selectedInsigne) { state.selectedInsigne.x_mm = insigneX.valueAsNumber; notify(); }});
     insigneY.addEventListener('input', () => { if (state.selectedInsigne) { state.selectedInsigne.y_mm = insigneY.valueAsNumber; notify(); }});
     insigneHeight.addEventListener('input', () => { if (state.selectedInsigne && !insigneHeight.disabled) { state.selectedInsigne.heightPct = insigneHeight.valueAsNumber / 100; notify(); }});
-    removeInsigneBtn.addEventListener('click', () => { if (state.selectedInsigne) { state.images = state.images.filter(i => i !== state.selectedInsigne); state.selectedInsigne = null; notify(); }});
+    removeInsigneBtn.addEventListener('click', () => {
+        if (state.selectedInsigne) {
+            state.images = state.images.filter(i => i !== state.selectedInsigne);
+            state.selectedInsigne = null;
+            recordStateForUndo();
+            notify();
+        }
+    });
     
     selectedMaterialX.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.x_mm = selectedMaterialX.valueAsNumber; notify(); }});
     selectedMaterialY.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.y_mm = selectedMaterialY.valueAsNumber; notify(); }});
     selectedMaterialWidth.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.width_mm = selectedMaterialWidth.valueAsNumber; notify(); }});
     selectedMaterialHeight.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.height_mm = selectedMaterialHeight.valueAsNumber; notify(); }});
-    removeMaterialBtn.addEventListener('click', () => { if (state.selectedMaterial) { state.materials = state.materials.filter(m => m !== state.selectedMaterial); state.selectedMaterial = null; notify(); }});
+    removeMaterialBtn.addEventListener('click', () => {
+        if (state.selectedMaterial) {
+            state.materials = state.materials.filter(m => m !== state.selectedMaterial);
+            state.selectedMaterial = null;
+            recordStateForUndo();
+            notify();
+        }
+    });
 }

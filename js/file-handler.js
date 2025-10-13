@@ -1,26 +1,15 @@
 import { state, notify } from './state.js';
 import { preloadImages } from './main.js';
 
-/**
- * Normalizes a string by removing accents and non-alphanumeric characters.
- * @param {string} str The string to sanitize.
- * @returns {string} The sanitized string.
- */
 function sanitizeString(str) {
     if (!str) return '';
-    // Normalize to separate base letters from accents
     return str.normalize('NFD')
-              // Remove accent characters
               .replace(/[\u0300-\u036f]/g, '')
-              // Remove spaces, apostrophes, and other non-alphanumeric characters
               .replace(/['\s\W]/g, '')
               .toLowerCase();
 }
 
-/**
- * Generates a timestamp in YYYY-MM-DD_HH-MM format.
- * @returns {string} The formatted timestamp.
- */
+
 function getTimestamp() {
     const d = new Date();
     const pad = (n) => n.toString().padStart(2, '0');

@@ -1,4 +1,3 @@
-// Cache to store generated textures and avoid regenerating them on every frame
 const textureCache = new Map();
 
 export function createVelvetTexture(ctx, color) {
@@ -27,7 +26,7 @@ export function createVelvetTexture(ctx, color) {
   patternCtx.putImageData(imageData, 0, 0);
 
   const pattern = ctx.createPattern(patternCanvas, 'repeat');
-  textureCache.set(cacheKey, pattern); // Store the new pattern in the cache
+  textureCache.set(cacheKey, pattern);
   return pattern;
 }
 
@@ -54,6 +53,6 @@ export function createSatinTexture(ctx, color) {
   patternCtx.stroke();
 
   const pattern = ctx.createPattern(patternCanvas, 'repeat');
-  textureCache.set(cacheKey, pattern); // Store the new pattern in the cache
+  textureCache.set(cacheKey, pattern);
   return pattern;
 }

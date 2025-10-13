@@ -1,7 +1,9 @@
-import { state, notify } from './state.js';
+import { state, notify, recordStateForUndo } from './state.js';
 import { getCachedImage, addImage } from './main.js';
 
 const SNAP_THRESHOLD_MM = 5;
+const MOIVRE_ROTATION_DEG = 15;
+const MOIVRE_ROTATION_RAD = MOIVRE_ROTATION_DEG * Math.PI / 180;
 
 export function initDragAndDrop(canvas) {
     const container = canvas.parentElement;
@@ -63,6 +65,7 @@ export function initDragAndDrop(canvas) {
                 const w_mm = h_mm * natAspect;
                 newInsigne.x_mm = gridX - w_mm / 2;
                 newInsigne.y_mm = gridY - h_mm / 2;
+                recordStateForUndo();
                 notify();
             });
 
@@ -106,6 +109,27 @@ export function initDragAndDrop(canvas) {
             }
             if(clickedItem) { notify(); return; }
             
+            for (let i = state.moivres.length - 1; i >= 0; i--) {
+                const m = state.moivres[i];
+                const centerX = m.x_mm + m.width_mm / 2;
+                const centerY = m.y_mm + m.height_mm / 2;
+
+                const dx = gridX - centerX;
+                const dy = gridY - centerY;
+                const rotatedX = dx * Math.cos(-MOIVRE_ROTATION_RAD) - dy * Math.sin(-MOIVRE_ROTATION_RAD);
+                const rotatedY = dx * Math.sin(-MOIVRE_ROTATION_RAD) + dy * Math.cos(-MOIVRE_ROTATION_RAD);
+
+                if (Math.abs(rotatedX) < m.width_mm / 2 && Math.abs(rotatedY) < m.height_mm / 2) {
+                    state.selectedMoivre = m;
+                    state.isDraggingMoivre = true;
+                    state.dragMoivreOffsetX = gridX - m.x_mm;
+                    state.selectedInsigne = state.selectedMaterial = null;
+                    clickedItem = true;
+                    break;
+                }
+            }
+            if (clickedItem) { notify(); return; }
+            
             state.selectedInsigne = state.selectedMaterial = state.selectedMoivre = null;
             notify();
         }
@@ -133,7 +157,6 @@ export function initDragAndDrop(canvas) {
             const insigneCenterY = (gridY - state.dragOffsetY) + h_mm / 2;
             const gridCenterY = state.gridHmm / 2;
             
-            // --- MODIFIED: Check for Shift key to disable snapping ---
             if (Math.abs(insigneCenterY - gridCenterY) < SNAP_THRESHOLD_MM && !event.shiftKey) {
                 state.selectedInsigne.y_mm = gridCenterY - h_mm / 2;
                 state.isSnapping = true;
@@ -148,10 +171,18 @@ export function initDragAndDrop(canvas) {
             state.selectedMaterial.x_mm = gridX - state.dragMaterialOffsetX;
             state.selectedMaterial.y_mm = gridY - state.dragMaterialOffsetY;
             notify();
+        } else if (state.isDraggingMoivre && state.selectedMoivre) {
+            event.preventDefault();
+            state.selectedMoivre.x_mm = gridX - state.dragMoivreOffsetX;
+            notify();
         }
     });
 
     window.addEventListener('mouseup', () => {
+        if (state.isDragging || state.isDraggingMaterial || state.isDraggingMoivre) {
+            recordStateForUndo();
+        }
+
         state.isPanning = false;
         state.isDragging = false;
         state.isDraggingMaterial = false;

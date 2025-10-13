@@ -3,6 +3,6 @@ export function loadImage(url) {
     const img = new Image();
     img.onload = () => resolve(img);
     img.onerror = (e) => reject(new Error(`Failed to load: ${url}`));
-    img.src = url; // relative to index.html
+    img.src = url;
   });
 }

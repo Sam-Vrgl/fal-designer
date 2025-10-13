@@ -25,12 +25,10 @@ function populateDropdown(selector) {
     const option = document.createElement('option');
     option.value = name;
     option.title = name;
-
     let displayText = name;
     if (displayText.length > maxLength) {
       displayText = displayText.substring(0, maxLength - 3) + '...';
     }
-
     if (discipline.custom === true) {
       const fullText = `${name} (**depends, unimplemented**)`;
       option.title = fullText;
@@ -48,22 +46,27 @@ function populateDropdown(selector) {
 
     if (discipline && discipline.custom !== true) {
       const colors = discipline.couleursRGB.map(c => `rgb(${c})`);
+      state.discipline = selectedDisciplineName;
       state.disciplineColors = colors;
       state.disciplineMaterial = discipline.matière;
     } else {
+      state.discipline = '';
       state.disciplineColors = [];
       state.disciplineMaterial = null;
     }
     notify();
   });
 
-  const firstValidDisciplineName = disciplineNames.find(name => !disciplinesData[name].custom);
-  if (firstValidDisciplineName) {
-      const firstDiscipline = disciplinesData[firstValidDisciplineName];
-      select.value = firstValidDisciplineName;
-      state.disciplineColors = firstDiscipline.couleursRGB.map(c => `rgb(${c})`);
-      state.disciplineMaterial = firstDiscipline.matière;
+  if (state.discipline && disciplinesData[state.discipline]) {
+    select.value = state.discipline;
+  } else {
+    const firstValidDisciplineName = disciplineNames.find(name => !disciplinesData[name].custom);
+    if (firstValidDisciplineName) {
+        select.value = firstValidDisciplineName;
+    }
   }
+
+  select.dispatchEvent(new Event('change'));
 }
 
 export async function initDisciplines(selector) {

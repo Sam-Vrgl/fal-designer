@@ -1,7 +1,9 @@
-// The key for storing the state in localStorage
 const LOCAL_STORAGE_KEY = 'falDesignerState';
 
-// The default state of the application
+let undoStack = [];
+let redoStack = [];
+const HISTORY_LIMIT = 50;
+
 const defaultState = {
   mmToPx: 3.7795275591,
   gridWmm: 700,
@@ -10,6 +12,7 @@ const defaultState = {
   minorStepMm: 1,
   majorStepMm: 10,
   helper: { showV: true, showH: true, color: '#666666', thickness: 3 },
+  discipline: '',
   disciplineColors: [],
   disciplineMaterial: null,
   materials: [],
@@ -34,13 +37,52 @@ const defaultState = {
   dragMoivreOffsetX: 0,
 };
 
-// Main application state
 export let state = { ...defaultState };
 
-/**
- * Saves the current state to localStorage.
- * Only serializable properties are saved.
- */
+function createSnapshot() {
+    return {
+        materials: JSON.parse(JSON.stringify(state.materials)),
+        moivres: JSON.parse(JSON.stringify(state.moivres)),
+        images: JSON.parse(JSON.stringify(state.images)),
+    };
+}
+
+function restoreFromSnapshot(snapshot) {
+    if (!snapshot) return;
+    state.materials = snapshot.materials;
+    state.moivres = snapshot.moivres;
+    state.images = snapshot.images;
+    
+    state.selectedInsigne = null;
+    state.selectedMaterial = null;
+    state.selectedMoivre = null;
+
+    notify();
+}
+
+export function recordStateForUndo() {
+    redoStack = [];
+    undoStack.push(createSnapshot());
+    if (undoStack.length > HISTORY_LIMIT) {
+        undoStack.shift();
+    }
+}
+
+export function undo() {
+    if (undoStack.length < 2) return;
+    const currentState = undoStack.pop();
+    redoStack.push(currentState);
+    const previousState = undoStack[undoStack.length - 1];
+    restoreFromSnapshot(previousState);
+}
+
+export function redo() {
+    if (redoStack.length === 0) return;
+    const nextState = redoStack.pop();
+    undoStack.push(nextState);
+    restoreFromSnapshot(nextState);
+}
+
 function saveState() {
     try {
         const stateToSave = {
@@ -48,6 +90,7 @@ function saveState() {
             gridHmm: state.gridHmm,
             marginMm: state.marginMm,
             helper: state.helper,
+            discipline: state.discipline,
             disciplineColors: state.disciplineColors,
             disciplineMaterial: state.disciplineMaterial,
             materials: state.materials,
@@ -63,30 +106,24 @@ function saveState() {
     }
 }
 
-/**
- * Loads the state from localStorage and merges it with the default state.
- * If loading fails, it resets to the default state.
- */
 function loadState() {
     try {
         const savedStateJSON = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (savedStateJSON) {
             const savedState = JSON.parse(savedStateJSON);
-            // Merge the loaded state into the default state to ensure
-            // all properties are present, even after updates.
             state = { ...defaultState, ...savedState };
+            undoStack = [createSnapshot()];
+        } else {
+            undoStack = [createSnapshot()];
         }
     } catch (error) {
         console.error("Failed to load or parse state from localStorage. Resetting to default.", error);
-        // If parsing fails, reset to a clean state
         state = { ...defaultState };
         localStorage.removeItem(LOCAL_STORAGE_KEY);
+        undoStack = [createSnapshot()];
     }
 }
 
-/**
- * Clears the saved state from localStorage and reloads the page.
- */
 export function resetState() {
     if (confirm("Are you sure you want to reset your design? This will clear all saved data.")) {
         localStorage.removeItem(LOCAL_STORAGE_KEY);
@@ -94,13 +131,11 @@ export function resetState() {
     }
 }
 
-// Pub/Sub system
 const listeners = new Set();
 export function subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); }
 export function notify() {
     for (const fn of listeners) fn();
-    saveState(); // Save state on every notification
+    saveState();
 }
 
-// --- Initial Load ---
 loadState();
