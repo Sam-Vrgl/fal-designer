@@ -4,147 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>FalDesigner V1</title>
-  <link rel="icon" type="image/png" href="./favicon.png">
-  <style>
-    :root { color-scheme: light; --toolbar-height: 40px; }
-    body { 
-      margin: 0; 
-      font: 14px/1.35 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; 
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      background-color: #f0f0f0;
-    }
-
-    #app-container {
-      display: flex;
-      flex-grow: 1;
-      overflow: hidden;
-      padding: 10px;
-      gap: 10px;
-    }
-    #palette-container {
-      width: 280px;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      overflow-y: auto;
-    }
-    #main-content-wrapper {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        min-width: 0;
-    }
-    #canvas-container {
-      flex-grow: 1;
-      position: relative;
-      overflow: hidden;
-      background-color: #e9e9e9;
-      border-radius: 10px;
-    }
-    #inspector-container {
-      width: 240px;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    canvas { 
-      display: block; 
-      position: absolute;
-      top: 0;
-      left: 0;
-      cursor: default;
-    }
-
-    #canvas-toolbar {
-        height: var(--toolbar-height);
-        flex-shrink: 0;
-        background: #fff;
-        border: 1px solid #ccc;
-        border-radius: 10px;
-        padding: 0 12px;
-        box-shadow: 0 1px 4px rgba(0,0,0,.05);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    #canvas-toolbar button { font-weight: bold; padding: 4px 8px; }
-    #zoom-display { font-weight: 500; min-width: 50px; text-align: center; }
-
-    #welcome-modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.6);
-        z-index: 1000;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    #welcome-modal {
-        background: #fff;
-        padding: 25px 30px;
-        border-radius: 12px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-        max-width: 500px;
-        text-align: center;
-    }
-    #welcome-modal h2 { margin-top: 0; color: #d9534f; }
-    #welcome-modal p { line-height: 1.6; margin-bottom: 20px; }
-    #welcome-modal button { padding: 10px 20px; border: none; background-color: #007bff; color: white; border-radius: 5px; cursor: pointer; font-size: 16px; }
-
-    .panel {
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      padding: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,.08);
-      flex-shrink: 0;
-    }
-    .panel h3 { margin: 0 0 10px 0; padding-bottom: 8px; border-bottom: 1px solid #e6e6e6; }
-    .row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
-    label { display: flex; gap: .5rem; align-items: center; white-space: nowrap; }
-    #toolbar { padding: 8px 12px; }
-    #toolbar button.active { background-color: #007bff; color: white; border-color: #007bff; }
-    #resetBtn { background-color: #dc3545; color: white; border-color: #dc3545; }
-    
-    #insigne-search { width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box; }
-    #insigne-palette { display: flex; flex-direction: column; min-height: 300px; }
-    #insigne-list { flex-grow: 1; overflow-y: auto; }
-    #insigne-palette .category { margin-bottom: 15px; }
-    #insigne-palette h4 { margin: 0 0 8px 0; }
-    #insigne-palette .items { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 8px; grid-auto-rows: 50px; }
-    #insigne-palette img { width: 100%; height: 100%; border: 2px solid transparent; border-radius: 4px; cursor: pointer; transition: all 0.2s ease; object-fit: contain; }
-    #insigne-palette img:hover { border-color: #007bff; background-color: #f0f8ff; }
-
-    #inspector-panel { flex-grow: 1; min-height: 0; overflow-y: auto; }
-    #inspector-panel .prop-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
-    #inspector-panel label { font-weight: 600; }
-    #inspector-panel input, #inspector-panel select { width: 100%; padding: 6px; box-sizing: border-box; }
-    #inspector-panel #no-selection { color: #777; }
-    #tips-panel ul { list-style: none; padding-left: 0; margin: 0; font-size: 13px; color: #333; }
-    #tips-panel li { margin-bottom: 8px; padding-left: 22px; position: relative; line-height: 1.4; }
-    #tips-panel li::before { content: "💡"; position: absolute; left: 0; top: 1px; }
-    #tips-panel b { background-color: #eee; padding: 2px 5px; border-radius: 4px; font-family: monospace; }
-    
-    details summary { cursor: pointer; font-weight: 600; list-style: none; padding: 4px 0; }
-    details summary::-webkit-details-marker { display: none; }
-    details summary::before { content: '▶'; display: inline-block; margin-right: .5rem; transition: transform .2s ease; font-size: 0.8em; }
-    details[open] > summary::before { transform: rotate(90deg); }
-    .details-content { padding-top: 12px; display: flex; flex-direction: column; gap: 10px; }
-    .details-content .row { flex-wrap: nowrap; align-items: center; margin-bottom: 0; }
-    .details-content .row label { flex-shrink: 0; }
-    .details-content .row input, .details-content .row select { flex-grow: 1; min-width: 0; }
-    .details-content .row input[type="number"] { max-width: 80px; }
-    .details-content .row input[type="color"] { flex-grow: 0; width: 40px; height: 30px; padding: 2px; }
-    .details-content hr { border: none; border-top: 1px solid #eee; margin: 4px 0; }
-  </style>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -187,9 +51,7 @@
               <label for="materialWidthInput">Largeur (mm)</label>
               <input type="number" id="materialWidthInput" value="100" min="1" step="1">
             </div>
-            <div class="row">
-              <button id="addMaterialBtn" style="width: 100%;">Ajouter section</button>
-            </div>
+            <button id="addMaterialBtn">Ajouter section</button>
              <hr />
              <div class="row">
                <label for="moivreColor">Moivre</label>

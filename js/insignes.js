@@ -24,6 +24,7 @@ export async function initInsignePalette(paletteId, searchInputId) {
         const path = itemData.path || itemData;
         img.src = path;
         img.title = name;
+        img.loading = 'lazy';
         img.dataset.name = name;
         img.dataset.path = path;
         if (itemData.size_mm) {

@@ -34,7 +34,7 @@ function findAndStructureImageFiles(dir) {
 
                     const files = fs.readdirSync(sizePath);
                     for (const file of files) {
-                        if (!/\.(png|jpg|jpeg|gif|svg)$/i.test(file)) continue;
+                        if (!/\.(png|jpg|jpeg|gif|svg|webp)$/i.test(file)) continue;
                         const webPath = './' + path.relative(PROJECT_ROOT, path.join(sizePath, file)).replace(/\\/g, '/');
                         const displayName = path.parse(file).name.replace(/_maj|_min/, '').replace(/_/g, ' ');
                         
@@ -45,7 +45,7 @@ function findAndStructureImageFiles(dir) {
             } else {
                 const items = fs.readdirSync(categoryPath);
                 for (const file of items) {
-                     if (!/\.(png|jpg|jpeg|gif|svg)$/i.test(file)) continue;
+                     if (!/\.(png|jpg|jpeg|gif|svg|webp)$/i.test(file)) continue;
                      
                      const webPath = './' + path.relative(PROJECT_ROOT, path.join(categoryPath, file)).replace(/\\/g, '/');
                      const match = file.match(/-(\d+)mm\./i);

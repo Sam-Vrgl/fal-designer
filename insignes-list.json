@@ -1,279 +1,279 @@
 {
   "numbers": {
     "small": {
-      "0": "./assets/insignes/chiffres/petit/0_min.png",
-      "1": "./assets/insignes/chiffres/petit/1_min.png",
-      "2": "./assets/insignes/chiffres/petit/2_min.png",
-      "3": "./assets/insignes/chiffres/petit/3_min.png",
-      "4": "./assets/insignes/chiffres/petit/4_min.png",
-      "5": "./assets/insignes/chiffres/petit/5_min.png",
-      "6": "./assets/insignes/chiffres/petit/6_min.png",
-      "7": "./assets/insignes/chiffres/petit/7_min.png",
-      "8": "./assets/insignes/chiffres/petit/8_min.png",
-      "9": "./assets/insignes/chiffres/petit/9_min.png"
+      "0": "./assets/insignes/chiffres/petit/0_min.webp",
+      "1": "./assets/insignes/chiffres/petit/1_min.webp",
+      "2": "./assets/insignes/chiffres/petit/2_min.webp",
+      "3": "./assets/insignes/chiffres/petit/3_min.webp",
+      "4": "./assets/insignes/chiffres/petit/4_min.webp",
+      "5": "./assets/insignes/chiffres/petit/5_min.webp",
+      "6": "./assets/insignes/chiffres/petit/6_min.webp",
+      "7": "./assets/insignes/chiffres/petit/7_min.webp",
+      "8": "./assets/insignes/chiffres/petit/8_min.webp",
+      "9": "./assets/insignes/chiffres/petit/9_min.webp"
     },
     "big": {
-      "0": "./assets/insignes/chiffres/grand/0_maj.png",
-      "1": "./assets/insignes/chiffres/grand/1_maj.png",
-      "2": "./assets/insignes/chiffres/grand/2_maj.png",
-      "3": "./assets/insignes/chiffres/grand/3_maj.png",
-      "4": "./assets/insignes/chiffres/grand/4_maj.png",
-      "5": "./assets/insignes/chiffres/grand/5_maj.png",
-      "6": "./assets/insignes/chiffres/grand/6_maj.png",
-      "7": "./assets/insignes/chiffres/grand/7_maj.png",
-      "8": "./assets/insignes/chiffres/grand/8_maj.png",
-      "9": "./assets/insignes/chiffres/grand/9_maj.png"
+      "0": "./assets/insignes/chiffres/grand/0_maj.webp",
+      "1": "./assets/insignes/chiffres/grand/1_maj.webp",
+      "2": "./assets/insignes/chiffres/grand/2_maj.webp",
+      "3": "./assets/insignes/chiffres/grand/3_maj.webp",
+      "4": "./assets/insignes/chiffres/grand/4_maj.webp",
+      "5": "./assets/insignes/chiffres/grand/5_maj.webp",
+      "6": "./assets/insignes/chiffres/grand/6_maj.webp",
+      "7": "./assets/insignes/chiffres/grand/7_maj.webp",
+      "8": "./assets/insignes/chiffres/grand/8_maj.webp",
+      "9": "./assets/insignes/chiffres/grand/9_maj.webp"
     }
   },
   "letters": {
     "small": {
-      "a": "./assets/insignes/lettres/min/a_min.png",
-      "b": "./assets/insignes/lettres/min/b_min.png",
-      "c": "./assets/insignes/lettres/min/c_min.png",
-      "d": "./assets/insignes/lettres/min/d_min.png",
-      "e": "./assets/insignes/lettres/min/e_min.png",
-      "f": "./assets/insignes/lettres/min/f_min.png",
-      "g": "./assets/insignes/lettres/min/g_min.png",
-      "h": "./assets/insignes/lettres/min/h_min.png",
-      "i": "./assets/insignes/lettres/min/i_min.png",
-      "j": "./assets/insignes/lettres/min/j_min.png",
-      "k": "./assets/insignes/lettres/min/k_min.png",
-      "l": "./assets/insignes/lettres/min/l_min.png",
-      "m": "./assets/insignes/lettres/min/m_min.png",
-      "n": "./assets/insignes/lettres/min/n_min.png",
-      "o": "./assets/insignes/lettres/min/o_min.png",
-      "p": "./assets/insignes/lettres/min/p_min.png",
-      "q": "./assets/insignes/lettres/min/q_min.png",
-      "r": "./assets/insignes/lettres/min/r_min.png",
-      "s": "./assets/insignes/lettres/min/s_min.png",
-      "t": "./assets/insignes/lettres/min/t_min.png",
-      "u": "./assets/insignes/lettres/min/u_min.png",
-      "v": "./assets/insignes/lettres/min/v_min.png",
-      "w": "./assets/insignes/lettres/min/w_min.png",
-      "x": "./assets/insignes/lettres/min/x_min.png",
-      "y": "./assets/insignes/lettres/min/y_min.png",
-      "z": "./assets/insignes/lettres/min/z_min.png"
+      "a": "./assets/insignes/lettres/min/a_min.webp",
+      "b": "./assets/insignes/lettres/min/b_min.webp",
+      "c": "./assets/insignes/lettres/min/c_min.webp",
+      "d": "./assets/insignes/lettres/min/d_min.webp",
+      "e": "./assets/insignes/lettres/min/e_min.webp",
+      "f": "./assets/insignes/lettres/min/f_min.webp",
+      "g": "./assets/insignes/lettres/min/g_min.webp",
+      "h": "./assets/insignes/lettres/min/h_min.webp",
+      "i": "./assets/insignes/lettres/min/i_min.webp",
+      "j": "./assets/insignes/lettres/min/j_min.webp",
+      "k": "./assets/insignes/lettres/min/k_min.webp",
+      "l": "./assets/insignes/lettres/min/l_min.webp",
+      "m": "./assets/insignes/lettres/min/m_min.webp",
+      "n": "./assets/insignes/lettres/min/n_min.webp",
+      "o": "./assets/insignes/lettres/min/o_min.webp",
+      "p": "./assets/insignes/lettres/min/p_min.webp",
+      "q": "./assets/insignes/lettres/min/q_min.webp",
+      "r": "./assets/insignes/lettres/min/r_min.webp",
+      "s": "./assets/insignes/lettres/min/s_min.webp",
+      "t": "./assets/insignes/lettres/min/t_min.webp",
+      "u": "./assets/insignes/lettres/min/u_min.webp",
+      "v": "./assets/insignes/lettres/min/v_min.webp",
+      "w": "./assets/insignes/lettres/min/w_min.webp",
+      "x": "./assets/insignes/lettres/min/x_min.webp",
+      "y": "./assets/insignes/lettres/min/y_min.webp",
+      "z": "./assets/insignes/lettres/min/z_min.webp"
     },
     "big": {
-      "a": "./assets/insignes/lettres/maj/a_maj.png",
-      "b": "./assets/insignes/lettres/maj/b_maj.png",
-      "c": "./assets/insignes/lettres/maj/c_maj.png",
-      "d": "./assets/insignes/lettres/maj/d_maj.png",
-      "e": "./assets/insignes/lettres/maj/e_maj.png",
-      "f": "./assets/insignes/lettres/maj/f_maj.png",
-      "g": "./assets/insignes/lettres/maj/g_maj.png",
-      "h": "./assets/insignes/lettres/maj/h_maj.png",
-      "i": "./assets/insignes/lettres/maj/i_maj.png",
-      "j": "./assets/insignes/lettres/maj/j_maj.png",
-      "k": "./assets/insignes/lettres/maj/k_maj.png",
-      "l": "./assets/insignes/lettres/maj/l_maj.png",
-      "m": "./assets/insignes/lettres/maj/m_maj.png",
-      "n": "./assets/insignes/lettres/maj/n_maj.png",
-      "o": "./assets/insignes/lettres/maj/o_maj.png",
-      "p": "./assets/insignes/lettres/maj/p_maj.png",
-      "q": "./assets/insignes/lettres/maj/q_maj.png",
-      "r": "./assets/insignes/lettres/maj/r_maj.png",
-      "s": "./assets/insignes/lettres/maj/s_maj.png",
-      "t": "./assets/insignes/lettres/maj/t_maj.png",
-      "u": "./assets/insignes/lettres/maj/u_maj.png",
-      "v": "./assets/insignes/lettres/maj/v_maj.png",
-      "w": "./assets/insignes/lettres/maj/w_maj.png",
-      "x": "./assets/insignes/lettres/maj/x_maj.png",
-      "y": "./assets/insignes/lettres/maj/y_maj.png",
-      "z": "./assets/insignes/lettres/maj/z_maj.png"
+      "a": "./assets/insignes/lettres/maj/a_maj.webp",
+      "b": "./assets/insignes/lettres/maj/b_maj.webp",
+      "c": "./assets/insignes/lettres/maj/c_maj.webp",
+      "d": "./assets/insignes/lettres/maj/d_maj.webp",
+      "e": "./assets/insignes/lettres/maj/e_maj.webp",
+      "f": "./assets/insignes/lettres/maj/f_maj.webp",
+      "g": "./assets/insignes/lettres/maj/g_maj.webp",
+      "h": "./assets/insignes/lettres/maj/h_maj.webp",
+      "i": "./assets/insignes/lettres/maj/i_maj.webp",
+      "j": "./assets/insignes/lettres/maj/j_maj.webp",
+      "k": "./assets/insignes/lettres/maj/k_maj.webp",
+      "l": "./assets/insignes/lettres/maj/l_maj.webp",
+      "m": "./assets/insignes/lettres/maj/m_maj.webp",
+      "n": "./assets/insignes/lettres/maj/n_maj.webp",
+      "o": "./assets/insignes/lettres/maj/o_maj.webp",
+      "p": "./assets/insignes/lettres/maj/p_maj.webp",
+      "q": "./assets/insignes/lettres/maj/q_maj.webp",
+      "r": "./assets/insignes/lettres/maj/r_maj.webp",
+      "s": "./assets/insignes/lettres/maj/s_maj.webp",
+      "t": "./assets/insignes/lettres/maj/t_maj.webp",
+      "u": "./assets/insignes/lettres/maj/u_maj.webp",
+      "v": "./assets/insignes/lettres/maj/v_maj.webp",
+      "w": "./assets/insignes/lettres/maj/w_maj.webp",
+      "x": "./assets/insignes/lettres/maj/x_maj.webp",
+      "y": "./assets/insignes/lettres/maj/y_maj.webp",
+      "z": "./assets/insignes/lettres/maj/z_maj.webp"
     }
   },
   "filiere": {
     "@ arobase": {
-      "path": "./assets/insignes/filiere/@-arobase-24mm.png",
+      "path": "./assets/insignes/filiere/@-arobase-24mm.webp",
       "size_mm": 24
     },
     "beta": {
-      "path": "./assets/insignes/filiere/beta-24mm.png",
+      "path": "./assets/insignes/filiere/beta-24mm.webp",
       "size_mm": 24
     },
     "caducee de medecine": {
-      "path": "./assets/insignes/filiere/caducee-de-medecine-30mm.png",
+      "path": "./assets/insignes/filiere/caducee-de-medecine-30mm.webp",
       "size_mm": 30
     },
     "caducee infirmier": {
-      "path": "./assets/insignes/filiere/caducee-infirmier-24mm.png",
+      "path": "./assets/insignes/filiere/caducee-infirmier-24mm.webp",
       "size_mm": 24
     },
     "caducee pharma": {
-      "path": "./assets/insignes/filiere/caducee-pharma-24mm.png",
+      "path": "./assets/insignes/filiere/caducee-pharma-24mm.webp",
       "size_mm": 24
     },
     "caducée de mercure": {
-      "path": "./assets/insignes/filiere/caducée-de-mercure-32mm.png",
+      "path": "./assets/insignes/filiere/caducée-de-mercure-32mm.webp",
       "size_mm": 32
     },
     "casque de pericles": {
-      "path": "./assets/insignes/filiere/casque-de-pericles-28mm.png",
+      "path": "./assets/insignes/filiere/casque-de-pericles-28mm.webp",
       "size_mm": 28
     },
     "chouette bicephale": {
-      "path": "./assets/insignes/filiere/chouette-bicephale-24mm.png",
+      "path": "./assets/insignes/filiere/chouette-bicephale-24mm.webp",
       "size_mm": 24
     },
     "ciseaux": {
-      "path": "./assets/insignes/filiere/ciseaux-25mm.png",
+      "path": "./assets/insignes/filiere/ciseaux-25mm.webp",
       "size_mm": 25
     },
     "clap de cinema": {
-      "path": "./assets/insignes/filiere/clap-de-cinema-24mm.png",
+      "path": "./assets/insignes/filiere/clap-de-cinema-24mm.webp",
       "size_mm": 24
     },
     "coq": {
-      "path": "./assets/insignes/filiere/coq-28mm.png",
+      "path": "./assets/insignes/filiere/coq-28mm.webp",
       "size_mm": 28
     },
     "croix d ankh": {
-      "path": "./assets/insignes/filiere/croix-d-ankh-24mm.png",
+      "path": "./assets/insignes/filiere/croix-d-ankh-24mm.webp",
       "size_mm": 24
     },
     "ecole ingenieur": {
-      "path": "./assets/insignes/filiere/ecole-ingenieur.png",
+      "path": "./assets/insignes/filiere/ecole-ingenieur.webp",
       "size_mm": null
     },
     "equerre et compas": {
-      "path": "./assets/insignes/filiere/equerre-et-compas-34mm.png",
+      "path": "./assets/insignes/filiere/equerre-et-compas-34mm.webp",
       "size_mm": 34
     },
     "glaive et balance": {
-      "path": "./assets/insignes/filiere/glaive-et-balance-32mm.png",
+      "path": "./assets/insignes/filiere/glaive-et-balance-32mm.webp",
       "size_mm": 32
     },
     "globe": {
-      "path": "./assets/insignes/filiere/globe-28mm.png",
+      "path": "./assets/insignes/filiere/globe-28mm.webp",
       "size_mm": 28
     },
     "grappe de raisin": {
-      "path": "./assets/insignes/filiere/grappe-de-raisin-24mm.png",
+      "path": "./assets/insignes/filiere/grappe-de-raisin-24mm.webp",
       "size_mm": 24
     },
     "grenouille": {
-      "path": "./assets/insignes/filiere/grenouille-24mm.png",
+      "path": "./assets/insignes/filiere/grenouille-24mm.webp",
       "size_mm": 24
     },
     "livre et plume": {
-      "path": "./assets/insignes/filiere/livre-et-plume-20mm.png",
+      "path": "./assets/insignes/filiere/livre-et-plume-20mm.webp",
       "size_mm": 20
     },
     "lyre": {
-      "path": "./assets/insignes/filiere/lyre-25mm.png",
+      "path": "./assets/insignes/filiere/lyre-25mm.webp",
       "size_mm": 25
     },
     "masque de comedie": {
-      "path": "./assets/insignes/filiere/masque-de-comedie-24mm.png",
+      "path": "./assets/insignes/filiere/masque-de-comedie-24mm.webp",
       "size_mm": 24
     },
     "molaire": {
-      "path": "./assets/insignes/filiere/molaire-20mm.png",
+      "path": "./assets/insignes/filiere/molaire-20mm.webp",
       "size_mm": 20
     },
     "mortier et pilon": {
-      "path": "./assets/insignes/filiere/mortier-et-pilon-24mm.png",
+      "path": "./assets/insignes/filiere/mortier-et-pilon-24mm.webp",
       "size_mm": 24
     },
     "palette et pinceau": {
-      "path": "./assets/insignes/filiere/palette-et-pinceau-20mm.png",
+      "path": "./assets/insignes/filiere/palette-et-pinceau-20mm.webp",
       "size_mm": 20
     },
     "palme sciences": {
-      "path": "./assets/insignes/filiere/palme-sciences-30mm.png",
+      "path": "./assets/insignes/filiere/palme-sciences-30mm.webp",
       "size_mm": 30
     },
     "parapluie": {
-      "path": "./assets/insignes/filiere/parapluie-24mm.png",
+      "path": "./assets/insignes/filiere/parapluie-24mm.webp",
       "size_mm": 24
     },
     "phi": {
-      "path": "./assets/insignes/filiere/phi-24mm.png",
+      "path": "./assets/insignes/filiere/phi-24mm.webp",
       "size_mm": 24
     },
     "plume d oie": {
-      "path": "./assets/insignes/filiere/plume-d-oie-34mm.png",
+      "path": "./assets/insignes/filiere/plume-d-oie-34mm.webp",
       "size_mm": 34
     },
     "psi": {
-      "path": "./assets/insignes/filiere/psi-24mm.png",
+      "path": "./assets/insignes/filiere/psi-24mm.webp",
       "size_mm": 24
     },
     "sphenoide": {
-      "path": "./assets/insignes/filiere/sphenoide-28mm.png",
+      "path": "./assets/insignes/filiere/sphenoide-28mm.webp",
       "size_mm": 28
     },
     "sphinx": {
-      "path": "./assets/insignes/filiere/sphinx-21mm.png",
+      "path": "./assets/insignes/filiere/sphinx-21mm.webp",
       "size_mm": 21
     },
     "squelette": {
-      "path": "./assets/insignes/filiere/squelette-28mm.png",
+      "path": "./assets/insignes/filiere/squelette-28mm.webp",
       "size_mm": 28
     },
     "tete de cheval": {
-      "path": "./assets/insignes/filiere/tete-de-cheval-24mm.png",
+      "path": "./assets/insignes/filiere/tete-de-cheval-24mm.webp",
       "size_mm": 24
     },
     "tete de mort sur femurs croises": {
-      "path": "./assets/insignes/filiere/tete-de-mort-sur-femurs-croises-24mm.png",
+      "path": "./assets/insignes/filiere/tete-de-mort-sur-femurs-croises-24mm.webp",
       "size_mm": 24
     }
   },
   "annees": {
     "beta": {
-      "path": "./assets/insignes/annees/beta-24mm.png",
+      "path": "./assets/insignes/annees/beta-24mm.webp",
       "size_mm": 24
     },
     "epsilon": {
-      "path": "./assets/insignes/annees/epsilon-24mm.png",
+      "path": "./assets/insignes/annees/epsilon-24mm.webp",
       "size_mm": 24
     },
     "etoile argent": {
-      "path": "./assets/insignes/annees/etoile-argent-12mm.png",
+      "path": "./assets/insignes/annees/etoile-argent-12mm.webp",
       "size_mm": 12
     },
     "etoile or": {
-      "path": "./assets/insignes/annees/etoile-or-12mm.png",
+      "path": "./assets/insignes/annees/etoile-or-12mm.webp",
       "size_mm": 12
     },
     "gamma": {
-      "path": "./assets/insignes/annees/gamma-24mm.png",
+      "path": "./assets/insignes/annees/gamma-24mm.webp",
       "size_mm": 24
     },
     "palme double": {
-      "path": "./assets/insignes/annees/palme-double-28mm.png",
+      "path": "./assets/insignes/annees/palme-double-28mm.webp",
       "size_mm": 28
     },
     "palme simple grande": {
-      "path": "./assets/insignes/annees/palme-simple-grande-36mm.png",
+      "path": "./assets/insignes/annees/palme-simple-grande-36mm.webp",
       "size_mm": 36
     },
     "palme simple petit": {
-      "path": "./assets/insignes/annees/palme-simple-petit-12mm.png",
+      "path": "./assets/insignes/annees/palme-simple-petit-12mm.webp",
       "size_mm": 12
     },
     "phi": {
-      "path": "./assets/insignes/annees/phi-24mm.png",
+      "path": "./assets/insignes/annees/phi-24mm.webp",
       "size_mm": 24
     },
     "psi": {
-      "path": "./assets/insignes/annees/psi-24mm.png",
+      "path": "./assets/insignes/annees/psi-24mm.webp",
       "size_mm": 24
     },
     "tete de mort": {
-      "path": "./assets/insignes/annees/tete-de-mort-15mm.png",
+      "path": "./assets/insignes/annees/tete-de-mort-15mm.webp",
       "size_mm": 15
     },
     "tete de vache": {
-      "path": "./assets/insignes/annees/tete-de-vache-18mm.png",
+      "path": "./assets/insignes/annees/tete-de-vache-18mm.webp",
       "size_mm": 18
     }
   },
   "other": {
     "drapeau UK": {
-      "path": "./assets/insignes/pays/drapeau-UK-10mm.png",
+      "path": "./assets/insignes/pays/drapeau-UK-10mm.webp",
       "size_mm": 10
     }
   }
