@@ -182,7 +182,6 @@ button:hover {
     flex-grow: 1;
     overflow-y: auto;
     padding-right: 8px;
-    /* For scrollbar */
 }
 
 #insigne-palette .category {
@@ -249,14 +248,12 @@ select {
     font-family: inherit;
 }
 
-/* --- NEW STYLES FOR DISABLED FIELDS --- */
 input:disabled,
 select:disabled {
     background-color: var(--sidebar-border);
     opacity: 0.7;
     cursor: not-allowed;
 }
-/* ------------------------------------ */
 
 #inspector-panel #no-selection {
     color: #94a3b8;
@@ -355,7 +352,6 @@ details[open]>summary::before {
     margin: 8px 0;
 }
 
-/* Custom Scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
 }
@@ -371,4 +367,32 @@ details[open]>summary::before {
 
 ::-webkit-scrollbar-thumb:hover {
     background: #64748b;
+}
+
+#mobile-blocker {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background-color: rgba(30, 41, 59, 0.95);
+  color: #cbd5e1;
+  font-family: var(--font-family);
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+}
+
+#mobile-blocker .message {
+  max-width: 400px;
+}
+
+#mobile-blocker h2 {
+  color: var(--primary-color);
+}
+
+@media (max-width: 1024px) {
+  #mobile-blocker {
+    display: flex;
+  }
 }
