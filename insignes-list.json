@@ -192,6 +192,10 @@
     }
   },
   "annees": {
+    "beta": {
+      "path": "./assets/insignes/annees/beta-24mm.png",
+      "size_mm": 24
+    },
     "epsilon": {
       "path": "./assets/insignes/annees/epsilon-24mm.png",
       "size_mm": 24
@@ -203,6 +207,10 @@
     "etoile or": {
       "path": "./assets/insignes/annees/etoile-or-12mm.png",
       "size_mm": 12
+    },
+    "gamma": {
+      "path": "./assets/insignes/annees/gamma-24mm.png",
+      "size_mm": 24
     },
     "palme double": {
       "path": "./assets/insignes/annees/palme-double-28mm.png",
