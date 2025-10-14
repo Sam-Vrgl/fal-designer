@@ -43,16 +43,16 @@ TODO:
 ### Filières velours
 - [x] Chirurgie dentaire > Molaire
 - [x] Classes préparatoires santé > Chouette bicéphale
-- [ ] Études courtes de santé > Squelette
-- [ ] Infirmier > Caducée infirmier
+- [x] Études courtes de santé > Squelette
+- [x] Infirmier > Caducée infirmier
 - [x] Kinésithérapie > Caducée de Mercure
-- [ ] Licence Accès Santé (LAS) > Emblème de la discipline majoritaire
+- [x] Licence Accès Santé (LAS) > Emblème de la discipline majoritaire
 - [x] Médecine > Caducée médecine
-- [ ] Ostéopathie > Sphénoïde
+- [x] Ostéopathie > Sphénoïde
 - [x] Paramédical > Ciseaux
 - [x] PASS > Tête de mort sur fémurs croisés
 - [x] Pharmacie > Caducée de pharmacie
-- [ ] Préparateur en pharmacie > Mortier et pilon
+- [x] Préparateur en pharmacie > Mortier et pilon
 - [x] Sage-Femme > Croix d’Ânkh
 - [x] Vétérinaire > Tête de cheval
 
@@ -60,8 +60,8 @@ TODO:
 - [x] Administration Économique et Sociale (AES) > Lettres “AES”
 - [x] Architecture > Équerre et compas
 - [x] Arts du spectacle > Masque de comédie
-- [ ] Arts numériques > @
-- [ ] Audiovisuel > Clap de cinéma
+- [x] Arts numériques > @
+- [x] Audiovisuel > Clap de cinéma
 - [x] Bachelors (au RNCP) > β
 - [x] Beaux-arts et arts plastiques > Palette et pinceau
 - [x] BTS > Lettres “BTS”
@@ -79,7 +79,7 @@ TODO:
 - [x] Histoire de l’art et archéologie > Sphinx
 - [x] IAE > Lettres “IAE”
 - [x] IUP > Lettres “IUP”
-- [ ] Licence Accès Santé (LAS) > Emblème de la discipline majoritaire
+- [x] Licence Accès Santé (LAS) > Emblème de la discipline majoritaire
 - [x] Lettres et langues > Livre ouvert et plume
 - [x] MEEF > Plume
 - [x] Musique, musicologie > Lyre
