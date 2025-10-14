@@ -7,7 +7,7 @@ import { initDisciplines } from './disciplines.js';
 import { initDragAndDrop } from './drag-handler.js';
 
 
-function main() {
+async function main() {
     const canvas = document.getElementById('myCanvas');
     if (!canvas) {
         console.error("Canvas element not found!");
@@ -19,11 +19,11 @@ function main() {
     subscribe(rerender);
     window.addEventListener('resize', rerender);
 
-    bindUI();
+    const disciplines = await initDisciplines('disciplineSelect');
+    bindUI(disciplines);
     initDragAndDrop(canvas);
 
     Promise.all([
-        initDisciplines('disciplineSelect'),
         initInsignePalette('insigne-list', 'insigne-search')
     ]).finally(() => {
         preloadImages().finally(rerender);

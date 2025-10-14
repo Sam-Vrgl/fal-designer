@@ -115,8 +115,21 @@ export function draw(canvas, ctx, s, isLiveRender = true) {
     if (isLiveRender) {
         const outlineWidth = 2 * baseLineWidth;
         if (s.selectedMaterial) {
-            ctx.strokeStyle = 'rgba(0, 123, 255, 0.9)'; ctx.lineWidth = outlineWidth;
-            ctx.strokeRect(s.marginMm + s.selectedMaterial.x_mm, s.marginMm + s.selectedMaterial.y_mm, s.selectedMaterial.width_mm, s.selectedMaterial.height_mm);
+            if (s.selectedMaterial.groupId) {
+                const group = s.materials.filter(m => m.groupId === s.selectedMaterial.groupId);
+                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                group.forEach(m => {
+                    minX = Math.min(minX, m.x_mm);
+                    minY = Math.min(minY, m.y_mm);
+                    maxX = Math.max(maxX, m.x_mm + m.width_mm);
+                    maxY = Math.max(maxY, m.y_mm + m.height_mm);
+                });
+                ctx.strokeStyle = 'rgba(0, 123, 255, 0.9)'; ctx.lineWidth = outlineWidth;
+                ctx.strokeRect(s.marginMm + minX, s.marginMm + minY, maxX - minX, maxY - minY);
+            } else {
+                ctx.strokeStyle = 'rgba(0, 123, 255, 0.9)'; ctx.lineWidth = outlineWidth;
+                ctx.strokeRect(s.marginMm + s.selectedMaterial.x_mm, s.marginMm + s.selectedMaterial.y_mm, s.selectedMaterial.width_mm, s.selectedMaterial.height_mm);
+            }
         }
         if (s.selectedMoivre) {
             const moivre = s.selectedMoivre;

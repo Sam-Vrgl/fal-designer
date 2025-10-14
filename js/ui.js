@@ -2,7 +2,7 @@ import { state, notify, subscribe, resetState, recordStateForUndo, undo, redo } 
 import { exportState, importState } from './file-handler.js';
 import { exportCanvasAsImage } from './image-exporter.js';
 
-export function bindUI() {
+export function bindUI(disciplinesData) {
     const $ = (id) => document.getElementById(id);
     const canvas = $('myCanvas');
     const container = canvas.parentElement;
@@ -31,8 +31,9 @@ export function bindUI() {
     const gridH = $('gridHInput');
     const margin = $('marginInput');
 
-    const materialType = $('materialType');
-    const materialColor = $('materialColor');
+    const materialDisciplineSelect = $('materialDisciplineSelect');
+    const materialHeightSelect = $('materialHeightSelect');
+    const materialWidthInput = $('materialWidthInput');
     const addMaterialBtn = $('addMaterialBtn');
     const moivreColor = $('moivreColor');
     const addMoivreBtn = $('addMoivreBtn');
@@ -62,6 +63,17 @@ export function bindUI() {
     gridW.value = state.gridWmm;
     gridH.value = state.gridHmm;
     margin.value = state.marginMm;
+
+    const disciplineNames = Object.keys(disciplinesData);
+    for (const name of disciplineNames) {
+        const discipline = disciplinesData[name];
+        if (!discipline.custom) {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            materialDisciplineSelect.appendChild(option);
+        }
+    }
 
     zoomInBtn.addEventListener('click', () => { state.viewScale *= 1.25; notify(); });
     zoomOutBtn.addEventListener('click', () => { state.viewScale /= 1.25; notify(); });
@@ -125,10 +137,47 @@ export function bindUI() {
     margin.addEventListener('input', () => { state.marginMm = margin.valueAsNumber; notify(); });
 
     addMaterialBtn.addEventListener('click', () => {
-        state.materials.push({ x_mm: 10, y_mm: 10, width_mm: 100, height_mm: 20, material: materialType.value, color: materialColor.value });
+        const selectedDisciplineName = materialDisciplineSelect.value;
+        const discipline = disciplinesData[selectedDisciplineName];
+        if (!discipline) return;
+
+        const heightMultiplier = parseFloat(materialHeightSelect.value);
+        const width = materialWidthInput.valueAsNumber;
+        const totalHeight = state.gridHmm * heightMultiplier;
+
+        if (discipline.couleursRGB.length > 1) {
+            const groupId = Date.now();
+            const sectionHeight = totalHeight / 2;
+            const color1 = `rgb(${discipline.couleursRGB[0]})`;
+            const color2 = `rgb(${discipline.couleursRGB[1]})`;
+
+            const material1 = {
+                x_mm: 10, y_mm: 0,
+                width_mm: width, height_mm: sectionHeight,
+                material: discipline.matière, color: color1,
+                groupId: groupId
+            };
+            const material2 = {
+                x_mm: 10, y_mm: sectionHeight,
+                width_mm: width, height_mm: sectionHeight,
+                material: discipline.matière, color: color2,
+                groupId: groupId
+            };
+            state.materials.push(material1, material2);
+        } else {
+            const newMaterial = {
+                x_mm: 10, y_mm: 0,
+                width_mm: width, height_mm: totalHeight,
+                material: discipline.matière,
+                color: `rgb(${discipline.couleursRGB[0]})`
+            };
+            state.materials.push(newMaterial);
+        }
+        
         recordStateForUndo();
         notify();
     });
+
     addMoivreBtn.addEventListener('click', () => {
         state.moivres.push({ x_mm: 50, y_mm: 0, width_mm: 5, height_mm: state.gridHmm, color: moivreColor.value });
         recordStateForUndo();
@@ -196,7 +245,11 @@ export function bindUI() {
     selectedMaterialHeight.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.height_mm = selectedMaterialHeight.valueAsNumber; notify(); }});
     removeMaterialBtn.addEventListener('click', () => {
         if (state.selectedMaterial) {
-            state.materials = state.materials.filter(m => m !== state.selectedMaterial);
+            if (state.selectedMaterial.groupId) {
+                state.materials = state.materials.filter(m => m.groupId !== state.selectedMaterial.groupId);
+            } else {
+                state.materials = state.materials.filter(m => m !== state.selectedMaterial);
+            }
             state.selectedMaterial = null;
             recordStateForUndo();
             notify();

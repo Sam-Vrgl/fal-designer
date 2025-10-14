@@ -72,4 +72,5 @@ function populateDropdown(selector) {
 export async function initDisciplines(selector) {
   disciplinesData = await fetchDisciplines();
   populateDropdown(selector);
+  return disciplinesData;
 }

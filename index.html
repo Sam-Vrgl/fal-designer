@@ -167,22 +167,29 @@
           <summary>Parcours/Discipline(s)</summary>
           <div class="details-content">
             <div class="row">
-              <label for="disciplineSelect">Discipline</label>
+              <label for="disciplineSelect">Discipline Principale</label>
               <select id="disciplineSelect"></select>
             </div>
             <hr />
             <div class="row">
-               <label for="materialType">Matière</label>
-               <select id="materialType">
-                 <option value="satin">Satin</option>
-                 <option value="velours">Velours</option>
-               </select>
-               <label for="materialColor">Couleur</label>
-               <input type="color" id="materialColor" value="#880000">
-             </div>
-             <div class="row">
-               <button id="addMaterialBtn" style="width: 100%;">Ajouter section custom</button>
-             </div>
+              <label for="materialDisciplineSelect">Discipline(s) secondaire(s)</label>
+              <select id="materialDisciplineSelect"></select>
+            </div>
+            <div class="row">
+              <label for="materialHeightSelect">Hauteur</label>
+              <select id="materialHeightSelect">
+                <option value="1">Pleine</option>
+                <option value="0.5">Moitié</option>
+                <option value="0.33">Tiers</option>
+              </select>
+            </div>
+            <div class="row">
+              <label for="materialWidthInput">Largeur (mm)</label>
+              <input type="number" id="materialWidthInput" value="100" min="1" step="1">
+            </div>
+            <div class="row">
+              <button id="addMaterialBtn" style="width: 100%;">Ajouter section</button>
+            </div>
              <hr />
              <div class="row">
                <label for="moivreColor">Moivre</label>

@@ -168,8 +168,46 @@ export function initDragAndDrop(canvas) {
 
         } else if (state.isDraggingMaterial && state.selectedMaterial) {
             event.preventDefault();
-            state.selectedMaterial.x_mm = gridX - state.dragMaterialOffsetX;
-            state.selectedMaterial.y_mm = gridY - state.dragMaterialOffsetY;
+            let newX = gridX - state.dragMaterialOffsetX;
+            let newY = gridY - state.dragMaterialOffsetY;
+
+            let group = [state.selectedMaterial];
+            if (state.selectedMaterial.groupId) {
+                group = state.materials.filter(m => m.groupId === state.selectedMaterial.groupId);
+            }
+
+            const totalHeight = group.reduce((sum, m) => sum + m.height_mm, 0);
+            
+            if (!event.shiftKey) {
+                if (Math.abs(totalHeight - state.gridHmm) < 1) { // Full height
+                    newY = 0;
+                } else {
+                    const top = newY;
+                    const bottom = newY + totalHeight;
+                    const middle = newY + totalHeight / 2;
+
+                    const snapTargets = [0, state.gridHmm / 2, state.gridHmm];
+                    let snapped = false;
+
+                    for (const target of snapTargets) {
+                        if (Math.abs(top - target) < SNAP_THRESHOLD_MM) { newY = target; snapped = true; break; }
+                        if (Math.abs(bottom - target) < SNAP_THRESHOLD_MM) { newY = target - totalHeight; snapped = true; break; }
+                        if (Math.abs(middle - target) < SNAP_THRESHOLD_MM) { newY = target - totalHeight / 2; snapped = true; break; }
+                    }
+                    state.isSnapping = snapped;
+                }
+            } else {
+                state.isSnapping = false;
+            }
+
+            const deltaX = newX - state.selectedMaterial.x_mm;
+            const deltaY = newY - state.selectedMaterial.y_mm;
+
+            group.forEach(member => {
+                member.x_mm += deltaX;
+                member.y_mm += deltaY;
+            });
+            
             notify();
         } else if (state.isDraggingMoivre && state.selectedMoivre) {
             event.preventDefault();
