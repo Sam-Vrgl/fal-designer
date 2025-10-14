@@ -11,7 +11,7 @@ const defaultState = {
   marginMm: 10,
   minorStepMm: 1,
   majorStepMm: 10,
-  helper: { showV: true, showH: true, color: '#666666', thickness: 3 },
+  helper: { showV: false, showH: false, color: '#666666', thickness: 3 },
   discipline: '',
   disciplineColors: [],
   disciplineMaterial: null,

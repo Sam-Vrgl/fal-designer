@@ -73,11 +73,7 @@ function findAndStructureImageFiles(dir) {
                      } else if (categoryName === 'annees') {
                         structure.annees[displayName] = insigneData;
                      } else {
-                        // All other folders (like 'pays') are considered 'other'
-                         if (!structure.other[categoryName]) {
-                            structure.other[categoryName] = {};
-                        }
-                        structure.other[categoryName][displayName] = insigneData;
+                        structure.other[displayName] = insigneData;
                      }
                 }
             }

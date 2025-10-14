@@ -82,13 +82,65 @@
     }
   },
   "filiere": {
+    "caducée de mercure": {
+      "path": "./assets/insignes/filiere/caducée-de-mercure-32mm.png",
+      "size_mm": 32
+    },
+    "ciseaux": {
+      "path": "./assets/insignes/filiere/ciseaux-25mm.png",
+      "size_mm": 25
+    },
     "ecole ingenieur": {
       "path": "./assets/insignes/filiere/ecole-ingenieur.png",
       "size_mm": null
     },
+    "equerre et compas": {
+      "path": "./assets/insignes/filiere/equerre-et-compas-34mm.png",
+      "size_mm": 34
+    },
+    "glaive et balance": {
+      "path": "./assets/insignes/filiere/glaive-et-balance-32mm.png",
+      "size_mm": 32
+    },
+    "livre et plume": {
+      "path": "./assets/insignes/filiere/livre-et-plume-20mm.png",
+      "size_mm": 20
+    },
+    "lyre": {
+      "path": "./assets/insignes/filiere/lyre-25mm.png",
+      "size_mm": 25
+    },
+    "molaire": {
+      "path": "./assets/insignes/filiere/molaire-20mm.png",
+      "size_mm": 20
+    },
+    "palette et pinceau": {
+      "path": "./assets/insignes/filiere/palette-et-pinceau-20mm.png",
+      "size_mm": 20
+    },
     "palme sciences": {
       "path": "./assets/insignes/filiere/palme-sciences-30mm.png",
       "size_mm": 30
+    },
+    "phi": {
+      "path": "./assets/insignes/filiere/phi-24mm.png",
+      "size_mm": 24
+    },
+    "plume d oie": {
+      "path": "./assets/insignes/filiere/plume-d-oie-34mm.png",
+      "size_mm": 34
+    },
+    "psi": {
+      "path": "./assets/insignes/filiere/psi-24mm.png",
+      "size_mm": 24
+    },
+    "sphinx": {
+      "path": "./assets/insignes/filiere/sphinx-21mm.png",
+      "size_mm": 21
+    },
+    "tete de cheval": {
+      "path": "./assets/insignes/filiere/tete-de-cheval-24mm.png",
+      "size_mm": 24
     }
   },
   "annees": {
