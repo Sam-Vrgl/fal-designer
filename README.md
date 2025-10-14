@@ -62,7 +62,7 @@ TODO:
 - [x] Arts du spectacle > Masque de comédie
 - [ ] Arts numériques > @
 - [ ] Audiovisuel > Clap de cinéma
-- [ ] Bachelors (au RNCP) > β
+- [x] Bachelors (au RNCP) > β
 - [x] Beaux-arts et arts plastiques > Palette et pinceau
 - [x] BTS > Lettres “BTS”
 - [x] BUT > Lettres “BUT”

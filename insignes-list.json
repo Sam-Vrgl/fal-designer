@@ -82,6 +82,10 @@
     }
   },
   "filiere": {
+    "beta": {
+      "path": "./assets/insignes/filiere/beta-24mm.png",
+      "size_mm": 24
+    },
     "caducee de medecine": {
       "path": "./assets/insignes/filiere/caducee-de-medecine-30mm.png",
       "size_mm": 30
@@ -223,6 +227,14 @@
     "palme simple petit": {
       "path": "./assets/insignes/annees/palme-simple-petit-12mm.png",
       "size_mm": 12
+    },
+    "phi": {
+      "path": "./assets/insignes/annees/phi-24mm.png",
+      "size_mm": 24
+    },
+    "psi": {
+      "path": "./assets/insignes/annees/psi-24mm.png",
+      "size_mm": 24
     },
     "tete de mort": {
       "path": "./assets/insignes/annees/tete-de-mort-15mm.png",
