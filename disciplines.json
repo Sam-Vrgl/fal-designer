@@ -11,7 +11,7 @@
     "condition": "",
     "matière": "velours",
     "couleurs": ["blanc"],
-    "couleursRGB": ["255, 255, 255"]
+    "couleursRGB": ["230, 230, 230"]
   },
   "Médecine": {
     "custom": false,
@@ -88,7 +88,7 @@
     "condition": "",
     "matière": "satin",
     "couleurs": ["blanc"],
-    "couleursRGB": ["255, 255, 255"]
+    "couleursRGB": ["230, 230, 230"]
   },
   "Classes préparatoires": {
     "custom": false,
