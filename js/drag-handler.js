@@ -179,7 +179,7 @@ export function initDragAndDrop(canvas) {
             const totalHeight = group.reduce((sum, m) => sum + m.height_mm, 0);
             
             if (!event.shiftKey) {
-                if (Math.abs(totalHeight - state.gridHmm) < 1) { // Full height
+                if (Math.abs(totalHeight - state.gridHmm) < 1) {
                     newY = 0;
                 } else {
                     const top = newY;

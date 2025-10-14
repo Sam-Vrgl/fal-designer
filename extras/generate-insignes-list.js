@@ -1,18 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 
-// --- Configuration ---
-// MODIFIED: Paths are now relative to the script's location inside the 'extras' folder.
-// '..' is used to navigate up one level to the project root.
 const PROJECT_ROOT = path.join(__dirname, '..');
 const ASSETS_DIR = path.join(PROJECT_ROOT, 'assets', 'insignes');
 const OUTPUT_FILE = path.join(PROJECT_ROOT, 'insignes-list.json');
 
-/**
- * Recursively finds and categorizes all image files.
- * @param {string} dir The directory to search.
- * @returns {object} A structured object of all found images.
- */
 function findAndStructureImageFiles(dir) {
     const structure = {
         numbers: { small: {}, big: {} },
@@ -29,9 +21,7 @@ function findAndStructureImageFiles(dir) {
             const categoryPath = path.join(dir, categoryName);
             if (!fs.statSync(categoryPath).isDirectory()) continue;
 
-            // --- Logic to handle different category types ---
             if (categoryName === 'chiffres' || categoryName === 'lettres') {
-                // Categories with size subdirectories (petit/grand)
                 const items = fs.readdirSync(categoryPath);
                 for (const sizeDirName of items) {
                     const sizePath = path.join(categoryPath, sizeDirName);
@@ -45,7 +35,6 @@ function findAndStructureImageFiles(dir) {
                     const files = fs.readdirSync(sizePath);
                     for (const file of files) {
                         if (!/\.(png|jpg|jpeg|gif|svg)$/i.test(file)) continue;
-                        // MODIFIED: Correctly calculate the web path relative to the project root
                         const webPath = './' + path.relative(PROJECT_ROOT, path.join(sizePath, file)).replace(/\\/g, '/');
                         const displayName = path.parse(file).name.replace(/_maj|_min/, '').replace(/_/g, ' ');
                         
@@ -54,12 +43,10 @@ function findAndStructureImageFiles(dir) {
                     }
                 }
             } else {
-                // Categories without size subdirectories (filiere, annees, other)
                 const items = fs.readdirSync(categoryPath);
                 for (const file of items) {
                      if (!/\.(png|jpg|jpeg|gif|svg)$/i.test(file)) continue;
                      
-                     // MODIFIED: Correctly calculate the web path relative to the project root
                      const webPath = './' + path.relative(PROJECT_ROOT, path.join(categoryPath, file)).replace(/\\/g, '/');
                      const match = file.match(/-(\d+)mm\./i);
                      const size = match ? parseInt(match[1], 10) : null;
@@ -67,7 +54,6 @@ function findAndStructureImageFiles(dir) {
                      
                      const insigneData = { path: webPath, size_mm: size };
 
-                     // Place the data in the correct category
                      if (categoryName === 'filiere') {
                         structure.filiere[displayName] = insigneData;
                      } else if (categoryName === 'annees') {
@@ -84,7 +70,6 @@ function findAndStructureImageFiles(dir) {
     return structure;
 }
 
-// --- Main Execution ---
 console.log(`🔍 Starting structured scan in: ${ASSETS_DIR}`);
 const structuredInsignes = findAndStructureImageFiles(ASSETS_DIR);
 
