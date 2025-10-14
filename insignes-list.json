@@ -82,13 +82,37 @@
     }
   },
   "filiere": {
+    "caducee de medecine": {
+      "path": "./assets/insignes/filiere/caducee-de-medecine-30mm.png",
+      "size_mm": 30
+    },
+    "caducee pharma": {
+      "path": "./assets/insignes/filiere/caducee-pharma-24mm.png",
+      "size_mm": 24
+    },
     "caducée de mercure": {
       "path": "./assets/insignes/filiere/caducée-de-mercure-32mm.png",
       "size_mm": 32
     },
+    "casque de pericles": {
+      "path": "./assets/insignes/filiere/casque-de-pericles-28mm.png",
+      "size_mm": 28
+    },
+    "chouette bicephale": {
+      "path": "./assets/insignes/filiere/chouette-bicephale-24mm.png",
+      "size_mm": 24
+    },
     "ciseaux": {
       "path": "./assets/insignes/filiere/ciseaux-25mm.png",
       "size_mm": 25
+    },
+    "coq": {
+      "path": "./assets/insignes/filiere/coq-28mm.png",
+      "size_mm": 28
+    },
+    "croix d ankh": {
+      "path": "./assets/insignes/filiere/croix-d-ankh-24mm.png",
+      "size_mm": 24
     },
     "ecole ingenieur": {
       "path": "./assets/insignes/filiere/ecole-ingenieur.png",
@@ -102,6 +126,18 @@
       "path": "./assets/insignes/filiere/glaive-et-balance-32mm.png",
       "size_mm": 32
     },
+    "globe": {
+      "path": "./assets/insignes/filiere/globe-28mm.png",
+      "size_mm": 28
+    },
+    "grappe de raisin": {
+      "path": "./assets/insignes/filiere/grappe-de-raisin-24mm.png",
+      "size_mm": 24
+    },
+    "grenouille": {
+      "path": "./assets/insignes/filiere/grenouille-24mm.png",
+      "size_mm": 24
+    },
     "livre et plume": {
       "path": "./assets/insignes/filiere/livre-et-plume-20mm.png",
       "size_mm": 20
@@ -109,6 +145,10 @@
     "lyre": {
       "path": "./assets/insignes/filiere/lyre-25mm.png",
       "size_mm": 25
+    },
+    "masque de comedie": {
+      "path": "./assets/insignes/filiere/masque-de-comedie-24mm.png",
+      "size_mm": 24
     },
     "molaire": {
       "path": "./assets/insignes/filiere/molaire-20mm.png",
@@ -121,6 +161,10 @@
     "palme sciences": {
       "path": "./assets/insignes/filiere/palme-sciences-30mm.png",
       "size_mm": 30
+    },
+    "parapluie": {
+      "path": "./assets/insignes/filiere/parapluie-24mm.png",
+      "size_mm": 24
     },
     "phi": {
       "path": "./assets/insignes/filiere/phi-24mm.png",
@@ -140,6 +184,10 @@
     },
     "tete de cheval": {
       "path": "./assets/insignes/filiere/tete-de-cheval-24mm.png",
+      "size_mm": 24
+    },
+    "tete de mort sur femurs croises": {
+      "path": "./assets/insignes/filiere/tete-de-mort-sur-femurs-croises-24mm.png",
       "size_mm": 24
     }
   },
