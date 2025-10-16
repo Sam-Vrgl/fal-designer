@@ -28,8 +28,7 @@ async function main() {
 
     if (isTouchDevice) {
         initTouchControls(canvas);
-        initTouchUI(canvas.parentElement); // Pass the canvas container here
-        document.getElementById('mobile-blocker').style.display = 'none';
+        initTouchUI(canvas.parentElement);
     } else {
         initDragAndDrop(canvas);
     }

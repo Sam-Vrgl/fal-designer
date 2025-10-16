@@ -370,7 +370,6 @@ details[open]>summary::before {
     background: #64748b;
 }
 
-#mobile-blocker,
 #mobile-toolbar {
     display: none;
 }
