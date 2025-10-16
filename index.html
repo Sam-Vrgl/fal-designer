@@ -72,6 +72,7 @@
              <div class="row">
               <label><input id="toggleV" type="checkbox" > Guide V</label>
               <label><input id="toggleH" type="checkbox" > Guide H</label>
+              <label><input id="toggleSnap" type="checkbox" > Aimantation</label>
             </div>
             <hr />
             <div class="row">
@@ -142,12 +143,18 @@
       </div>
     </div>
   </div>
+  
+  <div id="mobile-toolbar">
+      <button id="toggle-palette-btn">🎨</button>
+      <button id="toggle-inspector-btn">🔧</button>
+  </div>
+
 
   <div id="welcome-modal-overlay">
       <div id="welcome-modal">
           <h2>OUTIL EN ALPHA</h2>
           <p>
-              Bienvenue sur Fal Designer! (PC uniquement, version mobile-friendly à venir)<br/>
+              Bienvenue sur Fal Designer! <br/>
               ATTENTION, cet outil est actuellement en phase d'alpha-testing!
               Les fonctionnalités peuvent changer et des bugs peuvent survenir.
               Vos retours sont précieux, n'hésitez pas à signaler les problèmes. <br/>
@@ -157,10 +164,8 @@
       </div>
   </div>
 
-  <!-- Cloudflare Web Analytics -->
-   <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "bcf4e89c1e9f439dae8df5502c5dd3ce"}'></script>
-   <!-- End Cloudflare Web Analytics -->
-  <script type="module" src="./js/main.js"></script>
+  <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "bcf4e89c1e9f439dae8df5502c5dd3ce"}'></script>
+   <script type="module" src="./js/main.js"></script>
 
   <div id="mobile-blocker">
     <div class="message">

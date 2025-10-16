@@ -5,6 +5,8 @@ import { loadImage } from './images.js';
 import  { initInsignePalette } from './insignes.js';
 import { initDisciplines } from './disciplines.js';
 import { initDragAndDrop } from './drag-handler.js';
+import { initTouchControls } from './touch-handler.js';
+import { initTouchUI } from './touch-ui.js';
 
 
 async function main() {
@@ -21,7 +23,16 @@ async function main() {
 
     const disciplines = await initDisciplines('disciplineSelect');
     bindUI(disciplines);
-    initDragAndDrop(canvas);
+    
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+    if (isTouchDevice) {
+        initTouchControls(canvas);
+        initTouchUI(canvas.parentElement); // Pass the canvas container here
+        document.getElementById('mobile-blocker').style.display = 'none';
+    } else {
+        initDragAndDrop(canvas);
+    }
 
     Promise.all([
         initInsignePalette('insigne-list', 'insigne-search')

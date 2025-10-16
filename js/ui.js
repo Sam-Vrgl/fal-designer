@@ -27,6 +27,7 @@ export function bindUI(disciplinesData) {
     
     const chkV = $('toggleV');
     const chkH = $('toggleH');
+    const chkSnap = $('toggleSnap');
     const gridW = $('gridWInput');
     const gridH = $('gridHInput');
     const margin = $('marginInput');
@@ -60,6 +61,7 @@ export function bindUI(disciplinesData) {
 
     chkV.checked = state.helper.showV;
     chkH.checked = state.helper.showH;
+    chkSnap.checked = state.snapEnabled;
     gridW.value = state.gridWmm;
     gridH.value = state.gridHmm;
     margin.value = state.marginMm;
@@ -132,6 +134,7 @@ export function bindUI(disciplinesData) {
 
     chkV.addEventListener('change', () => { state.helper.showV = chkV.checked; notify(); });
     chkH.addEventListener('change', () => { state.helper.showH = chkH.checked; notify(); });
+    chkSnap.addEventListener('change', () => { state.snapEnabled = chkSnap.checked; notify(); });
     gridW.addEventListener('input', () => { state.gridWmm = gridW.valueAsNumber; notify(); });
     gridH.addEventListener('input', () => { state.gridHmm = gridH.valueAsNumber; notify(); });
     margin.addEventListener('input', () => { state.marginMm = margin.valueAsNumber; notify(); });
