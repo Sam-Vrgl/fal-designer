@@ -2,6 +2,9 @@ import { state, notify, recordStateForUndo } from './state.js';
 import { getCachedImage, addImage } from './main.js';
 
 const SNAP_THRESHOLD_MM = 5;
+const MOIVRE_ROTATION_DEG = 15;
+const MOIVRE_ROTATION_RAD = MOIVRE_ROTATION_DEG * Math.PI / 180;
+
 
 function getTouchDistance(touches) {
     const dx = touches[0].clientX - touches[1].clientX;
@@ -55,7 +58,6 @@ export function initTouchControls(canvas) {
         } else if (event.touches.length === 1) {
             const { gridX, gridY } = getGridCoordsFromEvent(event);
 
-            // **FIX STARTS HERE: Handle insigne placement**
             if (state.currentMode === 'place' && state.insigneToPlace) {
                 const { path, sizeMm, url } = state.insigneToPlace;
                 const newInsigne = { url: path, x_mm: 0, y_mm: 0 };
@@ -80,9 +82,8 @@ export function initTouchControls(canvas) {
                 state.currentMode = 'select';
                 state.insigneToPlace = null;
                 notify();
-                return; // Exit after placing the insigne
+                return;
             }
-            // **FIX ENDS HERE**
 
             let clickedItem = false;
             state.selectedInsigne = state.selectedMaterial = state.selectedMoivre = null;
@@ -116,6 +117,29 @@ export function initTouchControls(canvas) {
                     }
                 }
             }
+            
+            // **FIX STARTS HERE: Moivre selection logic**
+            if (!clickedItem) {
+                for (let i = state.moivres.length - 1; i >= 0; i--) {
+                    const m = state.moivres[i];
+                    const centerX = m.x_mm + m.width_mm / 2;
+                    const centerY = m.y_mm + m.height_mm / 2;
+
+                    const dx = gridX - centerX;
+                    const dy = gridY - centerY;
+                    const rotatedX = dx * Math.cos(-MOIVRE_ROTATION_RAD) - dy * Math.sin(-MOIVRE_ROTATION_RAD);
+                    const rotatedY = dx * Math.sin(-MOIVRE_ROTATION_RAD) + dy * Math.cos(-MOIVRE_ROTATION_RAD);
+
+                    if (Math.abs(rotatedX) < m.width_mm / 2 && Math.abs(rotatedY) < m.height_mm / 2) {
+                        state.selectedMoivre = m;
+                        state.isDraggingMoivre = true;
+                        state.dragMoivreOffsetX = gridX - m.x_mm;
+                        clickedItem = true;
+                        break;
+                    }
+                }
+            }
+            // **FIX ENDS HERE**
             
             if (!clickedItem) {
                 state.isPanning = true;
@@ -151,10 +175,39 @@ export function initTouchControls(canvas) {
                 state.selectedInsigne.y_mm = gridY - state.dragOffsetY;
                 state.isSnapping = false;
             }
+        // **FIX STARTS HERE: Material snapping logic**
         } else if (state.isDraggingMaterial && state.selectedMaterial) {
             const { gridX, gridY } = getGridCoordsFromEvent(event);
-            state.selectedMaterial.x_mm = gridX - state.dragMaterialOffsetX;
-            state.selectedMaterial.y_mm = gridY - state.dragMaterialOffsetY;
+            let newX = gridX - state.dragMaterialOffsetX;
+            let newY = gridY - state.dragMaterialOffsetY;
+
+            if (state.snapEnabled) {
+                const totalHeight = state.selectedMaterial.height_mm;
+                if (Math.abs(totalHeight - state.gridHmm) < 1) { // Full height
+                    newY = 0;
+                } else {
+                    const top = newY;
+                    const bottom = newY + totalHeight;
+                    const middle = newY + totalHeight / 2;
+
+                    const snapTargets = [0, state.gridHmm / 2, state.gridHmm];
+                    let snapped = false;
+                    for (const target of snapTargets) {
+                        if (Math.abs(top - target) < SNAP_THRESHOLD_MM) { newY = target; snapped = true; break; }
+                        if (Math.abs(bottom - target) < SNAP_THRESHOLD_MM) { newY = target - totalHeight; snapped = true; break; }
+                        if (Math.abs(middle - target) < SNAP_THRESHOLD_MM) { newY = target - totalHeight / 2; snapped = true; break; }
+                    }
+                    state.isSnapping = snapped;
+                }
+            } else {
+                state.isSnapping = false;
+            }
+            state.selectedMaterial.x_mm = newX;
+            state.selectedMaterial.y_mm = newY;
+        // **FIX ENDS HERE**
+        } else if (state.isDraggingMoivre && state.selectedMoivre) {
+            const { gridX } = getGridCoordsFromEvent(event);
+            state.selectedMoivre.x_mm = gridX - state.dragMoivreOffsetX;
         } else if (state.isPanning) {
             state.viewOffsetX = event.touches[0].clientX + panStartX;
             state.viewOffsetY = event.touches[0].clientY + panStartY;
@@ -163,12 +216,13 @@ export function initTouchControls(canvas) {
     }, { passive: false });
 
     container.addEventListener('touchend', () => {
-        if (didMove && (state.isDragging || state.isDraggingMaterial)) {
+        if (didMove && (state.isDragging || state.isDraggingMaterial || state.isDraggingMoivre)) {
             recordStateForUndo();
         }
         state.isPanning = false;
         state.isDragging = false;
         state.isDraggingMaterial = false;
+        state.isDraggingMoivre = false;
         state.isSnapping = false;
         lastTouchDistance = null;
         notify();
