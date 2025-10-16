@@ -12,6 +12,10 @@
 </head>
 
 <body>
+  <header>
+    <h1>Fal Designer</h1>
+  </header>
+
   <div id="app-container">
     <div id="palette-container">
       <div id="toolbar" class="panel">
@@ -148,10 +152,15 @@
       <button id="toggle-palette-btn">🎨</button>
       <button id="toggle-inspector-btn">🔧</button>
   </div>
+  
+  <footer>
+    <span id="copyright"></span>
+    <button id="about-btn">A propos</button>
+    <span id="version-display-footer"></span>
+  </footer>
 
-
-  <div id="welcome-modal-overlay">
-      <div id="welcome-modal">
+  <div id="welcome-modal-overlay" class="modal-overlay">
+      <div id="welcome-modal" class="modal-content">
           <h2>OUTIL EN ALPHA</h2>
           <p>
               Bienvenue sur Fal Designer! <br/>
@@ -160,12 +169,26 @@
               Vos retours sont précieux, n'hésitez pas à signaler les problèmes. <br/>
               Les insignes manquantes seront ajoutés progressivement.
           </p>
-          <span id="version-display" style="font-size: 0.8em; color: #64748b;"></span>
-          <button id="close-modal-btn">Compris</button>
+          <button class="close-modal-btn">Compris</button>
       </div>
   </div>
 
-  <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "bcf4e89c1e9f439dae8df5502c5dd3ce"}'></script>
-   <script type="module" src="./js/main.js"></script>
+  <div id="about-modal-overlay" class="modal-overlay" style="display: none;">
+      <div id="about-modal" class="modal-content">
+          <h2>A propos de Fal Designer</h2>
+          <p>
+              Hello, ici Sami V, impétrant IPP! <br/>
+              J'ai développé cet outil pour faciliter la planification et la visualisation de circulaires de fal. <br/>
+              En évolution constante, il se peut que certaines fonctionnalités soient instables. Vos retours sont les bienvenus! <br/>
+              Vous pouvez me contacter via facebook (Samuel VERGNOL) ou par email (contact@sam-vrgl.com).
+          </p>
+          <button class="close-modal-btn">Close</button>
+      </div>
+  </div>
+
+  <!-- Cloudflare Web Analytics -->
+   <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "bcf4e89c1e9f439dae8df5502c5dd3ce"}'></script>
+   <!-- End Cloudflare Web Analytics -->
+  <script type="module" src="./js/main.js"></script>
 </body>
 </html>

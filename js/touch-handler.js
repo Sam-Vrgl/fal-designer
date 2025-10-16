@@ -118,7 +118,6 @@ export function initTouchControls(canvas) {
                 }
             }
             
-            // **FIX STARTS HERE: Moivre selection logic**
             if (!clickedItem) {
                 for (let i = state.moivres.length - 1; i >= 0; i--) {
                     const m = state.moivres[i];
@@ -139,7 +138,6 @@ export function initTouchControls(canvas) {
                     }
                 }
             }
-            // **FIX ENDS HERE**
             
             if (!clickedItem) {
                 state.isPanning = true;
@@ -175,7 +173,6 @@ export function initTouchControls(canvas) {
                 state.selectedInsigne.y_mm = gridY - state.dragOffsetY;
                 state.isSnapping = false;
             }
-        // **FIX STARTS HERE: Material snapping logic**
         } else if (state.isDraggingMaterial && state.selectedMaterial) {
             const { gridX, gridY } = getGridCoordsFromEvent(event);
             let newX = gridX - state.dragMaterialOffsetX;
@@ -183,7 +180,7 @@ export function initTouchControls(canvas) {
 
             if (state.snapEnabled) {
                 const totalHeight = state.selectedMaterial.height_mm;
-                if (Math.abs(totalHeight - state.gridHmm) < 1) { // Full height
+                if (Math.abs(totalHeight - state.gridHmm) < 1) {
                     newY = 0;
                 } else {
                     const top = newY;
@@ -204,7 +201,6 @@ export function initTouchControls(canvas) {
             }
             state.selectedMaterial.x_mm = newX;
             state.selectedMaterial.y_mm = newY;
-        // **FIX ENDS HERE**
         } else if (state.isDraggingMoivre && state.selectedMoivre) {
             const { gridX } = getGridCoordsFromEvent(event);
             state.selectedMoivre.x_mm = gridX - state.dragMoivreOffsetX;

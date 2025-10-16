@@ -25,6 +25,23 @@ body {
     height: 100vh;
     background-color: var(--background-color);
     color: var(--text-color);
+    box-sizing: border-box; /* Ensures padding is included in height */
+}
+
+header {
+    background-color: var(--panel-background);
+    color: var(--text-color);
+    padding: 10px 20px;
+    text-align: center;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--sidebar-border);
+    z-index: 10;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5em;
+    font-weight: 600;
 }
 
 #app-container {
@@ -33,6 +50,30 @@ body {
     overflow: hidden;
     padding: 16px;
     gap: 16px;
+}
+
+footer {
+    background-color: var(--panel-background);
+    color: var(--text-light);
+    padding: 8px 20px;
+    text-align: center;
+    flex-shrink: 0;
+    font-size: 0.9em;
+    border-top: 1px solid var(--sidebar-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+footer button {
+    padding: 4px 8px;
+    font-size: 0.9em;
+    background: transparent;
+    border: 1px solid var(--sidebar-border);
+}
+
+footer button:hover {
+    background: var(--sidebar-border);
 }
 
 #palette-container,
@@ -47,6 +88,7 @@ body {
     padding: 16px;
     border-radius: 12px;
     overflow-y: auto;
+    -webkit-transition: transform 0.3s ease-in-out;
     transition: transform 0.3s ease-in-out;
 }
 
@@ -88,31 +130,32 @@ canvas {
     gap: 12px;
 }
 
-#welcome-modal-overlay {
+.modal-overlay {
     position: fixed;
     inset: 0;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0, 0, 0, 0.7);
     z-index: 1000;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-#welcome-modal {
+.modal-content {
     background: var(--panel-background);
     padding: 32px;
     border-radius: 16px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    max-width: 500px;
+    max-width: 90%;
+    width: 500px;
     text-align: center;
 }
 
-#welcome-modal h2 {
+.modal-content h2 {
     margin-top: 0;
-    color: var(--danger-color);
+    color: var(--primary-color);
 }
 
-#welcome-modal p {
+.modal-content p {
     line-height: 1.6;
     margin-bottom: 24px;
     color: var(--text-light);
@@ -375,7 +418,11 @@ details[open]>summary::before {
 }
 
 /* Mobile Styles */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
+    body {
+        padding-bottom: 64px;
+    }
+
     #app-container {
         flex-direction: column;
         padding: 8px;
@@ -385,8 +432,7 @@ details[open]>summary::before {
     }
 
     #main-content-wrapper {
-        flex: 1;
-        /* Take up all available space */
+        flex: 1; 
     }
 
     #palette-container,
@@ -400,38 +446,34 @@ details[open]>summary::before {
         margin: 0;
         border-radius: 16px 16px 0 0;
         box-sizing: border-box;
-        /* ADD -webkit- prefix */
         -webkit-transform: translateY(100%);
         transform: translateY(100%);
-        /* ADD -webkit- prefix */
         -webkit-transition: transform 0.3s ease-in-out;
         transition: transform 0.3s ease-in-out;
         z-index: 100;
-        box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
     }
 
     #palette-container.open,
     #inspector-container.open {
-        /* ADD -webkit- prefix */
         -webkit-transform: translateY(0);
         transform: translateY(0);
     }
 
-    /* Inspector no longer needs special positioning */
     #inspector-container {
-        left: 0;
+       left: 0;
     }
 
     #canvas-toolbar {
         display: none;
     }
-
+    
     #mobile-toolbar {
         display: flex;
         justify-content: space-around;
         align-items: center;
         position: fixed;
-        bottom: 0;
+        bottom: 33px;
         left: 0;
         right: 0;
         background-color: var(--panel-background);
@@ -440,7 +482,7 @@ details[open]>summary::before {
         border-top: 1px solid var(--sidebar-border);
     }
 
-    #mobile-toolbar button {
+     #mobile-toolbar button {
         font-size: 1.5rem;
         width: 60px;
         height: 44px;
@@ -451,5 +493,13 @@ details[open]>summary::before {
 
     #tips-panel {
         display: none;
+    }
+    
+    footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 5px 15px;
     }
 }

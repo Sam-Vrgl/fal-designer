@@ -7,11 +7,12 @@ export function bindUI(disciplinesData) {
     const canvas = $('myCanvas');
     const container = canvas.parentElement;
 
-    const modalOverlay = $('welcome-modal-overlay');
-    const closeModalBtn = $('close-modal-btn');
-    closeModalBtn.addEventListener('click', () => {
-        modalOverlay.style.display = 'none';
-    });
+    // Welcome modal logic is now handled in main.js
+    // const modalOverlay = $('welcome-modal-overlay');
+    // const closeModalBtn = $('close-modal-btn');
+    // closeModalBtn.addEventListener('click', () => {
+    //     modalOverlay.style.display = 'none';
+    // });
 
     const zoomInBtn = $('zoomInBtn');
     const zoomOutBtn = $('zoomOutBtn');
@@ -77,9 +78,9 @@ export function bindUI(disciplinesData) {
         }
     }
 
-    zoomInBtn.addEventListener('click', () => { state.viewScale *= 1.25; notify(); });
-    zoomOutBtn.addEventListener('click', () => { state.viewScale /= 1.25; notify(); });
-    zoomFitBtn.addEventListener('click', () => {
+    if (zoomInBtn) zoomInBtn.addEventListener('click', () => { state.viewScale *= 1.25; notify(); });
+    if (zoomOutBtn) zoomOutBtn.addEventListener('click', () => { state.viewScale /= 1.25; notify(); });
+    if (zoomFitBtn) zoomFitBtn.addEventListener('click', () => {
         const totalW_px = (state.gridWmm + 2 * state.marginMm) * state.mmToPx;
         const totalH_px = (state.gridHmm + 2 * state.marginMm) * state.mmToPx;
         const scaleX = container.clientWidth / totalW_px;
@@ -95,7 +96,9 @@ export function bindUI(disciplinesData) {
     };
     subscribe(updateZoomDisplay);
     
-    setTimeout(() => zoomFitBtn.click(), 50);
+    setTimeout(() => {
+        if(zoomFitBtn) zoomFitBtn.click()
+    }, 50);
 
     const setMode = (mode) => {
         state.currentMode = mode;
@@ -104,7 +107,7 @@ export function bindUI(disciplinesData) {
         }
         notify();
     };
-    selectModeBtn.addEventListener('click', () => setMode('select'));
+    if (selectModeBtn) selectModeBtn.addEventListener('click', () => setMode('select'));
     
     window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
@@ -126,11 +129,11 @@ export function bindUI(disciplinesData) {
         }
     });
 
-    resetBtn.addEventListener('click', resetState);
-    exportBtn.addEventListener('click', exportState);
-    exportImageBtn.addEventListener('click', exportCanvasAsImage);
-    importBtn.addEventListener('click', () => importFile.click());
-    importFile.addEventListener('change', (e) => { importState(e.target.files[0]); e.target.value = ''; });
+    if(resetBtn) resetBtn.addEventListener('click', resetState);
+    if(exportBtn) exportBtn.addEventListener('click', exportState);
+    if(exportImageBtn) exportImageBtn.addEventListener('click', exportCanvasAsImage);
+    if(importBtn) importBtn.addEventListener('click', () => importFile.click());
+    if(importFile) importFile.addEventListener('change', (e) => { importState(e.target.files[0]); e.target.value = ''; });
 
     chkV.addEventListener('change', () => { state.helper.showV = chkV.checked; notify(); });
     chkH.addEventListener('change', () => { state.helper.showH = chkH.checked; notify(); });
@@ -223,7 +226,7 @@ export function bindUI(disciplinesData) {
     
     const updateModeUI = () => {
         const mode = state.currentMode;
-        selectModeBtn.classList.toggle('active', mode === 'select');
+        if (selectModeBtn) selectModeBtn.classList.toggle('active', mode === 'select');
         container.style.cursor = mode === 'place' && state.insigneToPlace ? 'copy' : 'default';
     };
     

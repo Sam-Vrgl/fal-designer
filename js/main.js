@@ -8,10 +8,40 @@ import { initDragAndDrop } from './drag-handler.js';
 import { initTouchControls } from './touch-handler.js';
 import { initTouchUI } from './touch-ui.js';
 
-const APP_VERSION = "0.2.2";
+const APP_VERSION = "0.2.3";
 
 async function main() {
-    document.getElementById('version-display').textContent = `Version: ${APP_VERSION}`;
+    // Footer and Modal Logic
+    const year = new Date().getFullYear();
+    document.getElementById('copyright').textContent = `© ${year} Fal Designer`;
+    document.getElementById('version-display-footer').textContent = `v${APP_VERSION}`;
+
+    const aboutBtn = document.getElementById('about-btn');
+    const welcomeModalOverlay = document.getElementById('welcome-modal-overlay');
+    const aboutModalOverlay = document.getElementById('about-modal-overlay');
+    const closeModalBtns = document.querySelectorAll('.close-modal-btn');
+
+    aboutBtn.addEventListener('click', () => {
+        aboutModalOverlay.style.display = 'flex';
+    });
+
+    closeModalBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            welcomeModalOverlay.style.display = 'none';
+            aboutModalOverlay.style.display = 'none';
+        });
+    });
+
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.style.display = 'none';
+            }
+        });
+    });
+
+    // --- End Footer and Modal Logic ---
+
     const canvas = document.getElementById('myCanvas');
     if (!canvas) {
         console.error("Canvas element not found!");
