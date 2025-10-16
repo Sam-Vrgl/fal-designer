@@ -8,8 +8,10 @@ import { initDragAndDrop } from './drag-handler.js';
 import { initTouchControls } from './touch-handler.js';
 import { initTouchUI } from './touch-ui.js';
 
+const APP_VERSION = "0.2.2";
 
 async function main() {
+    document.getElementById('version-display').textContent = `Version: ${APP_VERSION}`;
     const canvas = document.getElementById('myCanvas');
     if (!canvas) {
         console.error("Canvas element not found!");
