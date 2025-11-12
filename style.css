@@ -25,7 +25,7 @@ body {
     height: 100vh;
     background-color: var(--background-color);
     color: var(--text-color);
-    box-sizing: border-box; /* Ensures padding is included in height */
+    box-sizing: border-box;
 }
 
 header {

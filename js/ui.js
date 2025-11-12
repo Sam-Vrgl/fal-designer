@@ -7,13 +7,6 @@ export function bindUI(disciplinesData) {
     const canvas = $('myCanvas');
     const container = canvas.parentElement;
 
-    // Welcome modal logic is now handled in main.js
-    // const modalOverlay = $('welcome-modal-overlay');
-    // const closeModalBtn = $('close-modal-btn');
-    // closeModalBtn.addEventListener('click', () => {
-    //     modalOverlay.style.display = 'none';
-    // });
-
     const zoomInBtn = $('zoomInBtn');
     const zoomOutBtn = $('zoomOutBtn');
     const zoomFitBtn = $('zoomFitBtn');

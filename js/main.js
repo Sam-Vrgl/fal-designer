@@ -11,7 +11,6 @@ import { initTouchUI } from './touch-ui.js';
 const APP_VERSION = "0.3.3";
 
 async function main() {
-    // Footer and Modal Logic
     const year = new Date().getFullYear();
     document.getElementById('copyright').textContent = `© ${year} Fal Designer`;
     document.getElementById('version-display-footer').textContent = `v${APP_VERSION}`;
@@ -39,8 +38,6 @@ async function main() {
             }
         });
     });
-
-    // --- End Footer and Modal Logic ---
 
     const canvas = document.getElementById('myCanvas');
     if (!canvas) {
