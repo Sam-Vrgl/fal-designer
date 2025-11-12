@@ -1,6 +1,7 @@
 import { state, notify, subscribe, resetState, recordStateForUndo, undo, redo } from './state.js';
 import { exportState, importState } from './file-handler.js';
 import { exportCanvasAsImage } from './image-exporter.js';
+import { addSessionInsigne } from './insignes.js';
 
 export function bindUI(disciplinesData) {
     const $ = (id) => document.getElementById(id);
@@ -34,6 +35,9 @@ export function bindUI(disciplinesData) {
     const addMoivreBtn = $('addMoivreBtn');
 
     const insignePalette = $('insigne-list');
+    const uploadSessionImageBtn = $('uploadSessionImageBtn');
+    const sessionImageInput = $('sessionImageInput');
+    const sessionObjectUrls = new Set();
 
     const insignePropsDiv = $('insigne-props');
     const insigneX = $('insigneX');
@@ -128,6 +132,42 @@ export function bindUI(disciplinesData) {
     if(importBtn) importBtn.addEventListener('click', () => importFile.click());
     if(importFile) importFile.addEventListener('change', (e) => { importState(e.target.files[0]); e.target.value = ''; });
 
+    if (uploadSessionImageBtn) {
+        uploadSessionImageBtn.addEventListener('click', () => {
+            if (sessionImageInput) {
+                sessionImageInput.click();
+            }
+        });
+    }
+
+    if (sessionImageInput) {
+        sessionImageInput.addEventListener('change', (event) => {
+            const [file] = event.target.files;
+            event.target.value = '';
+            if (!file) return;
+
+            const objectUrl = URL.createObjectURL(file);
+            sessionObjectUrls.add(objectUrl);
+
+            const baseName = file.name.replace(/\.[^/.]+$/, '') || 'Image importée';
+            const insigneElement = addSessionInsigne(objectUrl, baseName, { heightPct: 0.5 });
+
+            const placementHeightPct = insigneElement?.dataset.heightPct ? parseFloat(insigneElement.dataset.heightPct) : 0.5;
+            state.insigneToPlace = {
+                path: objectUrl,
+                heightPct: placementHeightPct,
+                url: objectUrl,
+                sessionOnly: true,
+            };
+            setMode('place');
+        });
+    }
+
+    window.addEventListener('beforeunload', () => {
+        sessionObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+        sessionObjectUrls.clear();
+    });
+
     chkV.addEventListener('change', () => { state.helper.showV = chkV.checked; notify(); });
     chkH.addEventListener('change', () => { state.helper.showH = chkH.checked; notify(); });
     chkSnap.addEventListener('change', () => { state.snapEnabled = chkSnap.checked; notify(); });
@@ -185,8 +225,12 @@ export function bindUI(disciplinesData) {
 
     insignePalette.addEventListener('click', (e) => {
         if (e.target.tagName === 'IMG') {
-            const { path, sizeMm } = e.target.dataset;
-            state.insigneToPlace = { path, sizeMm, url: e.target.src };
+            const { path, sizeMm, heightPct, sessionOnly } = e.target.dataset;
+            const insigneToPlace = { path, url: e.target.src };
+            if (sizeMm) insigneToPlace.sizeMm = sizeMm;
+            if (heightPct) insigneToPlace.heightPct = parseFloat(heightPct);
+            if (sessionOnly === 'true') insigneToPlace.sessionOnly = true;
+            state.insigneToPlace = insigneToPlace;
             setMode('place');
         }
     });

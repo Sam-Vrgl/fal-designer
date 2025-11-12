@@ -86,6 +86,8 @@ export function redo() {
 
 function saveState() {
     try {
+        const persistentImages = state.images.filter(img => !img.sessionOnly);
+
         const stateToSave = {
             gridWmm: state.gridWmm,
             gridHmm: state.gridHmm,
@@ -97,7 +99,7 @@ function saveState() {
             disciplineMaterial: state.disciplineMaterial,
             materials: state.materials,
             moivres: state.moivres,
-            images: state.images,
+            images: persistentImages,
             viewScale: state.viewScale,
             viewOffsetX: state.viewOffsetX,
             viewOffsetY: state.viewOffsetY,

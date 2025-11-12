@@ -29,6 +29,8 @@ export function exportState() {
     const timestamp = getTimestamp();
     const filename = `fal-design-${discipline}-${timestamp}.json`;
 
+    const persistentImages = state.images.filter(img => !img.sessionOnly);
+
     const stateToSave = {
         gridWmm: state.gridWmm,
         gridHmm: state.gridHmm,
@@ -36,7 +38,7 @@ export function exportState() {
         discipline: disciplineSelect.value,
         materials: state.materials,
         moivres: state.moivres,
-        images: state.images,
+        images: persistentImages,
     };
 
     const jsonString = JSON.stringify(stateToSave, null, 2);
