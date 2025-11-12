@@ -1,162 +1,163 @@
-let paletteElement = null;
-let sessionCategoryDiv = null;
-let sessionItemsDiv = null;
-let allInsigneElements = [];
-const pendingSessionAdditions = [];
+// js/insignes.js
 
-async function fetchInsignes() {
-  try {
-    const response = await fetch('./insignes-list.json');
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+/**
+ * A class to manage the insigne palette, including fetching,
+ * rendering, searching, and adding session images.
+ */
+export class InsignePaletteService {
+    constructor(paletteId, searchInputId) {
+        this.paletteElement = document.getElementById(paletteId);
+        this.searchInput = document.getElementById(searchInputId);
+        this.sessionCategoryDiv = null;
+        this.sessionItemsDiv = null;
+        this.allInsigneElements = [];
     }
-    return await response.json();
-  } catch (e) {
-    console.error("Could not load insignes-list.json:", e);
-    return {};
-  }
-}
 
-function createInsigneElement(name, itemData, options = {}) {
-  const img = document.createElement('img');
-  const path = itemData.path || itemData;
-  img.src = path;
-  img.title = name;
-  img.loading = 'lazy';
-  img.dataset.name = name;
-  img.dataset.path = path;
+    async #fetchInsignes() {
+        try {
+            const response = await fetch('./insignes-list.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (e) {
+            console.error("Could not load insignes-list.json:", e);
+            return {};
+        }
+    }
 
-  const explicitSize = options.sizeMm ?? itemData.size_mm;
-  if (explicitSize) {
-    img.dataset.sizeMm = explicitSize;
-  }
+    #createInsigneElement(name, itemData, options = {}) {
+        const img = document.createElement('img');
+        const path = itemData.path || itemData;
+        img.src = path;
+        img.title = name;
+        img.loading = 'lazy';
+        img.dataset.name = name;
+        img.dataset.path = path;
 
-  if (typeof options.heightPct === 'number') {
-    img.dataset.heightPct = options.heightPct;
-  }
+        const explicitSize = options.sizeMm ?? itemData.size_mm;
+        if (explicitSize) {
+            img.dataset.sizeMm = explicitSize;
+        }
 
-  if (options.sessionOnly) {
-    img.dataset.sessionOnly = 'true';
-  }
+        if (typeof options.heightPct === 'number') {
+            img.dataset.heightPct = options.heightPct;
+        }
 
-  allInsigneElements.push(img);
-  return img;
-}
+        if (options.sessionOnly) {
+            img.dataset.sessionOnly = 'true';
+        }
 
-function createCategory(label, items, isObjectBased) {
-  if (!paletteElement || !items || Object.keys(items).length === 0) return;
+        this.allInsigneElements.push(img);
+        return img;
+    }
 
-  const entries = Object.keys(items);
-  if (entries.length === 0) return;
+    #createCategory(label, items, isObjectBased) {
+        if (!this.paletteElement || !items || Object.keys(items).length === 0) return;
 
-  const categoryDiv = document.createElement('div');
-  categoryDiv.className = 'category';
+        const entries = Object.keys(items);
+        if (entries.length === 0) return;
 
-  const title = document.createElement('h4');
-  title.textContent = label;
-  categoryDiv.appendChild(title);
+        const categoryDiv = document.createElement('div');
+        categoryDiv.className = 'category';
 
-  const itemsDiv = document.createElement('div');
-  itemsDiv.className = 'items';
+        const title = document.createElement('h4');
+        title.textContent = label;
+        categoryDiv.appendChild(title);
 
-  for (const name of entries) {
-    const item = isObjectBased ? items[name] : { path: items[name] };
-    const insigneEl = createInsigneElement(name, item);
-    itemsDiv.appendChild(insigneEl);
-  }
+        const itemsDiv = document.createElement('div');
+        itemsDiv.className = 'items';
 
-  categoryDiv.appendChild(itemsDiv);
-  paletteElement.appendChild(categoryDiv);
-}
+        for (const name of entries) {
+            const item = isObjectBased ? items[name] : { path: items[name] };
+            const insigneEl = this.#createInsigneElement(name, item);
+            itemsDiv.appendChild(insigneEl);
+        }
 
-function ensureSessionCategory() {
-  if (!paletteElement || sessionItemsDiv) return;
+        categoryDiv.appendChild(itemsDiv);
+        this.paletteElement.appendChild(categoryDiv);
+    }
 
-  sessionCategoryDiv = document.createElement('div');
-  sessionCategoryDiv.className = 'category';
-  sessionCategoryDiv.style.display = 'none';
+    #ensureSessionCategory() {
+        if (!this.paletteElement || this.sessionItemsDiv) return;
 
-  const title = document.createElement('h4');
-  title.textContent = 'Ajouts de la session';
-  sessionCategoryDiv.appendChild(title);
+        this.sessionCategoryDiv = document.createElement('div');
+        this.sessionCategoryDiv.className = 'category';
+        this.sessionCategoryDiv.style.display = 'none';
 
-  sessionItemsDiv = document.createElement('div');
-  sessionItemsDiv.className = 'items';
-  sessionCategoryDiv.appendChild(sessionItemsDiv);
+        const title = document.createElement('h4');
+        title.textContent = 'Ajouts de la session';
+        this.sessionCategoryDiv.appendChild(title);
 
-  paletteElement.appendChild(sessionCategoryDiv);
-}
+        this.sessionItemsDiv = document.createElement('div');
+        this.sessionItemsDiv.className = 'items';
+        this.sessionCategoryDiv.appendChild(this.sessionItemsDiv);
 
-function appendSessionInsigne(url, name, options = {}) {
-  ensureSessionCategory();
+        this.paletteElement.appendChild(this.sessionCategoryDiv);
+    }
+    
+    #setupSearch() {
+        if (!this.searchInput) return;
 
-  const displayName = name || 'Image importée';
-  const insigneEl = createInsigneElement(displayName, { path: url }, {
-    sizeMm: options.sizeMm,
-    heightPct: options.heightPct,
-    sessionOnly: true,
-  });
+        this.searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            this.allInsigneElements.forEach((img) => {
+                const name = img.dataset.name.toLowerCase();
+                img.style.display = name.includes(searchTerm) ? '' : 'none';
+            });
 
-  if (sessionItemsDiv) {
-    sessionItemsDiv.appendChild(insigneEl);
-    sessionCategoryDiv.style.display = '';
-  }
+            if (!this.paletteElement) return;
+            this.paletteElement.querySelectorAll('.category').forEach((cat) => {
+                const visibleItems = cat.querySelectorAll('img:not([style*="display: none"])');
+                cat.style.display = visibleItems.length > 0 ? '' : 'none';
+            });
+        });
+    }
 
-  return insigneEl;
-}
+    /**
+     * Public method to initialize the palette.
+     * Fetches and renders all insignes.
+     */
+    async init() {
+        if (!this.paletteElement) return;
 
-function setupSearch(searchInput) {
-  if (!searchInput) return;
+        this.allInsigneElements = [];
+        this.sessionCategoryDiv = null;
+        this.sessionItemsDiv = null;
+        this.paletteElement.innerHTML = '';
 
-  searchInput.addEventListener('input', (e) => {
-    const searchTerm = e.target.value.toLowerCase();
-    allInsigneElements.forEach((img) => {
-      const name = img.dataset.name.toLowerCase();
-      img.style.display = name.includes(searchTerm) ? '' : 'none';
-    });
+        const insignes = await this.#fetchInsignes();
 
-    if (!paletteElement) return;
-    paletteElement.querySelectorAll('.category').forEach((cat) => {
-      const visibleItems = cat.querySelectorAll('img:not([style*="display: none"])');
-      cat.style.display = visibleItems.length > 0 ? '' : 'none';
-    });
-  });
-}
+        this.#createCategory('Filière', insignes.filiere, true);
+        this.#createCategory('Années', insignes.annees, true);
+        this.#createCategory('Chiffre (petits)', insignes.numbers?.small, false);
+        this.#createCategory('Chiffre (grands)', insignes.numbers?.big, false);
+        this.#createCategory('Lettres (petites)', insignes.letters?.small, false);
+        this.#createCategory('Lettres (grandes)', insignes.letters?.big, false);
+        this.#createCategory('Autres', insignes.other, true);
 
-export async function initInsignePalette(paletteId, searchInputId) {
-  paletteElement = document.getElementById(paletteId);
-  const searchInput = document.getElementById(searchInputId);
-  if (!paletteElement) return;
+        this.#ensureSessionCategory();
+        this.#setupSearch();
+    }
 
-  allInsigneElements = [];
-  sessionCategoryDiv = null;
-  sessionItemsDiv = null;
-  paletteElement.innerHTML = '';
+    /**
+     * Public method to add a new user-uploaded insigne to the palette.
+     */
+    addSessionInsigne(url, name, options = {}) {
+        this.#ensureSessionCategory(); // Will create if it doesn't exist
 
-  const insignes = await fetchInsignes();
+        const displayName = name || 'Image importée';
+        const insigneEl = this.#createInsigneElement(displayName, { path: url }, {
+            sizeMm: options.sizeMm,
+            heightPct: options.heightPct,
+            sessionOnly: true,
+        });
 
-  createCategory('Filière', insignes.filiere, true);
-  createCategory('Années', insignes.annees, true);
-  createCategory('Chiffre (petits)', insignes.numbers?.small, false);
-  createCategory('Chiffre (grands)', insignes.numbers?.big, false);
-  createCategory('Lettres (petites)', insignes.letters?.small, false);
-  createCategory('Lettres (grandes)', insignes.letters?.big, false);
-  createCategory('Autres', insignes.other, true);
+        if (this.sessionItemsDiv) {
+            this.sessionItemsDiv.appendChild(insigneEl);
+            this.sessionCategoryDiv.style.display = '';
+        }
 
-  ensureSessionCategory();
-  setupSearch(searchInput);
-
-  if (pendingSessionAdditions.length > 0) {
-    const queue = pendingSessionAdditions.splice(0, pendingSessionAdditions.length);
-    queue.forEach(({ url, name, options }) => appendSessionInsigne(url, name, options));
-  }
-}
-
-export function addSessionInsigne(url, name, options = {}) {
-  if (!paletteElement) {
-    pendingSessionAdditions.push({ url, name, options });
-    return null;
-  }
-
-  return appendSessionInsigne(url, name, options);
+        return insigneEl;
+    }
 }

@@ -1,5 +1,5 @@
 import { state, notify } from './state.js';
-import { preloadImages } from './main.js';
+import { preloadImages } from './image-service.js';
 
 function sanitizeString(str) {
     if (!str) return '';
