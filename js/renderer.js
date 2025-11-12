@@ -76,8 +76,8 @@ export function draw(canvas, ctx, s, isLiveRender = true) {
     
     if (s.disciplineColors && s.disciplineColors.length > 0) {
       const fillStyles = s.disciplineColors.map(color => {
-        if (s.disciplineMaterial === 'velours') return createVelvetTexture(ctx, color, currentMmToPx * s.viewScale);
-        if (s.disciplineMaterial === 'satin') return createSatinTexture(ctx, color, currentMmToPx * s.viewScale);
+        if (s.disciplineMaterial === 'velours') return createVelvetTexture(ctx, color);
+        if (s.disciplineMaterial === 'satin') return createSatinTexture(ctx, color);
         return color;
       });
       if (fillStyles.length === 1) {
@@ -91,8 +91,8 @@ export function draw(canvas, ctx, s, isLiveRender = true) {
 
     s.materials.forEach(material => {
         let fillStyle = material.color;
-        if (material.material === 'velours') fillStyle = createVelvetTexture(ctx, material.color, currentMmToPx * s.viewScale);
-        else if (material.material === 'satin') fillStyle = createSatinTexture(ctx, material.color, currentMmToPx * s.viewScale);
+        if (material.material === 'velours') fillStyle = createVelvetTexture(ctx, material.color);
+        else if (material.material === 'satin') fillStyle = createSatinTexture(ctx, material.color);
         colorRectGridMM(ctx, s, material.x_mm, material.y_mm, material.x_mm + material.width_mm, material.y_mm + material.height_mm, fillStyle);
     });
     
