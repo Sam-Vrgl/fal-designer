@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>FalDesigner V1</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <header>
+    <h1>Fal Designer</h1>
+  </header>
+
+  <div id="app-container">
+    <div id="palette-container">
+      <div id="toolbar" class="panel">
+        <div class="row">
+          <button id="selectModeBtn" class="active">Sélectionner</button>
+          <button id="resetBtn" title="Réinitialiser la création et toutes les données">Réinitialiser</button>
+        </div>
+         <div class="row" style="margin-top: 10px;">
+          <button id="exportBtn">Exporter JSON</button>
+          <button id="importBtn">Importer JSON</button>
+          <input type="file" id="importFile" accept=".json" style="display: none;" />
+          <button id="exportImageBtn">Exporter Image</button>
+        </div>
+      </div>
+      <div class="panel">
+        <details open>
+          <summary>Parcours/Discipline(s)</summary>
+          <div class="details-content">
+            <div class="row">
+              <label for="disciplineSelect">Discipline Principale</label>
+              <select id="disciplineSelect"></select>
+            </div>
+            <hr />
+            <div class="row">
+              <label for="materialDisciplineSelect">Discipline(s) secondaire(s)</label>
+              <select id="materialDisciplineSelect"></select>
+            </div>
+            <div class="row">
+              <label for="materialHeightSelect">Hauteur</label>
+              <select id="materialHeightSelect">
+                <option value="1">Pleine</option>
+                <option value="0.5">Moitié</option>
+                <option value="0.33">Tiers</option>
+              </select>
+            </div>
+            <div class="row">
+              <label for="materialWidthInput">Largeur (mm)</label>
+              <input type="number" id="materialWidthInput" value="100" min="1" step="1">
+            </div>
+            <button id="addMaterialBtn">Ajouter section</button>
+             <hr />
+             <div class="row">
+               <label for="moivreColor">Moivre</label>
+               <select id="moivreColor">
+                   <option value="rgb(255, 255, 255)">Blanc</option>
+                   <option value="rgb(0, 0, 200)">Bleu</option>
+                   <option value="rgb(0, 0, 0)">Noir</option>
+               </select>
+               <button id="addMoivreBtn">Ajouter</button>
+             </div>
+          </div>
+        </details>
+      </div>
+       <div class="panel">
+        <details>
+          <summary>Réglages</summary>
+          <div class="details-content">
+             <div class="row">
+              <label><input id="toggleV" type="checkbox" > Guide V</label>
+              <label><input id="toggleH" type="checkbox" > Guide H</label>
+              <label><input id="toggleSnap" type="checkbox" > Aimantation</label>
+            </div>
+            <hr />
+            <div class="row">
+               <label for="gridWInput">Largeur (mm)</label>
+               <input id="gridWInput" type="number" min="1" step="1" value="700">
+            </div>
+            <div class="row">
+               <label for="gridHInput">Hauteur (mm)</label>
+               <input id="gridHInput" type="number" min="1" step="1" value="38">
+            </div>
+            <div class="row">
+               <label for="marginInput">Marge (mm)</label>
+               <input id="marginInput" type="number" min="0" step="1" value="10">
+            </div>
+          </div>
+        </details>
+      </div>
+      <div id="insigne-palette" class="panel">
+        <input type="text" id="insigne-search" placeholder="Rechercher un insigne...">
+        <div class="row" style="margin-top: 10px;">
+          <button id="uploadSessionImageBtn">Ajouter une image (session)</button>
+          <input type="file" id="sessionImageInput" accept="image/*" style="display: none;" />
+        </div>
+        <div id="insigne-list"></div>
+      </div>
+    </div>
+
+    <div id="main-content-wrapper">
+        <div id="canvas-toolbar">
+            <button id="zoomOutBtn" title="Zoom arrière">-</button>
+            <button id="zoomInBtn" title="Zoom avant">+</button>
+            <button id="zoomFitBtn" title="Ajuster à la vue">Ajuster</button>
+            <span id="zoom-display">100%</span>
+        </div>
+        <div id="canvas-container" title="Molette pour défiler. Maj+Molette pour défiler horizontalement. Ctrl/Cmd+Molette pour zoomer.">
+          <canvas id="myCanvas"></canvas>
+        </div>
+    </div>
+
+    <div id="inspector-container">
+      <div id="inspector-panel" class="panel">
+        <h3>Propriétés</h3>
+        <div id="inspector-content">
+          <div id="no-selection">Sélectionnez un élément sur le canevas.</div>
+          <div id="insigne-props" style="display: none;">
+            <div class="prop-row"><label for="insigneX">X (mm)</label><input id="insigneX" type="number"></div>
+            <div class="prop-row"><label for="insigneY">Y (mm)</label><input id="insigneY" type="number"></div>
+            <div class="prop-row"><label for="insigneHeight">Hauteur (%)</label><input id="insigneHeight" type="number"></div>
+            <button id="removeInsigneBtn">Retirer l'insigne</button>
+          </div>
+          <div id="material-props" style="display: none;">
+             <div class="prop-row"><label for="selectedMaterialX">X (mm)</label><input id="selectedMaterialX" type="number"></div>
+             <div class="prop-row"><label for="selectedMaterialY">Y (mm)</label><input id="selectedMaterialY" type="number"></div>
+             <div class="prop-row"><label for="selectedMaterialWidth">Largeur (mm)</label><input id="selectedMaterialWidth" type="number"></div>
+             <div class="prop-row"><label for="selectedMaterialHeight">Hauteur (mm)</label><input id="selectedMaterialHeight" type="number"></div>
+            <button id="removeMaterialBtn">Retirer la section</button>
+          </div>
+          <div id="moivre-props" style="display: none;">
+             <p>Moivre sélectionné.</p>
+             <button id="removeMoivreBtn">Retirer le moivre</button>
+          </div>
+        </div>
+      </div>
+      <div id="tips-panel" class="panel">
+          <h3>Astuces</h3>
+          <ul>
+              <li><b>Molette</b> pour défiler verticalement.</li>
+              <li><b>Maj + Molette</b> pour défiler horizontalement.</li>
+              <li><b>Ctrl/Cmd + Molette</b> pour zoomer.</li>
+              <li>Maintenir <b>Maj</b> en déplaçant un élément pour désactiver l'aimantation.</li>
+          </ul>
+      </div>
+    </div>
+  </div>
+  
+  <div id="mobile-toolbar">
+      <button id="toggle-palette-btn">🎨</button>
+      <button id="toggle-inspector-btn">🔧</button>
+  </div>
+  
+  <footer>
+    <span id="copyright"></span>
+    <button id="about-btn">A propos</button>
+    <span id="version-display-footer"></span>
+  </footer>
+
+  <div id="welcome-modal-overlay" class="modal-overlay">
+      <div id="welcome-modal" class="modal-content">
+          <h2>OUTIL EN ALPHA</h2>
+          <p>
+              Bienvenue sur Fal Designer! <br/>
+              ATTENTION, cet outil est actuellement en phase d'alpha-testing!
+              Les fonctionnalités peuvent changer et des bugs peuvent survenir.
+              Vos retours sont précieux, n'hésitez pas à signaler les problèmes. <br/>
+              Les insignes manquantes seront ajoutés progressivement.
+          </p>
+          <button class="close-modal-btn">Compris</button>
+      </div>
+  </div>
+
+  <div id="about-modal-overlay" class="modal-overlay" style="display: none;">
+      <div id="about-modal" class="modal-content">
+          <h2>A propos de Fal Designer</h2>
+          <p>
+              Hello, ici Sami V, impétrant IPP! <br/>
+              J'ai développé cet outil pour faciliter la planification et la visualisation de circulaires de fal. <br/>
+              En évolution constante, il se peut que certaines fonctionnalités soient instables. Vos retours sont les bienvenus! <br/>
+              Vous pouvez me contacter via facebook (Samuel VERGNOL) ou par email (contact@sam-vrgl.com).
+          </p>
+          <button class="close-modal-btn">Close</button>
+      </div>
+  </div>
+
+  <!-- Cloudflare Web Analytics -->
+   <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "bcf4e89c1e9f439dae8df5502c5dd3ce"}'></script>
+   <!-- End Cloudflare Web Analytics -->
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
