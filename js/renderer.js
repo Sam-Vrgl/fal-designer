@@ -5,10 +5,6 @@ import { createVelvetTexture, createSatinTexture } from './textures.js';
 
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
-/**
- * Sets up the canvas size, DPR, and initial transform.
- * Returns the dpr if successful, or 0 if container is not ready.
- */
 function setupCanvas(canvas, ctx, s, isLiveRender) {
     let dpr = 1;
     if (isLiveRender) {
@@ -33,9 +29,6 @@ function setupCanvas(canvas, ctx, s, isLiveRender) {
     return dpr;
 }
 
-/**
- * Draws the white page background and the main grid container border.
- */
 function drawBase(ctx, s, baseLineWidth) {
     const TOTAL_W_MM = s.gridWmm + 2 * s.marginMm;
     const TOTAL_H_MM = s.gridHmm + 2 * s.marginMm;
@@ -48,9 +41,6 @@ function drawBase(ctx, s, baseLineWidth) {
     ctx.strokeRect(0, 0, TOTAL_W_MM, TOTAL_H_MM);
 }
 
-/**
- * Draws the minor and major grid lines.
- */
 function drawGrid(ctx, s, baseLineWidth) {
     const left = s.marginMm;
     const top = s.marginMm;
@@ -61,7 +51,6 @@ function drawGrid(ctx, s, baseLineWidth) {
     ctx.lineWidth = baseLineWidth;
     ctx.strokeRect(left, top, gridW, gridH);
 
-    // Minor grid
     if (s.minorStepMm * s.viewScale * s.mmToPx > 4) {
         const minor = Math.max(0.1, s.minorStepMm);
         ctx.beginPath();
@@ -75,7 +64,6 @@ function drawGrid(ctx, s, baseLineWidth) {
         ctx.stroke();
     }
     
-    // Major grid
     const major = Math.max(s.minorStepMm, s.majorStepMm);
     if (major * s.viewScale * s.mmToPx > 3) {
         ctx.beginPath();
@@ -91,11 +79,7 @@ function drawGrid(ctx, s, baseLineWidth) {
     }
 }
 
-/**
- * Draws the main discipline background and all added material sections.
- */
 function drawMaterials(ctx, s) {
-    // Main discipline background
     if (s.disciplineColors && s.disciplineColors.length > 0) {
       const fillStyles = s.disciplineColors.map(color => {
         if (s.disciplineMaterial === 'velours') return createVelvetTexture(ctx, color);
@@ -111,7 +95,6 @@ function drawMaterials(ctx, s) {
       }
     }
 
-    // Added material sections
     s.materials.forEach(material => {
         let fillStyle = material.color;
         if (material.material === 'velours') fillStyle = createVelvetTexture(ctx, material.color);
@@ -120,9 +103,6 @@ function drawMaterials(ctx, s) {
     });
 }
 
-/**
- * Draws all moivre sections.
- */
 function drawMoivres(ctx, s) {
     ctx.save();
     ctx.beginPath(); 
@@ -145,9 +125,6 @@ function drawMoivres(ctx, s) {
     ctx.restore();
 }
 
-/**
- * Draws all insignes.
- */
 function drawInsignes(ctx, s) {
     s.images.forEach(it => {
         const img = getCachedImage(it.url);
@@ -155,13 +132,9 @@ function drawInsignes(ctx, s) {
     });
 }
 
-/**
- * Draws live overlays: selections, snap lines, and helper guides.
- */
 function drawOverlays(ctx, s, baseLineWidth) {
     const outlineWidth = 2 * baseLineWidth;
     
-    // Material selection
     if (s.selectedMaterial) {
         ctx.strokeStyle = 'rgba(0, 123, 255, 0.9)'; 
         ctx.lineWidth = outlineWidth;
@@ -180,7 +153,6 @@ function drawOverlays(ctx, s, baseLineWidth) {
         }
     }
     
-    // Moivre selection
     if (s.selectedMoivre) {
         const moivre = s.selectedMoivre;
         const centerX = s.marginMm + moivre.x_mm + (moivre.width_mm / 2);
@@ -194,7 +166,6 @@ function drawOverlays(ctx, s, baseLineWidth) {
         ctx.restore();
     }
     
-    // Insigne selection
     if (s.selectedInsigne) {
         const insigne = s.selectedInsigne;
         const img = getCachedImage(insigne.url);
@@ -208,7 +179,6 @@ function drawOverlays(ctx, s, baseLineWidth) {
         }
     }
     
-    // Snap line
     if (s.isSnapping) {
         ctx.save();
         ctx.strokeStyle = 'rgba(255, 0, 255, 0.8)'; 
@@ -222,7 +192,6 @@ function drawOverlays(ctx, s, baseLineWidth) {
         ctx.restore();
     }
 
-    // V and H helper guides
     const TOTAL_W_MM = s.gridWmm + 2 * s.marginMm;
     const TOTAL_H_MM = s.gridHmm + 2 * s.marginMm;
     const midX_helper = TOTAL_W_MM / 2;
@@ -236,12 +205,9 @@ function drawOverlays(ctx, s, baseLineWidth) {
 }
 
 
-// --- MAIN DRAW FUNCTION ---
-// This is now just a clean coordinator.
-
 export function draw(canvas, ctx, s, isLiveRender = true) {
     const dpr = setupCanvas(canvas, ctx, s, isLiveRender);
-    if (dpr === 0) return; // Canvas not ready
+    if (dpr === 0) return;
 
     const baseLineWidth = 1 / (s.mmToPx * s.viewScale);
 
@@ -256,8 +222,6 @@ export function draw(canvas, ctx, s, isLiveRender = true) {
     }
 }
 
-
-// --- EXISTING HELPERS (UNCHANGED) ---
 
 export function colorRectGridMM(ctx, s, x1_mm, y1_mm, x2_mm, y2_mm, fillStyle, opts = {}) {
     const { behind = false, clamp: doClamp = true } = opts;

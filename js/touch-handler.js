@@ -32,7 +32,6 @@ export function initTouchControls(canvas) {
         if (event.touches.length === 1) {
             handlePointerDown(event, container);
         } else if (event.touches.length >= 2) {
-            // Stop any 1-finger drag/pan
             handlePointerUp(); 
             lastTouchDistance = getTouchDistance(event.touches);
         }
@@ -44,7 +43,6 @@ export function initTouchControls(canvas) {
         if (event.touches.length === 1) {
             handlePointerMove(event, container);
         } else if (event.touches.length >= 2 && lastTouchDistance) {
-            // Handle 2-finger pinch-to-zoom
             const newTouchDistance = getTouchDistance(event.touches);
             const zoomFactor = newTouchDistance / lastTouchDistance;
             lastTouchDistance = newTouchDistance;
@@ -59,7 +57,6 @@ export function initTouchControls(canvas) {
 
     container.addEventListener('touchend', (event) => {
         if (event.touches.length === 0) {
-            // Last finger was lifted
             handlePointerUp();
         }
         lastTouchDistance = null;

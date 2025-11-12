@@ -1,7 +1,6 @@
 // js/pointer-handler.js
 
 import { state, notify, recordStateForUndo } from './state.js';
-// This line is now fixed:
 import { getCachedImage, addImageToState } from './image-service.js';
 
 const SNAP_THRESHOLD_MM = 5;
@@ -129,7 +128,6 @@ export function handlePointerDown(event, container) {
         }
     }
 
-    // If we're here, no item was clicked. Start a pan.
     const pointer = getPointer(event);
     state.isPanning = true;
     panStartX = state.viewOffsetX - pointer.clientX;

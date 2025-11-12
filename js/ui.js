@@ -3,9 +3,7 @@
 import { state, notify, subscribe, resetState, recordStateForUndo, undo, redo } from './state.js';
 import { exportState, importState } from './file-handler.js';
 import { exportCanvasAsImage } from './image-exporter.js';
-// We no longer import from 'insignes.js'
 
-// Helper: Sets the application mode
 function setMode(mode) {
     state.currentMode = mode;
     if (mode === 'select') {
@@ -14,9 +12,6 @@ function setMode(mode) {
     notify();
 }
 
-/**
- * Binds events for the main toolbar (zoom, file, mode).
- */
 function bindToolbarEvents(container, zoomInBtn, zoomOutBtn, zoomFitBtn, selectModeBtn, resetBtn, exportBtn, importBtn, importFile, exportImageBtn) {
     if (zoomInBtn) zoomInBtn.addEventListener('click', () => { state.viewScale *= 1.25; notify(); });
     if (zoomOutBtn) zoomOutBtn.addEventListener('click', () => { state.viewScale /= 1.25; notify(); });
@@ -39,9 +34,6 @@ function bindToolbarEvents(container, zoomInBtn, zoomOutBtn, zoomFitBtn, selectM
     if (importFile) importFile.addEventListener('change', (e) => { importState(e.target.files[0]); e.target.value = ''; });
 }
 
-/**
- * Binds events for the settings panels (guides, grid, materials).
- */
 function bindSettingsEvents(disciplinesData, chkV, chkH, chkSnap, gridW, gridH, margin, materialDisciplineSelect, materialHeightSelect, materialWidthInput, addMaterialBtn, moivreColor, addMoivreBtn) {
     chkV.addEventListener('change', () => { state.helper.showV = chkV.checked; notify(); });
     chkH.addEventListener('change', () => { state.helper.showH = chkH.checked; notify(); });
@@ -50,7 +42,6 @@ function bindSettingsEvents(disciplinesData, chkV, chkH, chkSnap, gridW, gridH, 
     gridH.addEventListener('input', () => { state.gridHmm = gridH.valueAsNumber; notify(); });
     margin.addEventListener('input', () => { state.marginMm = margin.valueAsNumber; notify(); });
 
-    // Populate and bind material discipline dropdown
     const disciplineNames = Object.keys(disciplinesData);
     for (const name of disciplineNames) {
         const discipline = disciplinesData[name];
@@ -96,10 +87,6 @@ function bindSettingsEvents(disciplinesData, chkV, chkH, chkSnap, gridW, gridH, 
     });
 }
 
-/**
- * Binds events for the insigne palette (click to place, image upload).
- * Now accepts insignePalette service as a parameter.
- */
 function bindPaletteEvents(insignePaletteEl, uploadSessionImageBtn, sessionImageInput, sessionObjectUrls, insignePalette) {
     insignePaletteEl.addEventListener('click', (e) => {
         if (e.target.tagName === 'IMG') {
@@ -130,7 +117,6 @@ function bindPaletteEvents(insignePaletteEl, uploadSessionImageBtn, sessionImage
 
             const baseName = file.name.replace(/\.[^/.]+$/, '') || 'Image importée';
             
-            // Use the method from the passed-in service instance
             const insigneElement = insignePalette.addSessionInsigne(objectUrl, baseName, { heightPct: 0.5 });
 
             const placementHeightPct = insigneElement?.dataset.heightPct ? parseFloat(insigneElement.dataset.heightPct) : 0.5;
@@ -140,9 +126,6 @@ function bindPaletteEvents(insignePaletteEl, uploadSessionImageBtn, sessionImage
     }
 }
 
-/**
- * Binds events for the inspector panel (property inputs, remove buttons).
- */
 function bindInspectorEvents(insigneX, insigneY, insigneHeight, removeInsigneBtn, selectedMaterialX, selectedMaterialY, selectedMaterialWidth, selectedMaterialHeight, removeMaterialBtn, removeMoivreBtn) {
     insigneX.addEventListener('input', () => { if (state.selectedInsigne) { state.selectedInsigne.x_mm = insigneX.valueAsNumber; notify(); }});
     insigneY.addEventListener('input', () => { if (state.selectedInsigne) { state.selectedInsigne.y_mm = insigneY.valueAsNumber; notify(); }});
@@ -183,9 +166,6 @@ function bindInspectorEvents(insigneX, insigneY, insigneHeight, removeInsigneBtn
     });
 }
 
-/**
- * Binds global listeners for keyboard shortcuts and page exit.
- */
 function bindGlobalListeners(sessionObjectUrls) {
     window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
@@ -213,9 +193,6 @@ function bindGlobalListeners(sessionObjectUrls) {
     });
 }
 
-/**
- * Subscribes to state changes to update UI elements.
- */
 function setupSubscriptions(container, zoomDisplay, selectModeBtn, noSelectionDiv, insignePropsDiv, materialPropsDiv, moivrePropsDiv, insigneX, insigneY, insigneHeight, selectedMaterialX, selectedMaterialY, selectedMaterialWidth, selectedMaterialHeight) {
     
     const updateZoomDisplay = () => {
@@ -259,17 +236,11 @@ function setupSubscriptions(container, zoomDisplay, selectModeBtn, noSelectionDi
     subscribe(updateModeUI);
 }
 
-
-/**
- * Main UI binding function.
- * Now accepts insignePalette service as a parameter.
- */
 export function bindUI(disciplinesData, insignePalette) {
     const $ = (id) => document.getElementById(id);
     const canvas = $('myCanvas');
     const container = canvas.parentElement;
 
-    // --- Select All Elements ---
     const zoomInBtn = $('zoomInBtn'), zoomOutBtn = $('zoomOutBtn'), zoomFitBtn = $('zoomFitBtn'), zoomDisplay = $('zoom-display');
     const selectModeBtn = $('selectModeBtn'), resetBtn = $('resetBtn'), exportBtn = $('exportBtn'), importBtn = $('importBtn'), importFile = $('importFile'), exportImageBtn = $('exportImageBtn');
     const chkV = $('toggleV'), chkH = $('toggleH'), chkSnap = $('toggleSnap'), gridW = $('gridWInput'), gridH = $('gridHInput'), margin = $('marginInput');
@@ -280,10 +251,8 @@ export function bindUI(disciplinesData, insignePalette) {
     const moivrePropsDiv = $('moivre-props'), removeMoivreBtn = $('removeMoivreBtn');
     const noSelectionDiv = $('no-selection');
 
-    // Keep track of session-only images for cleanup
     const sessionObjectUrls = new Set();
 
-    // --- Set Initial Values ---
     chkV.checked = state.helper.showV;
     chkH.checked = state.helper.showH;
     chkSnap.checked = state.snapEnabled;
@@ -291,20 +260,16 @@ export function bindUI(disciplinesData, insignePalette) {
     gridH.value = state.gridHmm;
     margin.value = state.marginMm;
 
-    // --- Delegate Bindings ---
     bindToolbarEvents(container, zoomInBtn, zoomOutBtn, zoomFitBtn, selectModeBtn, resetBtn, exportBtn, importBtn, importFile, exportImageBtn);
     bindSettingsEvents(disciplinesData, chkV, chkH, chkSnap, gridW, gridH, margin, materialDisciplineSelect, materialHeightSelect, materialWidthInput, addMaterialBtn, moivreColor, addMoivreBtn);
     
-    // Pass the service instance to the binding function
     bindPaletteEvents(insignePaletteEl, uploadSessionImageBtn, sessionImageInput, sessionObjectUrls, insignePalette);
     
     bindInspectorEvents(insigneX, insigneY, insigneHeight, removeInsigneBtn, selectedMaterialX, selectedMaterialY, selectedMaterialWidth, selectedMaterialHeight, removeMaterialBtn, removeMoivreBtn);
     bindGlobalListeners(sessionObjectUrls);
     
-    // --- Setup UI > State Subscriptions ---
     setupSubscriptions(container, zoomDisplay, selectModeBtn, noSelectionDiv, insignePropsDiv, materialPropsDiv, moivrePropsDiv, insigneX, insigneY, insigneHeight, selectedMaterialX, selectedMaterialY, selectedMaterialWidth, selectedMaterialHeight);
 
-    // --- Initial UI State ---
     setTimeout(() => {
         if(zoomFitBtn) zoomFitBtn.click();
     }, 50);

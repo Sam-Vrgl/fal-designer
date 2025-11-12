@@ -1,9 +1,6 @@
 // js/insignes.js
 
-/**
- * A class to manage the insigne palette, including fetching,
- * rendering, searching, and adding session images.
- */
+
 export class InsignePaletteService {
     constructor(paletteId, searchInputId) {
         this.paletteElement = document.getElementById(paletteId);
@@ -114,10 +111,7 @@ export class InsignePaletteService {
         });
     }
 
-    /**
-     * Public method to initialize the palette.
-     * Fetches and renders all insignes.
-     */
+
     async init() {
         if (!this.paletteElement) return;
 
@@ -140,11 +134,9 @@ export class InsignePaletteService {
         this.#setupSearch();
     }
 
-    /**
-     * Public method to add a new user-uploaded insigne to the palette.
-     */
+
     addSessionInsigne(url, name, options = {}) {
-        this.#ensureSessionCategory(); // Will create if it doesn't exist
+        this.#ensureSessionCategory();
 
         const displayName = name || 'Image importée';
         const insigneEl = this.#createInsigneElement(displayName, { path: url }, {

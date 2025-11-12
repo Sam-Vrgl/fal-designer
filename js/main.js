@@ -4,7 +4,6 @@ import { state, subscribe } from './state.js';
 import { draw } from './renderer.js';
 import { bindUI } from './ui.js';
 import { preloadImages } from './image-service.js';
-// Import the new class from 'insignes.js'
 import { InsignePaletteService } from './insignes.js';
 import { initDisciplines } from './disciplines.js';
 import { initDragAndDrop } from './drag-handler.js';
@@ -53,12 +52,10 @@ async function main() {
     subscribe(rerender);
     window.addEventListener('resize', rerender);
 
-    // --- Create service instances ---
     const insignePalette = new InsignePaletteService('insigne-list', 'insigne-search');
     
     const disciplines = await initDisciplines('disciplineSelect');
     
-    // Pass the insignePalette instance to bindUI
     bindUI(disciplines, insignePalette);
     
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -71,7 +68,6 @@ async function main() {
     }
 
     Promise.all([
-        // Call the init method on the instance
         insignePalette.init()
     ]).finally(() => {
         preloadImages().finally(rerender);
