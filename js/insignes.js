@@ -25,7 +25,7 @@ export class InsignePaletteService {
 
     #createInsigneElement(name, itemData, options = {}) {
         const img = document.createElement('img');
-        const path = itemData.path || itemData;
+        const path = itemData.path;
         img.src = path;
         img.title = name;
         img.loading = 'lazy';
@@ -49,7 +49,13 @@ export class InsignePaletteService {
         return img;
     }
 
-    #createCategory(label, items, isObjectBased) {
+    // Some categories in insignes-list.json store a bare path string, others an
+    // object with a size. Normalise here so everything downstream sees one shape.
+    static #normalise(item) {
+        return typeof item === 'string' ? { path: item } : item;
+    }
+
+    #createCategory(label, items) {
         if (!this.paletteElement || !items || Object.keys(items).length === 0) return;
 
         const entries = Object.keys(items);
@@ -66,8 +72,7 @@ export class InsignePaletteService {
         itemsDiv.className = 'items';
 
         for (const name of entries) {
-            const item = isObjectBased ? items[name] : { path: items[name] };
-            const insigneEl = this.#createInsigneElement(name, item);
+            const insigneEl = this.#createInsigneElement(name, InsignePaletteService.#normalise(items[name]));
             itemsDiv.appendChild(insigneEl);
         }
 
@@ -122,13 +127,13 @@ export class InsignePaletteService {
 
         const insignes = await this.#fetchInsignes();
 
-        this.#createCategory('Filière', insignes.filiere, true);
-        this.#createCategory('Années', insignes.annees, true);
-        this.#createCategory('Chiffre (petits)', insignes.numbers?.small, false);
-        this.#createCategory('Chiffre (grands)', insignes.numbers?.big, false);
-        this.#createCategory('Lettres (petites)', insignes.letters?.small, false);
-        this.#createCategory('Lettres (grandes)', insignes.letters?.big, false);
-        this.#createCategory('Autres', insignes.other, true);
+        this.#createCategory('Filière', insignes.filiere);
+        this.#createCategory('Années', insignes.annees);
+        this.#createCategory('Chiffre (petits)', insignes.numbers?.small);
+        this.#createCategory('Chiffre (grands)', insignes.numbers?.big);
+        this.#createCategory('Lettres (petites)', insignes.letters?.small);
+        this.#createCategory('Lettres (grandes)', insignes.letters?.big);
+        this.#createCategory('Autres', insignes.other);
 
         this.#ensureSessionCategory();
         this.#setupSearch();

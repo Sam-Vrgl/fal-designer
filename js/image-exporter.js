@@ -1,25 +1,6 @@
 import { state } from './state.js';
 import { draw } from './renderer.js';
-
-function sanitizeString(str) {
-    if (!str) return '';
-    return str.normalize('NFD')
-              .replace(/[\u0300-\u036f]/g, '')
-              .replace(/['\s\W]/g, '')
-              .toLowerCase();
-}
-
-function getTimestamp() {
-    const d = new Date();
-    const pad = (n) => n.toString().padStart(2, '0');
-    const year = d.getFullYear();
-    const month = pad(d.getMonth() + 1);
-    const day = pad(d.getDate());
-    const hours = pad(d.getHours());
-    const minutes = pad(d.getMinutes());
-    return `${year}-${month}-${day}_${hours}-${minutes}`;
-}
-
+import { designFilename, downloadUrl } from './utils.js';
 
 export function exportCanvasAsImage() {
     const exportCanvas = document.createElement('canvas');
@@ -47,17 +28,7 @@ export function exportCanvasAsImage() {
 
     draw(exportCanvas, exportCtx, exportState, false);
 
-    const disciplineSelect = document.getElementById('disciplineSelect');
-    const discipline = sanitizeString(disciplineSelect.value) || 'design';
-    const timestamp = getTimestamp();
-    const filename = `fal-design-${discipline}-${timestamp}.png`;
-
-    const dataUrl = exportCanvas.toDataURL('image/png');
-    
-    const a = document.createElement('a');
-    a.href = dataUrl;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    // Still toDataURL; issue #14 swaps this for toBlob, which also removes the
+    // base64 inflation. Left alone here so this change stays a refactor.
+    downloadUrl(exportCanvas.toDataURL('image/png'), designFilename(state.discipline, 'png'));
 }

@@ -240,9 +240,9 @@ export function colorRectGridMM(ctx, s, x1_mm, y1_mm, x2_mm, y2_mm, fillStyle, o
     ctx.restore();
 }
 
-export function drawImgMM(ctx, s, img, x_mm, y_mm, opts = {}, mmToPxOverride = null) {
+export function drawImgMM(ctx, s, img, x_mm, y_mm, opts = {}) {
   const { height_mm = null, heightPct = null } = opts;
-  if (!img.complete || img.naturalWidth === 0) return null;
+  if (!img.complete || img.naturalWidth === 0) return;
   const natAspect = img.naturalWidth / img.naturalHeight;
   let h_mm = height_mm != null ? height_mm : (heightPct || 0.3) * s.gridHmm;
   let w_mm = h_mm * natAspect;
