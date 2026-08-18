@@ -1,17 +1,14 @@
 // js/default-design.js
 
 import { state, notify, resetHistory, markInitialised } from './state.js';
+import { loadJson } from './data.js';
 
 const DEFAULT_DESIGN_URL = './default-design.json';
 
 export async function seedDefaultDesign() {
     let design;
     try {
-        const response = await fetch(DEFAULT_DESIGN_URL);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        design = await response.json();
+        design = await loadJson(DEFAULT_DESIGN_URL);
     } catch (e) {
         console.error("Could not load the default design:", e);
         return;
