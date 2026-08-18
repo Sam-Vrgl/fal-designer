@@ -104,6 +104,9 @@ footer button:hover {
     flex-grow: 1;
     position: relative;
     overflow: hidden;
+    /* Single-finger drags now arrive as pointer events rather than touchmove,
+       so the browser must be told not to claim the gesture for scrolling. */
+    touch-action: none;
     background-color: var(--panel-background);
     border-radius: 12px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, .1), 0 2px 4px -2px rgba(0, 0, 0, .1);
@@ -115,6 +118,8 @@ canvas {
     top: 0;
     left: 0;
     cursor: default;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 #canvas-toolbar {
