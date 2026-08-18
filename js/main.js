@@ -11,7 +11,7 @@ import { initDragAndDrop } from './drag-handler.js';
 import { initTouchControls } from './touch-handler.js';
 import { initTouchUI } from './touch-ui.js';
 
-const APP_VERSION = "0.4.1";
+const APP_VERSION = "1.4.1";
 
 async function main() {
     const year = new Date().getFullYear();
