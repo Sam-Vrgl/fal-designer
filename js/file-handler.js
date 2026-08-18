@@ -1,4 +1,4 @@
-import { state, notify, designState } from './state.js';
+import { state, notify, designState, migrateImages } from './state.js';
 import { preloadImages } from './image-service.js';
 import { designFilename, downloadBlob } from './utils.js';
 
@@ -30,7 +30,7 @@ export function importState(file) {
 
             state.materials = loadedState.materials || [];
             state.moivres = loadedState.moivres || [];
-            state.images = loadedState.images || [];
+            state.images = migrateImages(loadedState.images || []);
             
             state.selectedInsigne = null;
             state.selectedMaterial = null;

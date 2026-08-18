@@ -91,19 +91,19 @@
       "height_mm": 24
     },
     {
-      "url": "./assets/insignes/chiffres/petit/1_min.webp",
+      "url": "./assets/insignes/chiffres/grand/1_maj.webp",
       "x_mm": 188.05108467459763,
       "y_mm": 25.811756473058086,
       "height_mm": 10
     },
     {
-      "url": "./assets/insignes/chiffres/petit/9_min.webp",
+      "url": "./assets/insignes/chiffres/grand/9_maj.webp",
       "x_mm": 195.6088173547936,
       "y_mm": 26.31560531840448,
       "height_mm": 10
     },
     {
-      "url": "./assets/insignes/lettres/min/i_min.webp",
+      "url": "./assets/insignes/lettres/maj/i_maj.webp",
       "x_mm": 193.7371647509579,
       "y_mm": 13.551724137931036,
       "height_mm": 10
@@ -211,13 +211,13 @@
       "height_mm": 10
     },
     {
-      "url": "./assets/insignes/lettres/min/a_min.webp",
+      "url": "./assets/insignes/lettres/maj/a_maj.webp",
       "x_mm": 446.6168582375479,
       "y_mm": 24.72413793103448,
       "height_mm": 10
     },
     {
-      "url": "./assets/insignes/lettres/min/a_min.webp",
+      "url": "./assets/insignes/lettres/maj/a_maj.webp",
       "x_mm": 488.8237547892721,
       "y_mm": 25.344827586206897,
       "height_mm": 10

@@ -39,17 +39,16 @@ export function handlePointerDown(event, container) {
     const { gridX, gridY } = getGridCoordsFromEvent(event, container);
 
     if (state.currentMode === 'place' && state.insigneToPlace) {
-        const { path, sizeMm, heightPct, url, sessionOnly } = state.insigneToPlace;
+        const { path, sizeMm, heightPct, sessionOnly } = state.insigneToPlace;
         const newInsigne = { url: path, x_mm: 0, y_mm: 0 };
         if (sessionOnly) newInsigne.sessionOnly = true;
 
+        // Every palette entry now carries its physical size, so there is nothing
+        // left to infer from the file path.
         if (sizeMm) newInsigne.height_mm = parseInt(sizeMm, 10);
         else if (typeof heightPct === 'number' && !Number.isNaN(heightPct)) newInsigne.heightPct = heightPct;
-        else if (url.includes('/petit/') || url.includes('/min/')) newInsigne.height_mm = 10;
-        else if (url.includes('/grand/') || url.includes('/maj/')) newInsigne.height_mm = 18;
         else newInsigne.heightPct = 0.5;
-        
-        // This function call is correct
+
         addImageToState(newInsigne).then(() => {
             const img = getCachedImage(newInsigne.url);
             if (!img) return;

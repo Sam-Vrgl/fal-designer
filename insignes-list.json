@@ -1,86 +1,302 @@
 {
   "numbers": {
     "small": {
-      "0": "./assets/insignes/chiffres/petit/0_min.webp",
-      "1": "./assets/insignes/chiffres/petit/1_min.webp",
-      "2": "./assets/insignes/chiffres/petit/2_min.webp",
-      "3": "./assets/insignes/chiffres/petit/3_min.webp",
-      "4": "./assets/insignes/chiffres/petit/4_min.webp",
-      "5": "./assets/insignes/chiffres/petit/5_min.webp",
-      "6": "./assets/insignes/chiffres/petit/6_min.webp",
-      "7": "./assets/insignes/chiffres/petit/7_min.webp",
-      "8": "./assets/insignes/chiffres/petit/8_min.webp",
-      "9": "./assets/insignes/chiffres/petit/9_min.webp"
+      "0": {
+        "path": "./assets/insignes/chiffres/grand/0_maj.webp",
+        "size_mm": 10
+      },
+      "1": {
+        "path": "./assets/insignes/chiffres/grand/1_maj.webp",
+        "size_mm": 10
+      },
+      "2": {
+        "path": "./assets/insignes/chiffres/grand/2_maj.webp",
+        "size_mm": 10
+      },
+      "3": {
+        "path": "./assets/insignes/chiffres/grand/3_maj.webp",
+        "size_mm": 10
+      },
+      "4": {
+        "path": "./assets/insignes/chiffres/grand/4_maj.webp",
+        "size_mm": 10
+      },
+      "5": {
+        "path": "./assets/insignes/chiffres/grand/5_maj.webp",
+        "size_mm": 10
+      },
+      "6": {
+        "path": "./assets/insignes/chiffres/grand/6_maj.webp",
+        "size_mm": 10
+      },
+      "7": {
+        "path": "./assets/insignes/chiffres/grand/7_maj.webp",
+        "size_mm": 10
+      },
+      "8": {
+        "path": "./assets/insignes/chiffres/grand/8_maj.webp",
+        "size_mm": 10
+      },
+      "9": {
+        "path": "./assets/insignes/chiffres/grand/9_maj.webp",
+        "size_mm": 10
+      }
     },
     "big": {
-      "0": "./assets/insignes/chiffres/grand/0_maj.webp",
-      "1": "./assets/insignes/chiffres/grand/1_maj.webp",
-      "2": "./assets/insignes/chiffres/grand/2_maj.webp",
-      "3": "./assets/insignes/chiffres/grand/3_maj.webp",
-      "4": "./assets/insignes/chiffres/grand/4_maj.webp",
-      "5": "./assets/insignes/chiffres/grand/5_maj.webp",
-      "6": "./assets/insignes/chiffres/grand/6_maj.webp",
-      "7": "./assets/insignes/chiffres/grand/7_maj.webp",
-      "8": "./assets/insignes/chiffres/grand/8_maj.webp",
-      "9": "./assets/insignes/chiffres/grand/9_maj.webp"
+      "0": {
+        "path": "./assets/insignes/chiffres/grand/0_maj.webp",
+        "size_mm": 18
+      },
+      "1": {
+        "path": "./assets/insignes/chiffres/grand/1_maj.webp",
+        "size_mm": 18
+      },
+      "2": {
+        "path": "./assets/insignes/chiffres/grand/2_maj.webp",
+        "size_mm": 18
+      },
+      "3": {
+        "path": "./assets/insignes/chiffres/grand/3_maj.webp",
+        "size_mm": 18
+      },
+      "4": {
+        "path": "./assets/insignes/chiffres/grand/4_maj.webp",
+        "size_mm": 18
+      },
+      "5": {
+        "path": "./assets/insignes/chiffres/grand/5_maj.webp",
+        "size_mm": 18
+      },
+      "6": {
+        "path": "./assets/insignes/chiffres/grand/6_maj.webp",
+        "size_mm": 18
+      },
+      "7": {
+        "path": "./assets/insignes/chiffres/grand/7_maj.webp",
+        "size_mm": 18
+      },
+      "8": {
+        "path": "./assets/insignes/chiffres/grand/8_maj.webp",
+        "size_mm": 18
+      },
+      "9": {
+        "path": "./assets/insignes/chiffres/grand/9_maj.webp",
+        "size_mm": 18
+      }
     }
   },
   "letters": {
     "small": {
-      "a": "./assets/insignes/lettres/min/a_min.webp",
-      "b": "./assets/insignes/lettres/min/b_min.webp",
-      "c": "./assets/insignes/lettres/min/c_min.webp",
-      "d": "./assets/insignes/lettres/min/d_min.webp",
-      "e": "./assets/insignes/lettres/min/e_min.webp",
-      "f": "./assets/insignes/lettres/min/f_min.webp",
-      "g": "./assets/insignes/lettres/min/g_min.webp",
-      "h": "./assets/insignes/lettres/min/h_min.webp",
-      "i": "./assets/insignes/lettres/min/i_min.webp",
-      "j": "./assets/insignes/lettres/min/j_min.webp",
-      "k": "./assets/insignes/lettres/min/k_min.webp",
-      "l": "./assets/insignes/lettres/min/l_min.webp",
-      "m": "./assets/insignes/lettres/min/m_min.webp",
-      "n": "./assets/insignes/lettres/min/n_min.webp",
-      "o": "./assets/insignes/lettres/min/o_min.webp",
-      "p": "./assets/insignes/lettres/min/p_min.webp",
-      "q": "./assets/insignes/lettres/min/q_min.webp",
-      "r": "./assets/insignes/lettres/min/r_min.webp",
-      "s": "./assets/insignes/lettres/min/s_min.webp",
-      "t": "./assets/insignes/lettres/min/t_min.webp",
-      "u": "./assets/insignes/lettres/min/u_min.webp",
-      "v": "./assets/insignes/lettres/min/v_min.webp",
-      "w": "./assets/insignes/lettres/min/w_min.webp",
-      "x": "./assets/insignes/lettres/min/x_min.webp",
-      "y": "./assets/insignes/lettres/min/y_min.webp",
-      "z": "./assets/insignes/lettres/min/z_min.webp"
+      "a": {
+        "path": "./assets/insignes/lettres/maj/a_maj.webp",
+        "size_mm": 10
+      },
+      "b": {
+        "path": "./assets/insignes/lettres/maj/b_maj.webp",
+        "size_mm": 10
+      },
+      "c": {
+        "path": "./assets/insignes/lettres/maj/c_maj.webp",
+        "size_mm": 10
+      },
+      "d": {
+        "path": "./assets/insignes/lettres/maj/d_maj.webp",
+        "size_mm": 10
+      },
+      "e": {
+        "path": "./assets/insignes/lettres/maj/e_maj.webp",
+        "size_mm": 10
+      },
+      "f": {
+        "path": "./assets/insignes/lettres/maj/f_maj.webp",
+        "size_mm": 10
+      },
+      "g": {
+        "path": "./assets/insignes/lettres/maj/g_maj.webp",
+        "size_mm": 10
+      },
+      "h": {
+        "path": "./assets/insignes/lettres/maj/h_maj.webp",
+        "size_mm": 10
+      },
+      "i": {
+        "path": "./assets/insignes/lettres/maj/i_maj.webp",
+        "size_mm": 10
+      },
+      "j": {
+        "path": "./assets/insignes/lettres/maj/j_maj.webp",
+        "size_mm": 10
+      },
+      "k": {
+        "path": "./assets/insignes/lettres/maj/k_maj.webp",
+        "size_mm": 10
+      },
+      "l": {
+        "path": "./assets/insignes/lettres/maj/l_maj.webp",
+        "size_mm": 10
+      },
+      "m": {
+        "path": "./assets/insignes/lettres/maj/m_maj.webp",
+        "size_mm": 10
+      },
+      "n": {
+        "path": "./assets/insignes/lettres/maj/n_maj.webp",
+        "size_mm": 10
+      },
+      "o": {
+        "path": "./assets/insignes/lettres/maj/o_maj.webp",
+        "size_mm": 10
+      },
+      "p": {
+        "path": "./assets/insignes/lettres/maj/p_maj.webp",
+        "size_mm": 10
+      },
+      "q": {
+        "path": "./assets/insignes/lettres/maj/q_maj.webp",
+        "size_mm": 10
+      },
+      "r": {
+        "path": "./assets/insignes/lettres/maj/r_maj.webp",
+        "size_mm": 10
+      },
+      "s": {
+        "path": "./assets/insignes/lettres/maj/s_maj.webp",
+        "size_mm": 10
+      },
+      "t": {
+        "path": "./assets/insignes/lettres/maj/t_maj.webp",
+        "size_mm": 10
+      },
+      "u": {
+        "path": "./assets/insignes/lettres/maj/u_maj.webp",
+        "size_mm": 10
+      },
+      "v": {
+        "path": "./assets/insignes/lettres/maj/v_maj.webp",
+        "size_mm": 10
+      },
+      "w": {
+        "path": "./assets/insignes/lettres/maj/w_maj.webp",
+        "size_mm": 10
+      },
+      "x": {
+        "path": "./assets/insignes/lettres/maj/x_maj.webp",
+        "size_mm": 10
+      },
+      "y": {
+        "path": "./assets/insignes/lettres/maj/y_maj.webp",
+        "size_mm": 10
+      },
+      "z": {
+        "path": "./assets/insignes/lettres/maj/z_maj.webp",
+        "size_mm": 10
+      }
     },
     "big": {
-      "a": "./assets/insignes/lettres/maj/a_maj.webp",
-      "b": "./assets/insignes/lettres/maj/b_maj.webp",
-      "c": "./assets/insignes/lettres/maj/c_maj.webp",
-      "d": "./assets/insignes/lettres/maj/d_maj.webp",
-      "e": "./assets/insignes/lettres/maj/e_maj.webp",
-      "f": "./assets/insignes/lettres/maj/f_maj.webp",
-      "g": "./assets/insignes/lettres/maj/g_maj.webp",
-      "h": "./assets/insignes/lettres/maj/h_maj.webp",
-      "i": "./assets/insignes/lettres/maj/i_maj.webp",
-      "j": "./assets/insignes/lettres/maj/j_maj.webp",
-      "k": "./assets/insignes/lettres/maj/k_maj.webp",
-      "l": "./assets/insignes/lettres/maj/l_maj.webp",
-      "m": "./assets/insignes/lettres/maj/m_maj.webp",
-      "n": "./assets/insignes/lettres/maj/n_maj.webp",
-      "o": "./assets/insignes/lettres/maj/o_maj.webp",
-      "p": "./assets/insignes/lettres/maj/p_maj.webp",
-      "q": "./assets/insignes/lettres/maj/q_maj.webp",
-      "r": "./assets/insignes/lettres/maj/r_maj.webp",
-      "s": "./assets/insignes/lettres/maj/s_maj.webp",
-      "t": "./assets/insignes/lettres/maj/t_maj.webp",
-      "u": "./assets/insignes/lettres/maj/u_maj.webp",
-      "v": "./assets/insignes/lettres/maj/v_maj.webp",
-      "w": "./assets/insignes/lettres/maj/w_maj.webp",
-      "x": "./assets/insignes/lettres/maj/x_maj.webp",
-      "y": "./assets/insignes/lettres/maj/y_maj.webp",
-      "z": "./assets/insignes/lettres/maj/z_maj.webp"
+      "a": {
+        "path": "./assets/insignes/lettres/maj/a_maj.webp",
+        "size_mm": 18
+      },
+      "b": {
+        "path": "./assets/insignes/lettres/maj/b_maj.webp",
+        "size_mm": 18
+      },
+      "c": {
+        "path": "./assets/insignes/lettres/maj/c_maj.webp",
+        "size_mm": 18
+      },
+      "d": {
+        "path": "./assets/insignes/lettres/maj/d_maj.webp",
+        "size_mm": 18
+      },
+      "e": {
+        "path": "./assets/insignes/lettres/maj/e_maj.webp",
+        "size_mm": 18
+      },
+      "f": {
+        "path": "./assets/insignes/lettres/maj/f_maj.webp",
+        "size_mm": 18
+      },
+      "g": {
+        "path": "./assets/insignes/lettres/maj/g_maj.webp",
+        "size_mm": 18
+      },
+      "h": {
+        "path": "./assets/insignes/lettres/maj/h_maj.webp",
+        "size_mm": 18
+      },
+      "i": {
+        "path": "./assets/insignes/lettres/maj/i_maj.webp",
+        "size_mm": 18
+      },
+      "j": {
+        "path": "./assets/insignes/lettres/maj/j_maj.webp",
+        "size_mm": 18
+      },
+      "k": {
+        "path": "./assets/insignes/lettres/maj/k_maj.webp",
+        "size_mm": 18
+      },
+      "l": {
+        "path": "./assets/insignes/lettres/maj/l_maj.webp",
+        "size_mm": 18
+      },
+      "m": {
+        "path": "./assets/insignes/lettres/maj/m_maj.webp",
+        "size_mm": 18
+      },
+      "n": {
+        "path": "./assets/insignes/lettres/maj/n_maj.webp",
+        "size_mm": 18
+      },
+      "o": {
+        "path": "./assets/insignes/lettres/maj/o_maj.webp",
+        "size_mm": 18
+      },
+      "p": {
+        "path": "./assets/insignes/lettres/maj/p_maj.webp",
+        "size_mm": 18
+      },
+      "q": {
+        "path": "./assets/insignes/lettres/maj/q_maj.webp",
+        "size_mm": 18
+      },
+      "r": {
+        "path": "./assets/insignes/lettres/maj/r_maj.webp",
+        "size_mm": 18
+      },
+      "s": {
+        "path": "./assets/insignes/lettres/maj/s_maj.webp",
+        "size_mm": 18
+      },
+      "t": {
+        "path": "./assets/insignes/lettres/maj/t_maj.webp",
+        "size_mm": 18
+      },
+      "u": {
+        "path": "./assets/insignes/lettres/maj/u_maj.webp",
+        "size_mm": 18
+      },
+      "v": {
+        "path": "./assets/insignes/lettres/maj/v_maj.webp",
+        "size_mm": 18
+      },
+      "w": {
+        "path": "./assets/insignes/lettres/maj/w_maj.webp",
+        "size_mm": 18
+      },
+      "x": {
+        "path": "./assets/insignes/lettres/maj/x_maj.webp",
+        "size_mm": 18
+      },
+      "y": {
+        "path": "./assets/insignes/lettres/maj/y_maj.webp",
+        "size_mm": 18
+      },
+      "z": {
+        "path": "./assets/insignes/lettres/maj/z_maj.webp",
+        "size_mm": 18
+      }
     }
   },
   "filiere": {
@@ -222,10 +438,6 @@
     }
   },
   "annees": {
-    "beta": {
-      "path": "./assets/insignes/annees/beta-24mm.webp",
-      "size_mm": 24
-    },
     "epsilon": {
       "path": "./assets/insignes/annees/epsilon-24mm.webp",
       "size_mm": 24
@@ -254,14 +466,6 @@
       "path": "./assets/insignes/annees/palme-simple-petit-12mm.webp",
       "size_mm": 12
     },
-    "phi": {
-      "path": "./assets/insignes/annees/phi-24mm.webp",
-      "size_mm": 24
-    },
-    "psi": {
-      "path": "./assets/insignes/annees/psi-24mm.webp",
-      "size_mm": 24
-    },
     "tete de mort": {
       "path": "./assets/insignes/annees/tete-de-mort-15mm.webp",
       "size_mm": 15
@@ -269,6 +473,18 @@
     "tete de vache": {
       "path": "./assets/insignes/annees/tete-de-vache-18mm.webp",
       "size_mm": 18
+    },
+    "beta": {
+      "path": "./assets/insignes/filiere/beta-24mm.webp",
+      "size_mm": 24
+    },
+    "phi": {
+      "path": "./assets/insignes/filiere/phi-24mm.webp",
+      "size_mm": 24
+    },
+    "psi": {
+      "path": "./assets/insignes/filiere/psi-24mm.webp",
+      "size_mm": 24
     }
   },
   "other": {

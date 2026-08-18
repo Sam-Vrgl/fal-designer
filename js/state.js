@@ -155,11 +155,39 @@ function saveState() {
     }
 }
 
+// v0.5 removed the duplicate letter and digit files: the small and large
+// palette entries now share one image at two sizes. Designs saved or exported
+// before that still reference the deleted copies, so rewrite them to the
+// surviving file. The physical size is stored on the placement itself, so
+// nothing the user sees changes.
+const MOVED_ASSETS = [
+    [/\/lettres\/min\/([a-z])_min\.webp$/, '/lettres/maj/$1_maj.webp'],
+    [/\/chiffres\/petit\/(\d)_min\.webp$/, '/chiffres/grand/$1_maj.webp'],
+    [/\/annees\/(beta|phi|psi)-24mm\.webp$/, '/filiere/$1-24mm.webp'],
+];
+
+export function migrateAssetPath(url) {
+    if (typeof url !== 'string') return url;
+    for (const [pattern, replacement] of MOVED_ASSETS) {
+        if (pattern.test(url)) return url.replace(pattern, replacement);
+    }
+    return url;
+}
+
+export function migrateImages(images) {
+    if (!Array.isArray(images)) return images;
+    for (const image of images) {
+        if (image && typeof image === 'object') image.url = migrateAssetPath(image.url);
+    }
+    return images;
+}
+
 function loadState() {
     try {
         const savedStateJSON = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (savedStateJSON) {
             const savedState = JSON.parse(savedStateJSON);
+            migrateImages(savedState.images);
             state = { ...defaultState, ...savedState };
             loadedFromStorage = true;
             undoStack = [createSnapshot()];
