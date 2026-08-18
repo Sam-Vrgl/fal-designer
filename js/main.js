@@ -7,8 +7,8 @@ import { preloadImages } from './image-service.js';
 import { InsignePaletteService } from './insignes.js';
 import { initDisciplines } from './disciplines.js';
 import { seedDefaultDesign } from './default-design.js';
-import { initDragAndDrop } from './drag-handler.js';
-import { initTouchControls } from './touch-handler.js';
+import { initCanvasInput } from './input-handler.js';
+import { initPinchZoom } from './touch-handler.js';
 import { initTouchUI } from './touch-ui.js';
 
 const APP_VERSION = "1.4.1";
@@ -63,14 +63,12 @@ async function main() {
     
     bindUI(disciplines, insignePalette);
     
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
-    if (isTouchDevice) {
-        initTouchControls(canvas);
-        initTouchUI(canvas.parentElement);
-    } else {
-        initDragAndDrop(canvas);
-    }
+    // Bound unconditionally. Device class is not a reliable proxy for either
+    // capability or layout: a touch laptop needs wheel zoom, and a narrow
+    // non-touch window gets the drawer layout from a width media query.
+    initCanvasInput(canvas);
+    initPinchZoom(canvas);
+    initTouchUI(canvas.parentElement);
 
     Promise.all([
         insignePalette.init()

@@ -1,11 +1,6 @@
 // js/touch-handler.js
 
 import { state, notify } from './state.js';
-import { 
-    handlePointerDown, 
-    handlePointerMove, 
-    handlePointerUp 
-} from './pointer-handler.js';
 
 function getTouchDistance(touches) {
     const dx = touches[0].clientX - touches[1].clientX;
@@ -20,45 +15,35 @@ function getMidpoint(touches) {
     };
 }
 
-export function initTouchControls(canvas) {
+// Two-finger pinch only. Single-pointer input of every kind — mouse, pen and
+// one finger — goes through initCanvasInput (input-handler.js), so nothing here
+// runs for a one-finger drag and the two never double-handle the same gesture.
+export function initPinchZoom(canvas) {
     const container = canvas.parentElement;
     let lastTouchDistance = null;
 
     container.addEventListener('touchstart', (event) => {
-        if (event.target === canvas) {
-            event.preventDefault();
-        }
-
-        if (event.touches.length === 1) {
-            handlePointerDown(event, container);
-        } else if (event.touches.length >= 2) {
-            handlePointerUp(); 
-            lastTouchDistance = getTouchDistance(event.touches);
-        }
+        if (event.touches.length < 2) return;
+        event.preventDefault();
+        lastTouchDistance = getTouchDistance(event.touches);
     }, { passive: false });
 
     container.addEventListener('touchmove', (event) => {
+        if (event.touches.length < 2 || lastTouchDistance === null) return;
         event.preventDefault();
 
-        if (event.touches.length === 1) {
-            handlePointerMove(event, container);
-        } else if (event.touches.length >= 2 && lastTouchDistance) {
-            const newTouchDistance = getTouchDistance(event.touches);
-            const zoomFactor = newTouchDistance / lastTouchDistance;
-            lastTouchDistance = newTouchDistance;
-            
-            const midpoint = getMidpoint(event.touches);
-            state.viewOffsetX -= (midpoint.x - state.viewOffsetX) * (zoomFactor - 1);
-            state.viewOffsetY -= (midpoint.y - state.viewOffsetY) * (zoomFactor - 1);
-            state.viewScale *= zoomFactor;
-            notify();
-        }
+        const newTouchDistance = getTouchDistance(event.touches);
+        const zoomFactor = newTouchDistance / lastTouchDistance;
+        lastTouchDistance = newTouchDistance;
+
+        const midpoint = getMidpoint(event.touches);
+        state.viewOffsetX -= (midpoint.x - state.viewOffsetX) * (zoomFactor - 1);
+        state.viewOffsetY -= (midpoint.y - state.viewOffsetY) * (zoomFactor - 1);
+        state.viewScale *= zoomFactor;
+        notify();
     }, { passive: false });
 
     container.addEventListener('touchend', (event) => {
-        if (event.touches.length === 0) {
-            handlePointerUp();
-        }
-        lastTouchDistance = null;
+        if (event.touches.length < 2) lastTouchDistance = null;
     });
 }
