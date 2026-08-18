@@ -3,6 +3,11 @@
 import { state, notify, subscribe, resetState, recordStateForUndo, undo, redo } from './state.js';
 import { exportState, importState } from './file-handler.js';
 import { exportCanvasAsImage } from './image-exporter.js';
+import { debounce } from './utils.js';
+
+// Typing in a number field fires an input event per keystroke, and dragging a
+// spinner fires a stream of them. Collapse each burst into one history entry.
+const recordEdit = debounce(recordStateForUndo, 400);
 
 function setMode(mode) {
     state.currentMode = mode;
@@ -49,12 +54,15 @@ function bindSettings(settingsContainer, disciplinesData) {
     if (gridH) gridH.value = state.gridHmm;
     if (margin) margin.value = state.marginMm;
 
+    // Guide and snap toggles are interface preferences, not document content,
+    // so they deliberately stay out of history.
     if (chkV) chkV.addEventListener('change', () => { state.helper.showV = chkV.checked; notify(); });
     if (chkH) chkH.addEventListener('change', () => { state.helper.showH = chkH.checked; notify(); });
     if (chkSnap) chkSnap.addEventListener('change', () => { state.snapEnabled = chkSnap.checked; notify(); });
-    if (gridW) gridW.addEventListener('input', () => { state.gridWmm = gridW.valueAsNumber; notify(); });
-    if (gridH) gridH.addEventListener('input', () => { state.gridHmm = gridH.valueAsNumber; notify(); });
-    if (margin) margin.addEventListener('input', () => { state.marginMm = margin.valueAsNumber; notify(); });
+
+    if (gridW) gridW.addEventListener('input', () => { state.gridWmm = gridW.valueAsNumber; notify(); recordEdit(); });
+    if (gridH) gridH.addEventListener('input', () => { state.gridHmm = gridH.valueAsNumber; notify(); recordEdit(); });
+    if (margin) margin.addEventListener('input', () => { state.marginMm = margin.valueAsNumber; notify(); recordEdit(); });
 
     if (materialDisciplineSelect) {
         const disciplineNames = Object.keys(disciplinesData);
@@ -184,9 +192,9 @@ function bindInspectorPanel(inspectorPanelEl) {
 
     const removeMoivreBtn = inspectorPanelEl.querySelector('#removeMoivreBtn');
 
-    if (insigneX) insigneX.addEventListener('input', () => { if (state.selectedInsigne) { state.selectedInsigne.x_mm = insigneX.valueAsNumber; notify(); }});
-    if (insigneY) insigneY.addEventListener('input', () => { if (state.selectedInsigne) { state.selectedInsigne.y_mm = insigneY.valueAsNumber; notify(); }});
-    if (insigneHeight) insigneHeight.addEventListener('input', () => { if (state.selectedInsigne && !insigneHeight.disabled) { state.selectedInsigne.heightPct = insigneHeight.valueAsNumber / 100; notify(); }});
+    if (insigneX) insigneX.addEventListener('input', () => { if (state.selectedInsigne) { state.selectedInsigne.x_mm = insigneX.valueAsNumber; notify(); recordEdit(); }});
+    if (insigneY) insigneY.addEventListener('input', () => { if (state.selectedInsigne) { state.selectedInsigne.y_mm = insigneY.valueAsNumber; notify(); recordEdit(); }});
+    if (insigneHeight) insigneHeight.addEventListener('input', () => { if (state.selectedInsigne && !insigneHeight.disabled) { state.selectedInsigne.heightPct = insigneHeight.valueAsNumber / 100; notify(); recordEdit(); }});
     if (removeInsigneBtn) removeInsigneBtn.addEventListener('click', () => {
         if (state.selectedInsigne) {
             state.images = state.images.filter(i => i !== state.selectedInsigne);
@@ -196,10 +204,10 @@ function bindInspectorPanel(inspectorPanelEl) {
         }
     });
     
-    if (selectedMaterialX) selectedMaterialX.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.x_mm = selectedMaterialX.valueAsNumber; notify(); }});
-    if (selectedMaterialY) selectedMaterialY.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.y_mm = selectedMaterialY.valueAsNumber; notify(); }});
-    if (selectedMaterialWidth) selectedMaterialWidth.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.width_mm = selectedMaterialWidth.valueAsNumber; notify(); }});
-    if (selectedMaterialHeight) selectedMaterialHeight.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.height_mm = selectedMaterialHeight.valueAsNumber; notify(); }});
+    if (selectedMaterialX) selectedMaterialX.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.x_mm = selectedMaterialX.valueAsNumber; notify(); recordEdit(); }});
+    if (selectedMaterialY) selectedMaterialY.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.y_mm = selectedMaterialY.valueAsNumber; notify(); recordEdit(); }});
+    if (selectedMaterialWidth) selectedMaterialWidth.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.width_mm = selectedMaterialWidth.valueAsNumber; notify(); recordEdit(); }});
+    if (selectedMaterialHeight) selectedMaterialHeight.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.height_mm = selectedMaterialHeight.valueAsNumber; notify(); recordEdit(); }});
     if (removeMaterialBtn) removeMaterialBtn.addEventListener('click', () => {
         if (state.selectedMaterial) {
             if (state.selectedMaterial.groupId) {
@@ -265,6 +273,16 @@ function setupAllSubscriptions() {
     const selectedMaterialY = document.getElementById('selectedMaterialY');
     const selectedMaterialWidth = document.getElementById('selectedMaterialWidth');
     const selectedMaterialHeight = document.getElementById('selectedMaterialHeight');
+    const gridWInput = document.getElementById('gridWInput');
+    const gridHInput = document.getElementById('gridHInput');
+    const marginInput = document.getElementById('marginInput');
+    const disciplineSelect = document.getElementById('disciplineSelect');
+
+    // Never write into the control the user is currently editing; doing so
+    // moves the caret mid-keystroke.
+    const setValue = (el, value) => {
+        if (el && el !== document.activeElement) el.value = value;
+    };
 
     const updateZoomDisplay = () => {
         if(zoomDisplay) zoomDisplay.textContent = `${Math.round(state.viewScale * 100)}%`;
@@ -279,8 +297,8 @@ function setupAllSubscriptions() {
         moivrePropsDiv.style.display = state.selectedMoivre ? 'block' : 'none';
 
         if (state.selectedInsigne) {
-            if (insigneX) insigneX.value = state.selectedInsigne.x_mm;
-            if (insigneY) insigneY.value = state.selectedInsigne.y_mm;
+            setValue(insigneX, state.selectedInsigne.x_mm);
+            setValue(insigneY, state.selectedInsigne.y_mm);
             if (insigneHeight) {
                 if (state.selectedInsigne.height_mm) {
                     insigneHeight.value = ((state.selectedInsigne.height_mm / state.gridHmm) * 100).toFixed(2);
@@ -292,13 +310,26 @@ function setupAllSubscriptions() {
             }
         }
         if (state.selectedMaterial) {
-            if (selectedMaterialX) selectedMaterialX.value = state.selectedMaterial.x_mm;
-            if (selectedMaterialY) selectedMaterialY.value = state.selectedMaterial.y_mm;
-            if (selectedMaterialWidth) selectedMaterialWidth.value = state.selectedMaterial.width_mm;
-            if (selectedMaterialHeight) selectedMaterialHeight.value = state.selectedMaterial.height_mm;
+            setValue(selectedMaterialX, state.selectedMaterial.x_mm);
+            setValue(selectedMaterialY, state.selectedMaterial.y_mm);
+            setValue(selectedMaterialWidth, state.selectedMaterial.width_mm);
+            setValue(selectedMaterialHeight, state.selectedMaterial.height_mm);
         }
     };
     
+    // Undo and redo can change grid geometry and discipline, so the controls
+    // that own those values have to follow state rather than only being seeded
+    // once at bind time. Assigning .value does not fire change, so this cannot
+    // loop back into the handlers above.
+    const updateSettingsControls = () => {
+        setValue(gridWInput, state.gridWmm);
+        setValue(gridHInput, state.gridHmm);
+        setValue(marginInput, state.marginMm);
+        if (disciplineSelect && disciplineSelect.value !== state.discipline) {
+            setValue(disciplineSelect, state.discipline);
+        }
+    };
+
     const updateModeUI = () => {
         const mode = state.currentMode;
         if (selectModeBtn) selectModeBtn.classList.toggle('active', mode === 'select');
@@ -307,6 +338,7 @@ function setupAllSubscriptions() {
     
     subscribe(updateZoomDisplay);
     subscribe(updateInspector);
+    subscribe(updateSettingsControls);
     subscribe(updateModeUI);
 }
 
