@@ -42,3 +42,16 @@ export function downloadBlob(blob, filename) {
     downloadUrl(url, filename);
     URL.revokeObjectURL(url);
 }
+
+// Trailing debounce: runs fn once the calls stop for ms. Used to collapse a
+// burst of input events into a single undo entry.
+export function debounce(fn, ms) {
+    let timer = null;
+    return (...args) => {
+        if (timer !== null) clearTimeout(timer);
+        timer = setTimeout(() => {
+            timer = null;
+            fn(...args);
+        }, ms);
+    };
+}

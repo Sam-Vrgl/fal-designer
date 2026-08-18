@@ -42,22 +42,31 @@ const defaultState = {
 
 export let state = { ...defaultState };
 
-// Still only the three arrays. Widening this to designState(), and cloning on
-// the way back out, is issue #4.
-function createSnapshot() {
+// The whole design, plus the resolved discipline colours the renderer needs.
+// Colours are derived from disciplines.json, but carrying them means a restore
+// is self-consistent without having to re-resolve anything.
+function historyState() {
     return {
-        materials: JSON.parse(JSON.stringify(state.materials)),
-        moivres: JSON.parse(JSON.stringify(state.moivres)),
-        images: JSON.parse(JSON.stringify(state.images)),
+        ...designState({ includeSessionImages: true }),
+        disciplineColors: state.disciplineColors,
+        disciplineMaterial: state.disciplineMaterial,
     };
+}
+
+function createSnapshot() {
+    return structuredClone(historyState());
 }
 
 function restoreFromSnapshot(snapshot) {
     if (!snapshot) return;
-    state.materials = snapshot.materials;
-    state.moivres = snapshot.moivres;
-    state.images = snapshot.images;
-    
+
+    // Clone on the way out as well as in. Assigning the stored arrays directly
+    // would leave state and the history entry sharing objects, so the next drag
+    // would mutate the very entry the user is standing on.
+    Object.assign(state, structuredClone(snapshot));
+
+    // Selections point into the arrays that were just replaced, so any held
+    // reference is now an orphan the user could still drag.
     state.selectedInsigne = null;
     state.selectedMaterial = null;
     state.selectedMoivre = null;
@@ -71,8 +80,13 @@ export function resetHistory() {
 }
 
 export function recordStateForUndo() {
+    const snapshot = createSnapshot();
+
+    const previous = undoStack[undoStack.length - 1];
+    if (previous && JSON.stringify(previous) === JSON.stringify(snapshot)) return;
+
     redoStack = [];
-    undoStack.push(createSnapshot());
+    undoStack.push(snapshot);
     if (undoStack.length > HISTORY_LIMIT) {
         undoStack.shift();
     }
@@ -103,7 +117,7 @@ function persistentImages() {
 // This is exactly what an exported .json file contains, and what undo needs
 // to restore. Anything added here is picked up by save, export and history
 // together, which is the point of it being one definition.
-export function designState() {
+export function designState({ includeSessionImages = false } = {}) {
     return {
         gridWmm: state.gridWmm,
         gridHmm: state.gridHmm,
@@ -111,7 +125,10 @@ export function designState() {
         discipline: state.discipline,
         materials: state.materials,
         moivres: state.moivres,
-        images: persistentImages(),
+        // Session images are dead outside this page, so they are left out of
+        // anything that outlives it. Undo lives inside the page and must keep
+        // them, or undoing after placing one would silently delete it.
+        images: includeSessionImages ? state.images : persistentImages(),
     };
 }
 
