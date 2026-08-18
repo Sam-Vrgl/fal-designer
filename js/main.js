@@ -1,11 +1,12 @@
 // js/main.js
 
-import { state, subscribe } from './state.js';
+import { state, subscribe, shouldSeedDefaultDesign } from './state.js';
 import { draw } from './renderer.js';
 import { bindUI } from './ui.js';
 import { preloadImages } from './image-service.js';
 import { InsignePaletteService } from './insignes.js';
 import { initDisciplines } from './disciplines.js';
+import { seedDefaultDesign } from './default-design.js';
 import { initDragAndDrop } from './drag-handler.js';
 import { initTouchControls } from './touch-handler.js';
 import { initTouchUI } from './touch-ui.js';
@@ -54,6 +55,10 @@ async function main() {
 
     const insignePalette = new InsignePaletteService('insigne-list', 'insigne-search');
     
+    if (shouldSeedDefaultDesign()) {
+        await seedDefaultDesign();
+    }
+
     const disciplines = await initDisciplines('disciplineSelect');
     
     bindUI(disciplines, insignePalette);

@@ -1,5 +1,7 @@
 const LOCAL_STORAGE_KEY = 'falDesignerState';
+const INIT_MARKER_KEY = 'falDesignerInitialised';
 
+let loadedFromStorage = false;
 let undoStack = [];
 let redoStack = [];
 const HISTORY_LIMIT = 50;
@@ -61,6 +63,11 @@ function restoreFromSnapshot(snapshot) {
     notify();
 }
 
+export function resetHistory() {
+    undoStack = [createSnapshot()];
+    redoStack = [];
+}
+
 export function recordStateForUndo() {
     redoStack = [];
     undoStack.push(createSnapshot());
@@ -116,6 +123,7 @@ function loadState() {
         if (savedStateJSON) {
             const savedState = JSON.parse(savedStateJSON);
             state = { ...defaultState, ...savedState };
+            loadedFromStorage = true;
             undoStack = [createSnapshot()];
         } else {
             undoStack = [createSnapshot()];
@@ -128,9 +136,28 @@ function loadState() {
     }
 }
 
+export function shouldSeedDefaultDesign() {
+    if (loadedFromStorage) return false;
+    try {
+        return localStorage.getItem(INIT_MARKER_KEY) === null;
+    } catch (error) {
+        console.error("Could not read the initialisation marker:", error);
+        return false;
+    }
+}
+
+export function markInitialised() {
+    try {
+        localStorage.setItem(INIT_MARKER_KEY, '1');
+    } catch (error) {
+        console.error("Could not save the initialisation marker:", error);
+    }
+}
+
 export function resetState() {
     if (confirm("Êtes-vous sûr de vouloir réinitialiser le circulaire? Toutes les données seront effacées.")) {
         localStorage.removeItem(LOCAL_STORAGE_KEY);
+        markInitialised();
         window.location.reload();
     }
 }
