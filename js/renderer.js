@@ -21,18 +21,31 @@ function visibleRangeMm(ctx, canvas) {
     };
 }
 
-function setupCanvas(canvas, ctx, s, isLiveRender) {
-    let dpr = 1;
-    if (isLiveRender) {
-        const container = canvas.parentElement;
-        if (!container || container.clientWidth === 0) return 0;
-        dpr = window.devicePixelRatio || 1;
+// Assigning canvas.width or canvas.height throws away the entire backing store
+// and resets every context property, even when the value written is identical.
+// Doing that unconditionally meant a buffer reallocation on every pointer move,
+// so only write when the size has genuinely changed.
+export function syncCanvasSize(canvas) {
+    const container = canvas.parentElement;
+    if (!container || container.clientWidth === 0) return 0;
 
-        canvas.width = container.clientWidth * dpr;
-        canvas.height = container.clientHeight * dpr;
+    const dpr = window.devicePixelRatio || 1;
+    const width = Math.round(container.clientWidth * dpr);
+    const height = Math.round(container.clientHeight * dpr);
+
+    if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
         canvas.style.width = `${container.clientWidth}px`;
         canvas.style.height = `${container.clientHeight}px`;
     }
+
+    return dpr;
+}
+
+function setupCanvas(canvas, ctx, s, isLiveRender) {
+    const dpr = isLiveRender ? syncCanvasSize(canvas) : 1;
+    if (dpr === 0) return 0;
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);

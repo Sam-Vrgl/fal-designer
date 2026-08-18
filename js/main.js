@@ -12,6 +12,7 @@ import { initCanvasInput } from './input-handler.js';
 import { initPinchZoom } from './touch-handler.js';
 import { initTouchUI } from './touch-ui.js';
 import { showModal, hideModal } from './messages.js';
+import { fitToView, preserveCentre, measure, isDesignVisible } from './view.js';
 
 const APP_VERSION = "1.4.1";
 
@@ -65,6 +66,11 @@ async function main() {
 
     const rerender = () => draw(canvas, ctx, state);
     subscribe(rerender);
+
+    // A window resize does not change the container box when a drawer opens, and
+    // a container box change does not happen when the window moves to a display
+    // with a different pixel ratio. The observer covers the first, this covers
+    // the second; both are cheap now that sizing and rendering are both guarded.
     window.addEventListener('resize', rerender);
 
     const insignePalette = new InsignePaletteService('insigne-list', 'insigne-search');
@@ -84,6 +90,8 @@ async function main() {
     initPinchZoom(canvas);
     initTouchUI(canvas.parentElement);
 
+    observeCanvasBox(canvas.parentElement);
+
     // Both steps are best-effort: a failed palette or a missing image should
     // still leave a usable canvas, so each is caught rather than allowed to
     // abandon startup.
@@ -100,6 +108,35 @@ async function main() {
     }
 
     rerender();
+}
+
+// Fit once, when the first real layout arrives, then hold the user's view
+// steady through later size changes rather than snapping back to fit.
+//
+// Holding the centre is preferred over re-fitting because re-fitting throws
+// away whatever the user had zoomed into, and because it would fight
+// touch-ui.js, which already recentres vertically when a drawer opens. But it
+// is only a preference: if a size change leaves the design entirely off screen
+// there is nothing to hold on to, and on mobile no toolbar to recover with, so
+// fitting is the right answer there.
+function observeCanvasBox(container) {
+    if (!container || typeof ResizeObserver === 'undefined') return;
+
+    let previous = null;
+    const observer = new ResizeObserver(() => {
+        if (container.clientWidth === 0) return;
+
+        if (previous === null) {
+            fitToView(container);
+        } else if (container.clientWidth !== previous.width || container.clientHeight !== previous.height) {
+            preserveCentre(container, previous);
+            if (!isDesignVisible(container)) fitToView(container);
+        }
+
+        previous = measure(container);
+    });
+
+    observer.observe(container);
 }
 
 window.addEventListener('DOMContentLoaded', () => {
