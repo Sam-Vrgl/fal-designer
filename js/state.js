@@ -42,6 +42,8 @@ const defaultState = {
 
 export let state = { ...defaultState };
 
+// Still only the three arrays. Widening this to designState(), and cloning on
+// the way back out, is issue #4.
 function createSnapshot() {
     return {
         materials: JSON.parse(JSON.stringify(state.materials)),
@@ -91,27 +93,46 @@ export function redo() {
     restoreFromSnapshot(nextState);
 }
 
+// Session-only images live in blob: URLs that die with the page, so they are
+// never written to storage or to an exported file.
+function persistentImages() {
+    return state.images.filter(img => !img.sessionOnly);
+}
+
+// The portable design: geometry and content, no view or interface state.
+// This is exactly what an exported .json file contains, and what undo needs
+// to restore. Anything added here is picked up by save, export and history
+// together, which is the point of it being one definition.
+export function designState() {
+    return {
+        gridWmm: state.gridWmm,
+        gridHmm: state.gridHmm,
+        marginMm: state.marginMm,
+        discipline: state.discipline,
+        materials: state.materials,
+        moivres: state.moivres,
+        images: persistentImages(),
+    };
+}
+
+// The design plus everything else that should survive a reload: resolved
+// discipline colours, guide toggles and the current view.
+function persistableState() {
+    return {
+        ...designState(),
+        helper: state.helper,
+        snapEnabled: state.snapEnabled,
+        disciplineColors: state.disciplineColors,
+        disciplineMaterial: state.disciplineMaterial,
+        viewScale: state.viewScale,
+        viewOffsetX: state.viewOffsetX,
+        viewOffsetY: state.viewOffsetY,
+    };
+}
+
 function saveState() {
     try {
-        const persistentImages = state.images.filter(img => !img.sessionOnly);
-
-        const stateToSave = {
-            gridWmm: state.gridWmm,
-            gridHmm: state.gridHmm,
-            marginMm: state.marginMm,
-            helper: state.helper,
-            snapEnabled: state.snapEnabled,
-            discipline: state.discipline,
-            disciplineColors: state.disciplineColors,
-            disciplineMaterial: state.disciplineMaterial,
-            materials: state.materials,
-            moivres: state.moivres,
-            images: persistentImages,
-            viewScale: state.viewScale,
-            viewOffsetX: state.viewOffsetX,
-            viewOffsetY: state.viewOffsetY,
-        };
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stateToSave));
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(persistableState()));
     } catch (error) {
         console.error("Could not save state to localStorage:", error);
     }

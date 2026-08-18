@@ -70,11 +70,24 @@ async function main() {
     initPinchZoom(canvas);
     initTouchUI(canvas.parentElement);
 
-    Promise.all([
-        insignePalette.init()
-    ]).finally(() => {
-        preloadImages().finally(rerender);
-    });
+    // Both steps are best-effort: a failed palette or a missing image should
+    // still leave a usable canvas, so each is caught rather than allowed to
+    // abandon startup.
+    try {
+        await insignePalette.init();
+    } catch (error) {
+        console.error("Could not build the insigne palette:", error);
+    }
+
+    try {
+        await preloadImages();
+    } catch (error) {
+        console.error("Some images could not be preloaded:", error);
+    }
+
+    rerender();
 }
 
-window.addEventListener('DOMContentLoaded', main);
+window.addEventListener('DOMContentLoaded', () => {
+    main().catch((error) => console.error("Fal Designer failed to start:", error));
+});
