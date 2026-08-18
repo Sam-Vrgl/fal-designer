@@ -156,6 +156,9 @@ export function markInitialised() {
 
 export function resetState() {
     if (confirm("Êtes-vous sûr de vouloir réinitialiser le circulaire? Toutes les données seront effacées.")) {
+        // Stop any pending or flush-triggered write, otherwise the state we are
+        // about to clear gets saved straight back during unload.
+        suspendPersistence();
         localStorage.removeItem(LOCAL_STORAGE_KEY);
         markInitialised();
         window.location.reload();
@@ -164,9 +167,61 @@ export function resetState() {
 
 const listeners = new Set();
 export function subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); }
-export function notify() {
+
+const SAVE_DEBOUNCE_MS = 500;
+
+let renderHandle = null;
+let saveTimer = null;
+let persistenceSuspended = false;
+
+function runListeners() {
+    renderHandle = null;
     for (const fn of listeners) fn();
+}
+
+function clearSaveTimer() {
+    if (saveTimer !== null) {
+        clearTimeout(saveTimer);
+        saveTimer = null;
+    }
+}
+
+// Write immediately, cancelling any pending debounce. Used when the page is
+// going away and a trailing timer would never fire.
+function flushSave() {
+    if (persistenceSuspended) return;
+    if (saveTimer === null) return;
+    clearSaveTimer();
     saveState();
 }
+
+// Permanently disable persistence for the remaining life of the page.
+function suspendPersistence() {
+    persistenceSuspended = true;
+    clearSaveTimer();
+}
+
+// Coalesces a burst of calls into one render per frame and one write per
+// quiet period. A drag emitting 60 notify() calls a second now costs one
+// repaint per frame and a single serialisation once the pointer settles.
+export function notify() {
+    if (renderHandle === null) {
+        renderHandle = requestAnimationFrame(runListeners);
+    }
+
+    if (persistenceSuspended) return;
+    clearSaveTimer();
+    saveTimer = setTimeout(() => {
+        saveTimer = null;
+        saveState();
+    }, SAVE_DEBOUNCE_MS);
+}
+
+// pagehide covers navigation and tab close; visibilitychange is the one that
+// actually fires when a mobile browser backgrounds the page.
+window.addEventListener('pagehide', flushSave);
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushSave();
+});
 
 loadState();
