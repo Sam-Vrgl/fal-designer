@@ -4,10 +4,57 @@ import { state, notify, subscribe, resetState, recordStateForUndo, undo, redo } 
 import { exportState, importState } from './file-handler.js';
 import { exportCanvasAsImage } from './image-exporter.js';
 import { debounce } from './utils.js';
+import { LIMITS, readNumber } from './validation.js';
 
 // Typing in a number field fires an input event per keystroke, and dragging a
 // spinner fires a stream of them. Collapse each burst into one history entry.
 const recordEdit = debounce(recordStateForUndo, 400);
+
+// Every numeric control in the app goes through here, so no keystroke can put a
+// non-finite or out-of-range number into state.
+//
+// `get` returns the current value in the unit the field displays, or undefined
+// when the field has nothing to edit — nothing selected, or a disabled field.
+// `set` receives a number already clamped to `limit`.
+//
+// Two rules make this bearable to type in:
+//
+//   - An unreadable field is not an edit. Clearing a box leaves the last good
+//     value in state, so the canvas stays on screen while the user retypes
+//     instead of blanking and being persisted that way.
+//   - Clamping happens in state, never in the box, while the field has focus.
+//     Rewriting the text mid-keystroke fights the user; the field is normalised
+//     on blur, which is when they have finished saying what they meant.
+// The control's own min/max come from the same table as everything else, so the
+// browser enforces the range on spinners and arrow keys without the bounds
+// being written down a second time in the markup.
+function applyLimit(el, limit) {
+    if (!el) return;
+    el.min = limit.min;
+    el.max = limit.max;
+}
+
+function bindNumberInput(el, limit, { get, set }) {
+    if (!el) return;
+
+    applyLimit(el, limit);
+
+    el.addEventListener('input', () => {
+        if (get() === undefined) return;
+
+        const value = readNumber(el, limit);
+        if (value === null) return;
+
+        set(value);
+        notify();
+        recordEdit();
+    });
+
+    el.addEventListener('blur', () => {
+        const current = get();
+        if (current !== undefined) el.value = current;
+    });
+}
 
 function setMode(mode) {
     state.currentMode = mode;
@@ -47,6 +94,9 @@ function bindSettings(settingsContainer, disciplinesData) {
     const moivreColor = settingsContainer.querySelector('#moivreColor');
     const addMoivreBtn = settingsContainer.querySelector('#addMoivreBtn');
 
+    // Read on click rather than bound to state, so it only needs its range.
+    applyLimit(materialWidthInput, LIMITS.width_mm);
+
     if (chkV) chkV.checked = state.helper.showV;
     if (chkH) chkH.checked = state.helper.showH;
     if (chkSnap) chkSnap.checked = state.snapEnabled;
@@ -60,9 +110,18 @@ function bindSettings(settingsContainer, disciplinesData) {
     if (chkH) chkH.addEventListener('change', () => { state.helper.showH = chkH.checked; notify(); });
     if (chkSnap) chkSnap.addEventListener('change', () => { state.snapEnabled = chkSnap.checked; notify(); });
 
-    if (gridW) gridW.addEventListener('input', () => { state.gridWmm = gridW.valueAsNumber; notify(); recordEdit(); });
-    if (gridH) gridH.addEventListener('input', () => { state.gridHmm = gridH.valueAsNumber; notify(); recordEdit(); });
-    if (margin) margin.addEventListener('input', () => { state.marginMm = margin.valueAsNumber; notify(); recordEdit(); });
+    bindNumberInput(gridW, LIMITS.gridWmm, {
+        get: () => state.gridWmm,
+        set: (value) => { state.gridWmm = value; },
+    });
+    bindNumberInput(gridH, LIMITS.gridHmm, {
+        get: () => state.gridHmm,
+        set: (value) => { state.gridHmm = value; },
+    });
+    bindNumberInput(margin, LIMITS.marginMm, {
+        get: () => state.marginMm,
+        set: (value) => { state.marginMm = value; },
+    });
 
     if (materialDisciplineSelect) {
         const disciplineNames = Object.keys(disciplinesData);
@@ -83,9 +142,9 @@ function bindSettings(settingsContainer, disciplinesData) {
         if (!discipline) return;
         
         const heightMultiplier = parseFloat(materialHeightSelect?.value ?? '1');
-        const width = materialWidthInput?.valueAsNumber ?? 0;
+        const width = readNumber(materialWidthInput, LIMITS.width_mm);
 
-        if (!Number.isFinite(heightMultiplier) || !Number.isFinite(width) || width <= 0) return;
+        if (!Number.isFinite(heightMultiplier) || width === null) return;
 
         const totalHeight = state.gridHmm * heightMultiplier;
 
@@ -192,9 +251,24 @@ function bindInspectorPanel(inspectorPanelEl) {
 
     const removeMoivreBtn = inspectorPanelEl.querySelector('#removeMoivreBtn');
 
-    if (insigneX) insigneX.addEventListener('input', () => { if (state.selectedInsigne) { state.selectedInsigne.x_mm = insigneX.valueAsNumber; notify(); recordEdit(); }});
-    if (insigneY) insigneY.addEventListener('input', () => { if (state.selectedInsigne) { state.selectedInsigne.y_mm = insigneY.valueAsNumber; notify(); recordEdit(); }});
-    if (insigneHeight) insigneHeight.addEventListener('input', () => { if (state.selectedInsigne && !insigneHeight.disabled) { state.selectedInsigne.heightPct = insigneHeight.valueAsNumber / 100; notify(); recordEdit(); }});
+    bindNumberInput(insigneX, LIMITS.x_mm, {
+        get: () => state.selectedInsigne?.x_mm,
+        set: (value) => { state.selectedInsigne.x_mm = value; },
+    });
+    bindNumberInput(insigneY, LIMITS.y_mm, {
+        get: () => state.selectedInsigne?.y_mm,
+        set: (value) => { state.selectedInsigne.y_mm = value; },
+    });
+    // The field is in percent of the grid height; state stores the fraction.
+    // It is disabled for insignes with a fixed physical size, and a disabled
+    // field has nothing to edit, so get() reports undefined for one.
+    bindNumberInput(insigneHeight, LIMITS.heightPercent, {
+        get: () => {
+            if (!state.selectedInsigne || insigneHeight.disabled) return undefined;
+            return (state.selectedInsigne.heightPct ?? 0) * 100;
+        },
+        set: (value) => { state.selectedInsigne.heightPct = value / 100; },
+    });
     if (removeInsigneBtn) removeInsigneBtn.addEventListener('click', () => {
         if (state.selectedInsigne) {
             state.images = state.images.filter(i => i !== state.selectedInsigne);
@@ -204,10 +278,22 @@ function bindInspectorPanel(inspectorPanelEl) {
         }
     });
     
-    if (selectedMaterialX) selectedMaterialX.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.x_mm = selectedMaterialX.valueAsNumber; notify(); recordEdit(); }});
-    if (selectedMaterialY) selectedMaterialY.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.y_mm = selectedMaterialY.valueAsNumber; notify(); recordEdit(); }});
-    if (selectedMaterialWidth) selectedMaterialWidth.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.width_mm = selectedMaterialWidth.valueAsNumber; notify(); recordEdit(); }});
-    if (selectedMaterialHeight) selectedMaterialHeight.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.height_mm = selectedMaterialHeight.valueAsNumber; notify(); recordEdit(); }});
+    bindNumberInput(selectedMaterialX, LIMITS.x_mm, {
+        get: () => state.selectedMaterial?.x_mm,
+        set: (value) => { state.selectedMaterial.x_mm = value; },
+    });
+    bindNumberInput(selectedMaterialY, LIMITS.y_mm, {
+        get: () => state.selectedMaterial?.y_mm,
+        set: (value) => { state.selectedMaterial.y_mm = value; },
+    });
+    bindNumberInput(selectedMaterialWidth, LIMITS.width_mm, {
+        get: () => state.selectedMaterial?.width_mm,
+        set: (value) => { state.selectedMaterial.width_mm = value; },
+    });
+    bindNumberInput(selectedMaterialHeight, LIMITS.height_mm, {
+        get: () => state.selectedMaterial?.height_mm,
+        set: (value) => { state.selectedMaterial.height_mm = value; },
+    });
     if (removeMaterialBtn) removeMaterialBtn.addEventListener('click', () => {
         if (state.selectedMaterial) {
             if (state.selectedMaterial.groupId) {

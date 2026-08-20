@@ -1,4 +1,4 @@
-import { state, notify, designState, migrateImages } from './state.js';
+import { state, notify, designState, applyImportedDesign } from './state.js';
 import { preloadImages } from './image-service.js';
 import { designFilename, downloadBlob } from './utils.js';
 
@@ -18,20 +18,14 @@ export function importState(file) {
         try {
             const loadedState = JSON.parse(e.target.result);
 
-            state.gridWmm = loadedState.gridWmm;
-            state.gridHmm = loadedState.gridHmm;
-            state.marginMm = loadedState.marginMm;
-            
             const disciplineSelect = document.getElementById('disciplineSelect');
             if (loadedState.discipline) {
                 disciplineSelect.value = loadedState.discipline;
                 disciplineSelect.dispatchEvent(new Event('change'));
             }
 
-            state.materials = loadedState.materials || [];
-            state.moivres = loadedState.moivres || [];
-            state.images = migrateImages(loadedState.images || []);
-            
+            applyImportedDesign(loadedState);
+
             state.selectedInsigne = null;
             state.selectedMaterial = null;
             state.selectedMoivre = null;

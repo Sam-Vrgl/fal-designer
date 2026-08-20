@@ -1,3 +1,5 @@
+import { sanitizeDesign } from './validation.js';
+
 const LOCAL_STORAGE_KEY = 'falDesignerState';
 const INIT_MARKER_KEY = 'falDesignerInitialised';
 
@@ -40,7 +42,15 @@ const defaultState = {
   dragMoivreOffsetX: 0,
 };
 
-export let state = { ...defaultState };
+// structuredClone rather than a spread: defaultState holds three arrays and a
+// nested helper object, and a shallow copy leaves the running state mutating
+// the defaults themselves — so the "defaults" a later reset falls back to are
+// whatever the last session left behind.
+function freshState() {
+    return structuredClone(defaultState);
+}
+
+export let state = freshState();
 
 // The whole design, plus the resolved discipline colours the renderer needs.
 // Colours are derived from disciplines.json, but carrying them means a restore
@@ -182,13 +192,35 @@ export function migrateImages(images) {
     return images;
 }
 
+// A design file is untrusted in exactly the way a saved state is — more so, in
+// that someone else may have written it — so it goes through the same shape
+// check rather than being assigned field by field at the call site.
+//
+// This covers the geometry only. What the image URLs inside it are allowed to
+// point at, and telling the user when something was rejected, is issue #9.
+export function applyImportedDesign(loadedState) {
+    migrateImages(loadedState?.images);
+    const design = sanitizeDesign(loadedState, defaultState);
+
+    state.gridWmm = design.gridWmm;
+    state.gridHmm = design.gridHmm;
+    state.marginMm = design.marginMm;
+    state.materials = design.materials;
+    state.moivres = design.moivres;
+    state.images = design.images;
+}
+
 function loadState() {
     try {
         const savedStateJSON = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (savedStateJSON) {
             const savedState = JSON.parse(savedStateJSON);
             migrateImages(savedState.images);
-            state = { ...defaultState, ...savedState };
+            // Field by field, not a wholesale spread. A design saved while a
+            // number field was empty carries null where a size should be —
+            // JSON.stringify writes NaN out that way — and spreading let that
+            // null overwrite the default and outlive the reload.
+            state = sanitizeDesign(savedState, defaultState);
             loadedFromStorage = true;
             undoStack = [createSnapshot()];
         } else {
@@ -196,7 +228,7 @@ function loadState() {
         }
     } catch (error) {
         console.error("Failed to load or parse state from localStorage. Resetting to default.", error);
-        state = { ...defaultState };
+        state = freshState();
         localStorage.removeItem(LOCAL_STORAGE_KEY);
         undoStack = [createSnapshot()];
     }
