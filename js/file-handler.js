@@ -1,6 +1,7 @@
 import { state, notify, designState, applyImportedDesign } from './state.js';
 import { preloadImages } from './image-service.js';
 import { designFilename, downloadBlob } from './utils.js';
+import { showError } from './messages.js';
 
 export function exportState() {
     const json = JSON.stringify(designState(), null, 2);
@@ -34,8 +35,13 @@ export function importState(file) {
             notify();
 
         } catch (error) {
+            // English detail for whoever is debugging, French for whoever is
+            // holding the file — they can act on this by picking another one.
             console.error("Failed to parse or load the state file:", error);
-            alert("Error: Could not load the file. It might be corrupted or in the wrong format.");
+            showError(
+                "Ce fichier n'a pas pu être ouvert. Il est peut-être endommagé, " +
+                "ou il ne s'agit pas d'un circulaire exporté depuis Fal Designer."
+            );
         }
     };
     reader.readAsText(file);

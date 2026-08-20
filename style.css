@@ -181,6 +181,23 @@ canvas {
     color: var(--text-light);
 }
 
+#error-modal h2 {
+    color: var(--danger-color);
+}
+
+/* Sits where the content it is standing in for would have been, so an empty
+   list explains itself instead of just looking empty. */
+.inline-notice {
+    margin: 8px 0;
+    padding: 10px 12px;
+    border-left: 3px solid var(--danger-color);
+    background: rgba(239, 68, 68, 0.08);
+    border-radius: 4px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--sidebar-text);
+}
+
 .panel {
     background: transparent;
     border: none;

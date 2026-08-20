@@ -2,6 +2,7 @@ import { state } from './state.js';
 import { draw } from './renderer.js';
 import { designFilename, downloadUrl } from './utils.js';
 import { canExport, maxExportWidthMm } from './validation.js';
+import { showError } from './messages.js';
 
 const EXPORT_DPI = 300;
 
@@ -15,10 +16,8 @@ export function exportCanvasAsImage() {
     // name the width that would actually work.
     if (!canExport(totalW_mm, totalH_mm, EXPORT_DPI)) {
         const limit = maxExportWidthMm(totalH_mm, EXPORT_DPI);
-        // Issue #16 moves this onto the shared modal; alert() is what the rest
-        // of the app still uses for an actionable failure.
-        alert(
-            `Le circulaire est trop grand pour être exporté en image à ${EXPORT_DPI} DPI.\n` +
+        showError(
+            `Le circulaire est trop grand pour être exporté en image à ${EXPORT_DPI} DPI. ` +
             `Avec une hauteur de ${totalH_mm} mm, la largeur maximale est de ${limit} mm.`
         );
         return;

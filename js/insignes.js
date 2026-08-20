@@ -1,6 +1,7 @@
 // js/insignes.js
 
 import { loadJson } from './data.js';
+import { showInlineNotice } from './messages.js';
 
 
 export class InsignePaletteService {
@@ -124,6 +125,16 @@ export class InsignePaletteService {
         this.paletteElement.innerHTML = '';
 
         const insignes = await this.#fetchInsignes();
+
+        // Same reasoning as the discipline list: the detail is already in the
+        // console for whoever can fix it, but a blank palette should say why it
+        // is blank rather than leaving the tool looking empty.
+        if (Object.keys(insignes).length === 0) {
+            showInlineNotice(
+                this.paletteElement,
+                "La palette d'insignes n'a pas pu être chargée. Rechargez la page pour réessayer."
+            );
+        }
 
         this.#createCategory('Filière', insignes.filiere);
         this.#createCategory('Années', insignes.annees);

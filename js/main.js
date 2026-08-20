@@ -11,6 +11,7 @@ import { seedDefaultDesign } from './default-design.js';
 import { initCanvasInput } from './input-handler.js';
 import { initPinchZoom } from './touch-handler.js';
 import { initTouchUI } from './touch-ui.js';
+import { showModal, hideModal } from './messages.js';
 
 const APP_VERSION = "1.4.1";
 
@@ -20,26 +21,20 @@ async function main() {
     document.getElementById('version-display-footer').textContent = `v${APP_VERSION}`;
 
     const aboutBtn = document.getElementById('about-btn');
-    const welcomeModalOverlay = document.getElementById('welcome-modal-overlay');
     const aboutModalOverlay = document.getElementById('about-modal-overlay');
-    const closeModalBtns = document.querySelectorAll('.close-modal-btn');
 
-    aboutBtn.addEventListener('click', () => {
-        aboutModalOverlay.style.display = 'flex';
-    });
+    aboutBtn.addEventListener('click', () => showModal(aboutModalOverlay));
 
-    closeModalBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            welcomeModalOverlay.style.display = 'none';
-            aboutModalOverlay.style.display = 'none';
-        });
+    // Close the modal the button is actually inside, rather than naming each
+    // one here. There are three now, and the error modal is opened from modules
+    // that have no business being wired up in startup.
+    document.querySelectorAll('.close-modal-btn').forEach(btn => {
+        btn.addEventListener('click', () => hideModal(btn.closest('.modal-overlay')));
     });
 
     document.querySelectorAll('.modal-overlay').forEach(overlay => {
         overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) {
-                overlay.style.display = 'none';
-            }
+            if (e.target === overlay) hideModal(overlay);
         });
     });
 
