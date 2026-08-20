@@ -5,6 +5,7 @@ import { exportState, importState } from './file-handler.js';
 import { exportCanvasAsImage } from './image-exporter.js';
 import { debounce } from './utils.js';
 import { LIMITS, readNumber } from './validation.js';
+import { fitToView } from './view.js';
 
 // Typing in a number field fires an input event per keystroke, and dragging a
 // spinner fires a stream of them. Collapse each burst into one history entry.
@@ -180,19 +181,7 @@ function bindCanvasToolbar(toolbarEl, canvasContainer) {
 
     if (zoomInBtn) zoomInBtn.addEventListener('click', () => { state.viewScale *= 1.25; notify(); });
     if (zoomOutBtn) zoomOutBtn.addEventListener('click', () => { state.viewScale /= 1.25; notify(); });
-    if (zoomFitBtn) zoomFitBtn.addEventListener('click', () => {
-        if (!canvasContainer) return;
-        const totalW_px = (state.gridWmm + 2 * state.marginMm) * state.mmToPx;
-        const totalH_px = (state.gridHmm + 2 * state.marginMm) * state.mmToPx;
-        const scaleX = canvasContainer.clientWidth / totalW_px;
-        const scaleY = canvasContainer.clientHeight / totalH_px;
-        state.viewScale = Math.min(scaleX, scaleY) * 0.95;
-        state.viewOffsetX = (canvasContainer.clientWidth - (totalW_px * state.viewScale)) / 2;
-        state.viewOffsetY = (canvasContainer.clientHeight - (totalH_px * state.viewScale)) / 2;
-        notify();
-    });
-
-    return { zoomFitBtn };
+    if (zoomFitBtn) zoomFitBtn.addEventListener('click', () => fitToView(canvasContainer));
 }
 
 function bindInsignePalette(paletteEl, insignePalette, sessionObjectUrls) {
@@ -437,11 +426,9 @@ export function bindUI(disciplinesData, insignePalette) {
     const inspectorPanel = $('inspector-panel');
 
     const sessionObjectUrls = new Set();
-    let zoomFitBtn = null;
 
     if (canvasToolbar && canvasContainer) {
-        const { zoomFitBtn: fitBtn } = bindCanvasToolbar(canvasToolbar, canvasContainer);
-        zoomFitBtn = fitBtn;
+        bindCanvasToolbar(canvasToolbar, canvasContainer);
     }
 
     if (paletteContainer) {
@@ -466,8 +453,6 @@ export function bindUI(disciplinesData, insignePalette) {
     bindGlobalListeners(sessionObjectUrls);
     
     setupAllSubscriptions();
-
-    setTimeout(() => {
-        if(zoomFitBtn) zoomFitBtn.click();
-    }, 50);
+    // The initial fit used to be a setTimeout racing layout. main.js now does it
+    // from the ResizeObserver's first callback, when the box is really known.
 }
