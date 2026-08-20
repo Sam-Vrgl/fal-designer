@@ -25,21 +25,23 @@ export function designFilename(discipline, extension) {
     return `fal-design-${name}-${getTimestamp()}.${extension}`;
 }
 
-// Hands the user a file without leaving the page. Takes a URL rather than a
-// blob so a caller already holding a data: URL does not have to decode it back
-// into bytes just to download it.
-export function downloadUrl(url, filename) {
+// Hands the user a file without leaving the page. Took a URL rather than a blob
+// so that a caller holding a data: URL did not have to decode it back into
+// bytes; the PNG export was the only such caller, and it uses a blob now.
+//
+// The object URL is revoked immediately: click() starts the download
+// synchronously, so the browser is already holding the bytes by the time this
+// returns.
+export function downloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+
     const a = document.createElement('a');
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-}
 
-export function downloadBlob(blob, filename) {
-    const url = URL.createObjectURL(blob);
-    downloadUrl(url, filename);
     URL.revokeObjectURL(url);
 }
 
