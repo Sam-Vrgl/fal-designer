@@ -1,14 +1,11 @@
 import { state, notify } from './state.js';
+import { loadJson } from './data.js';
 
 let disciplinesData = {};
 
 async function fetchDisciplines() {
   try {
-    const response = await fetch('./disciplines.json');
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return await response.json();
+    return await loadJson('./disciplines.json');
   } catch (e) {
     console.error("Could not load disciplines:", e);
     return {};

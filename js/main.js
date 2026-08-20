@@ -42,6 +42,12 @@ async function main() {
         });
     });
 
+    // Neither depends on the other, so start both now rather than letting each
+    // wait for the one before it. Whoever needs one awaits the request already
+    // in flight. The seed design is only fetched on a first visit.
+    prefetchJson('./disciplines.json', './insignes-list.json');
+    if (shouldSeedDefaultDesign()) prefetchJson('./default-design.json');
+
     const canvas = document.getElementById('myCanvas');
     if (!canvas) {
         console.error("Canvas element not found!");

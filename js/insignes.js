@@ -1,5 +1,7 @@
 // js/insignes.js
 
+import { loadJson } from './data.js';
+
 
 export class InsignePaletteService {
     constructor(paletteId, searchInputId) {
@@ -12,11 +14,7 @@ export class InsignePaletteService {
 
     async #fetchInsignes() {
         try {
-            const response = await fetch('./insignes-list.json');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return await response.json();
+            return await loadJson('./insignes-list.json');
         } catch (e) {
             console.error("Could not load insignes-list.json:", e);
             return {};
