@@ -1,4 +1,5 @@
 import { sanitizeDesign } from './validation.js';
+import { showError } from './messages.js';
 
 const LOCAL_STORAGE_KEY = 'falDesignerState';
 const INIT_MARKER_KEY = 'falDesignerInitialised';
@@ -157,11 +158,30 @@ function persistableState() {
     };
 }
 
+// The quota failure is the one worth interrupting for: the user carries on
+// designing, believing their work is saved, and it is not. Safari private mode
+// reaches this in ordinary use. They can act on it — export the design — so it
+// belongs in the UI rather than in a console line nobody has open.
+let storageWarningShown = false;
+
 function saveState() {
     try {
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(persistableState()));
+        // Room again. A later failure is news rather than the same news.
+        storageWarningShown = false;
     } catch (error) {
         console.error("Could not save state to localStorage:", error);
+
+        // Once per run of failures. saveState runs on a debounce, so warning
+        // every time would put the modal back up every half second.
+        if (!storageWarningShown) {
+            storageWarningShown = true;
+            showError(
+                "La sauvegarde automatique a échoué : la mémoire du navigateur est pleine " +
+                "ou indisponible (navigation privée). Vos modifications seront perdues en " +
+                "fermant la page. Exportez votre circulaire en JSON pour la conserver."
+            );
+        }
     }
 }
 

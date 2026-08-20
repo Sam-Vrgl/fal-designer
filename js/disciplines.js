@@ -1,5 +1,6 @@
 import { state, notify } from './state.js';
 import { loadJson } from './data.js';
+import { showInlineNotice } from './messages.js';
 
 let disciplinesData = {};
 
@@ -68,6 +69,18 @@ function populateDropdown(selector) {
 
 export async function initDisciplines(selector) {
   disciplinesData = await fetchDisciplines();
+
+  // Nothing the user can fix — the console already has the English detail — but
+  // an empty dropdown and a dropdown that failed to load look identical, and
+  // one of them is worth reloading the page for.
+  if (Object.keys(disciplinesData).length === 0) {
+    const select = document.getElementById(selector);
+    showInlineNotice(
+      select?.closest('.row')?.parentElement,
+      "La liste des disciplines n'a pas pu être chargée. Rechargez la page pour réessayer."
+    );
+  }
+
   populateDropdown(selector);
   return disciplinesData;
 }
