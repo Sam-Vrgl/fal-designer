@@ -1,6 +1,6 @@
 import { state } from './state.js';
 import { draw } from './renderer.js';
-import { designFilename, downloadUrl } from './utils.js';
+import { designFilename, downloadBlob } from './utils.js';
 import { canExport, maxExportWidthMm } from './validation.js';
 import { showError } from './messages.js';
 
@@ -44,7 +44,23 @@ export function exportCanvasAsImage() {
 
     draw(exportCanvas, exportCtx, exportState, false);
 
-    // Still toDataURL; issue #14 swaps this for toBlob, which also removes the
-    // base64 inflation. Left alone here so this change stays a refactor.
-    downloadUrl(exportCanvas.toDataURL('image/png'), designFilename(state.discipline, 'png'));
+    // toBlob rather than toDataURL: the latter encodes synchronously and then
+    // base64-inflates the result by a third into a single JS string, several
+    // megabytes for a full-width ribbon. Mobile Safari also handles very large
+    // data: URLs on <a download> unreliably, which is the case that matters —
+    // the phone is where this tool is mostly used.
+    exportCanvas.toBlob((blob) => {
+        if (!blob) {
+            console.error("Canvas encoding returned no blob during PNG export.");
+            showError("L'image n'a pas pu être générée. Réessayez, ou réduisez la taille du circulaire.");
+            return;
+        }
+
+        downloadBlob(blob, designFilename(state.discipline, 'png'));
+
+        // Release the backing store now rather than waiting for the collector.
+        // At 300 DPI this is tens of megabytes that nothing refers to again.
+        exportCanvas.width = 0;
+        exportCanvas.height = 0;
+    }, 'image/png');
 }
