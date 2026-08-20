@@ -158,18 +158,25 @@
     </div>
   </div>
   
-  <div id="mobile-toolbar">
-      <button id="toggle-palette-btn">🎨</button>
-      <button id="toggle-inspector-btn">🔧</button>
-  </div>
-  
-  <footer>
-    <span id="copyright"></span>
-    <button id="about-btn">A propos</button>
-    <span id="version-display-footer"></span>
-  </footer>
+  <!-- One container so the toolbar sits on top of the footer structurally.
+       They used to be two separately fixed elements, with the toolbar offset by
+       the footer's rendered height in pixels. -->
+  <div id="bottom-bar">
+    <div id="mobile-toolbar">
+        <button id="toggle-palette-btn">🎨</button>
+        <button id="toggle-inspector-btn">🔧</button>
+    </div>
 
-  <div id="welcome-modal-overlay" class="modal-overlay">
+    <footer>
+      <span id="copyright"></span>
+      <button id="about-btn">A propos</button>
+      <span id="version-display-footer"></span>
+    </footer>
+  </div>
+
+  <!-- Hidden until JS decides whether this visitor has seen it, so it cannot
+       flash on every load before the script runs. -->
+  <div id="welcome-modal-overlay" class="modal-overlay" style="display: none;">
       <div id="welcome-modal" class="modal-content">
           <h2>OUTIL EN ALPHA</h2>
           <p>

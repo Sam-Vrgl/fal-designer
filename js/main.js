@@ -1,6 +1,6 @@
 // js/main.js
 
-import { state, subscribe, shouldSeedDefaultDesign } from './state.js';
+import { state, subscribe, shouldSeedDefaultDesign, shouldShowWelcome, markWelcomeSeen } from './state.js';
 import { prefetchJson } from './data.js';
 import { draw } from './renderer.js';
 import { bindUI } from './ui.js';
@@ -37,6 +37,18 @@ async function main() {
             if (e.target === overlay) hideModal(overlay);
         });
     });
+
+    // Shown from here rather than being visible by default, so it cannot appear
+    // for a returning visitor while the script is still loading.
+    const welcomeModalOverlay = document.getElementById('welcome-modal-overlay');
+    if (shouldShowWelcome()) {
+        showModal(welcomeModalOverlay);
+        // Dismissing it is the acknowledgement, by either route out.
+        welcomeModalOverlay.querySelector('.close-modal-btn')?.addEventListener('click', markWelcomeSeen);
+        welcomeModalOverlay.addEventListener('click', (e) => {
+            if (e.target === welcomeModalOverlay) markWelcomeSeen();
+        });
+    }
 
     // Neither depends on the other, so start both now rather than letting each
     // wait for the one before it. Whoever needs one awaits the request already

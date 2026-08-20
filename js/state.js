@@ -3,6 +3,7 @@ import { showError } from './messages.js';
 
 const LOCAL_STORAGE_KEY = 'falDesignerState';
 const INIT_MARKER_KEY = 'falDesignerInitialised';
+const WELCOME_SEEN_KEY = 'falDesignerWelcomeSeen';
 
 let loadedFromStorage = false;
 let undoStack = [];
@@ -261,6 +262,29 @@ export function shouldSeedDefaultDesign() {
     } catch (error) {
         console.error("Could not read the initialisation marker:", error);
         return false;
+    }
+}
+
+// The alpha warning is worth showing once. It carried no marker at all, so it
+// blocked the app on every load and every reload, forever.
+//
+// If storage cannot be read we choose not to show it: nagging someone on every
+// single visit is worse than a first-time visitor missing it once, which is the
+// same call shouldSeedDefaultDesign makes.
+export function shouldShowWelcome() {
+    try {
+        return localStorage.getItem(WELCOME_SEEN_KEY) === null;
+    } catch (error) {
+        console.error("Could not read the welcome marker:", error);
+        return false;
+    }
+}
+
+export function markWelcomeSeen() {
+    try {
+        localStorage.setItem(WELCOME_SEEN_KEY, '1');
+    } catch (error) {
+        console.error("Could not save the welcome marker:", error);
     }
 }
 
