@@ -1,6 +1,7 @@
 // js/main.js
 
 import { state, subscribe, shouldSeedDefaultDesign } from './state.js';
+import { prefetchJson } from './data.js';
 import { draw } from './renderer.js';
 import { bindUI } from './ui.js';
 import { preloadImages } from './image-service.js';
