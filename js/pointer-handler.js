@@ -8,18 +8,23 @@ const MOIVRE_ROTATION_DEG = 15;
 const MOIVRE_ROTATION_RAD = MOIVRE_ROTATION_DEG * Math.PI / 180;
 
 let panStartX, panStartY, didDrag = false;
+let dragRect = null;
 
 function getPointer(event) {
     return event.touches ? event.touches[0] : event;
 }
 
-function getGridCoordsFromEvent(event, container, relativeToGrid = true) {
+// Shared client -> container-relative conversion, so every gesture (wheel,
+// pinch, drag) agrees on where the container origin is.
+export function toContainerXY(clientX, clientY, rect) {
+    return { x: clientX - rect.left, y: clientY - rect.top };
+}
+
+function getGridCoordsFromEvent(event, rect, relativeToGrid = true) {
     const pointer = getPointer(event);
     if (!pointer) return { gridX: 0, gridY: 0 };
 
-    const rect = container.getBoundingClientRect();
-    const screenX = pointer.clientX - rect.left;
-    const screenY = pointer.clientY - rect.top;
+    const { x: screenX, y: screenY } = toContainerXY(pointer.clientX, pointer.clientY, rect);
 
     const worldX = (screenX - state.viewOffsetX) / state.viewScale;
     const worldY = (screenY - state.viewOffsetY) / state.viewScale;
@@ -36,7 +41,8 @@ function getGridCoordsFromEvent(event, container, relativeToGrid = true) {
 
 export function handlePointerDown(event, container) {
     didDrag = false;
-    const { gridX, gridY } = getGridCoordsFromEvent(event, container);
+    dragRect = container.getBoundingClientRect();
+    const { gridX, gridY } = getGridCoordsFromEvent(event, dragRect);
 
     if (state.currentMode === 'place' && state.insigneToPlace) {
         const { path, sizeMm, heightPct, sessionOnly } = state.insigneToPlace;
@@ -136,6 +142,10 @@ export function handlePointerDown(event, container) {
 }
 
 export function handlePointerMove(event, container) {
+    if (!state.isPanning && !state.isDragging && !state.isDraggingMaterial && !state.isDraggingMoivre) {
+        return;
+    }
+
     if (state.isPanning) {
         event.preventDefault();
         const pointer = getPointer(event);
@@ -146,8 +156,9 @@ export function handlePointerMove(event, container) {
         return;
     }
 
-    const { gridX, gridY } = getGridCoordsFromEvent(event, container);
-    
+    const rect = dragRect || container.getBoundingClientRect();
+    const { gridX, gridY } = getGridCoordsFromEvent(event, rect);
+
     if (state.isDragging && state.selectedInsigne) {
         event.preventDefault();
         didDrag = true;
@@ -224,6 +235,7 @@ export function handlePointerUp() {
     if (didDrag && (state.isDragging || state.isDraggingMaterial || state.isDraggingMoivre)) {
         recordStateForUndo();
     }
+    dragRect = null;
     state.isPanning = false;
     state.isDragging = false;
     state.isDraggingMaterial = false;
@@ -241,8 +253,7 @@ export function handleWheel(event, container) {
         const scroll = event.deltaY < 0 ? 1 : -1;
         const zoom = Math.exp(scroll * zoomIntensity);
         const rect = container.getBoundingClientRect();
-        const mouseX = event.clientX - rect.left;
-        const mouseY = event.clientY - rect.top;
+        const { x: mouseX, y: mouseY } = toContainerXY(event.clientX, event.clientY, rect);
         state.viewOffsetX = mouseX - (mouseX - state.viewOffsetX) * zoom;
         state.viewOffsetY = mouseY - (mouseY - state.viewOffsetY) * zoom;
         state.viewScale = Math.max(0.05, state.viewScale * zoom);
