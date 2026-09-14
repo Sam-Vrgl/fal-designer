@@ -13,6 +13,32 @@ async function fetchDisciplines() {
   }
 }
 
+// True for a real, selectable discipline name — not one that is merely a key
+// in disciplines.json, since "custom" entries are placeholders the UI shows
+// disabled and were never a value a user could have actually picked.
+export function isKnownDiscipline(name) {
+    const discipline = disciplinesData[name];
+    return Boolean(discipline && discipline.custom !== true);
+}
+
+// Resolves a discipline name to its colours and material and writes all three
+// into state. Shared by the dropdown's change handler and by import, so a
+// design file's discipline is applied exactly the way picking it in the UI
+// would be — rather than going through the <select> element as a side door.
+export function applyDiscipline(name) {
+    const discipline = disciplinesData[name];
+
+    if (discipline && discipline.custom !== true) {
+        state.discipline = name;
+        state.disciplineColors = discipline.couleursRGB.map(c => `rgb(${c})`);
+        state.disciplineMaterial = discipline.matière;
+    } else {
+        state.discipline = '';
+        state.disciplineColors = [];
+        state.disciplineMaterial = null;
+    }
+}
+
 function populateDropdown(selector) {
   const select = document.getElementById(selector);
   const disciplineNames = Object.keys(disciplinesData);
@@ -39,19 +65,7 @@ function populateDropdown(selector) {
   }
 
   select.addEventListener('change', (event) => {
-    const selectedDisciplineName = event.target.value;
-    const discipline = disciplinesData[selectedDisciplineName];
-
-    if (discipline && discipline.custom !== true) {
-      const colors = discipline.couleursRGB.map(c => `rgb(${c})`);
-      state.discipline = selectedDisciplineName;
-      state.disciplineColors = colors;
-      state.disciplineMaterial = discipline.matière;
-    } else {
-      state.discipline = '';
-      state.disciplineColors = [];
-      state.disciplineMaterial = null;
-    }
+    applyDiscipline(event.target.value);
     notify();
   });
 

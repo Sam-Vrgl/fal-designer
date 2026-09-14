@@ -48,6 +48,28 @@ export function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
 }
 
+// Where an image placement is allowed to point. A design file is untrusted —
+// more so than a saved state, since someone else may have written it — and an
+// arbitrary `url` reaches `new Image().src` unchanged, which makes it a
+// tracking pixel wearing a design file's clothes, and a cross-origin image
+// without CORS also throws on toDataURL() and breaks PNG export outright.
+// Only assets shipped with the app, or a blob: URL from a same-session
+// upload, are allowed through.
+const ASSETS_BASE = new URL('assets/', document.baseURI);
+
+export function isAllowedImageUrl(url) {
+    if (typeof url !== 'string' || url === '') return false;
+    if (url.startsWith('blob:')) return true;
+
+    let resolved;
+    try {
+        resolved = new URL(url, document.baseURI);
+    } catch {
+        return false;
+    }
+    return resolved.origin === ASSETS_BASE.origin && resolved.pathname.startsWith(ASSETS_BASE.pathname);
+}
+
 // Coerces anything to a number inside [min, max], or returns `fallback` when it
 // cannot. Pass fallback: null to make "unreadable" distinguishable from a real
 // value, which is what every caller that would rather skip than substitute does.
@@ -151,9 +173,23 @@ function sanitizeImage(image) {
     return placed;
 }
 
+// URL allowlisting happens before geometry sanitization, and is tallied
+// separately: "your image's position was garbage" and "that URL isn't
+// allowed" are different problems and the import warning should say which.
 function sanitizeImages(list) {
-    if (!Array.isArray(list)) return [];
-    return list.map(sanitizeImage).filter(Boolean);
+    if (!Array.isArray(list)) return { images: [], rejectedByUrl: 0 };
+
+    const images = [];
+    let rejectedByUrl = 0;
+    for (const item of list) {
+        if (item && typeof item === 'object' && !isAllowedImageUrl(item.url)) {
+            rejectedByUrl += 1;
+            continue;
+        }
+        const image = sanitizeImage(item);
+        if (image) images.push(image);
+    }
+    return { images, rejectedByUrl };
 }
 
 // Takes an untrusted saved or imported design and returns one that is safe to
@@ -161,11 +197,16 @@ function sanitizeImages(list) {
 // wrong shape. Spreading the parsed object wholesale is what let a single null
 // survive a reload and blank the canvas.
 //
-// Dropped placements are counted rather than passed through, and reported to
-// the console in English: a corrupt entry is not something the user can fix.
+// Returns `{ design, warnings }`. Dropped placements are always logged to the
+// console in English (a corrupt entry is not something the user can fix), and
+// also collected into `warnings` in French: a caller acting on behalf of an
+// import — where the file is untrusted and someone should be told something
+// was rejected — surfaces those in the UI. A caller restoring from
+// localStorage is free to ignore them.
 export function sanitizeDesign(saved, defaults) {
     const result = structuredClone(defaults);
-    if (!saved || typeof saved !== 'object') return result;
+    const warnings = [];
+    if (!saved || typeof saved !== 'object') return { design: result, warnings };
 
     const takeNumber = (key, limit) => {
         result[key] = coerceNumber(saved[key], { ...limit, fallback: defaults[key] });
@@ -199,14 +240,28 @@ export function sanitizeDesign(saved, defaults) {
 
     result.materials = sanitizeRects(saved.materials);
     result.moivres = sanitizeRects(saved.moivres);
-    result.images = sanitizeImages(saved.images);
+    const { images, rejectedByUrl } = sanitizeImages(saved.images);
+    result.images = images;
 
     const dropped = countDropped(saved, result);
     if (dropped > 0) {
         console.warn(`Discarded ${dropped} item(s) with unusable geometry while loading the design.`);
     }
 
-    return result;
+    if (rejectedByUrl > 0) {
+        warnings.push(rejectedByUrl === 1
+            ? "1 image ignorée : son URL n'est pas autorisée."
+            : `${rejectedByUrl} images ignorées : leur URL n'est pas autorisée.`);
+    }
+
+    const geometryDropped = dropped - rejectedByUrl;
+    if (geometryDropped > 0) {
+        warnings.push(geometryDropped === 1
+            ? "1 élément ignoré : sa position ou sa taille était invalide."
+            : `${geometryDropped} éléments ignorés : leur position ou leur taille était invalide.`);
+    }
+
+    return { design: result, warnings };
 }
 
 function countDropped(saved, result) {

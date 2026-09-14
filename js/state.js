@@ -217,11 +217,13 @@ export function migrateImages(images) {
 // that someone else may have written it — so it goes through the same shape
 // check rather than being assigned field by field at the call site.
 //
-// This covers the geometry only. What the image URLs inside it are allowed to
-// point at, and telling the user when something was rejected, is issue #9.
+// This covers geometry and image URLs. Discipline is validated by the caller,
+// which is the one that knows which discipline names actually exist.
+// Returns the French warnings sanitizeDesign collected, so the caller can
+// show the user what was rejected.
 export function applyImportedDesign(loadedState) {
     migrateImages(loadedState?.images);
-    const design = sanitizeDesign(loadedState, defaultState);
+    const { design, warnings } = sanitizeDesign(loadedState, defaultState);
 
     state.gridWmm = design.gridWmm;
     state.gridHmm = design.gridHmm;
@@ -229,6 +231,8 @@ export function applyImportedDesign(loadedState) {
     state.materials = design.materials;
     state.moivres = design.moivres;
     state.images = design.images;
+
+    return warnings;
 }
 
 function loadState() {
@@ -241,7 +245,11 @@ function loadState() {
             // number field was empty carries null where a size should be —
             // JSON.stringify writes NaN out that way — and spreading let that
             // null overwrite the default and outlive the reload.
-            state = sanitizeDesign(savedState, defaultState);
+            const { design, warnings } = sanitizeDesign(savedState, defaultState);
+            state = design;
+            if (warnings.length > 0) {
+                console.warn('Discarded while restoring saved state:', warnings);
+            }
             loadedFromStorage = true;
             undoStack = [createSnapshot()];
         } else {

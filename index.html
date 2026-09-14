@@ -7,6 +7,12 @@
   <meta name="description" content="Outil pour planifier la création d'une faluche : le circulaire, les rubans et les insignes nécessaires à sa confection.">
   <meta name="theme-color" content="#172235">
 
+  <!-- Nothing here needs a third party beyond the Cloudflare beacon below, and
+       nothing needs inline script. An imported design file's image URLs are
+       allowlisted in code (js/validation.js), but img-src is the backstop if
+       that ever slips. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' blob: data:; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://cloudflareinsights.com https://static.cloudflareinsights.com;">
+
   <!-- Self-hosted, so the font arrives in one same-origin request instead of
        two chained handshakes to fonts.googleapis.com then fonts.gstatic.com. -->
   <link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
