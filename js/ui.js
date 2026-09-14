@@ -4,7 +4,7 @@ import { state, notify, subscribe, resetState, recordStateForUndo, undo, redo } 
 import { exportState, importState } from './file-handler.js';
 import { exportCanvasAsImage } from './image-exporter.js';
 import { placeInsigne } from './image-service.js';
-import { debounce } from './utils.js';
+import { debounce, randomId } from './utils.js';
 import { LIMITS, readNumber, clamp } from './validation.js';
 import { fitToView } from './view.js';
 
@@ -256,7 +256,10 @@ function bindSettings(settingsContainer, disciplinesData) {
         const totalHeight = state.gridHmm * heightMultiplier;
 
         if (discipline.couleursRGB.length > 1) {
-            const groupId = Date.now();
+            // Date.now() gave two sections added in the same millisecond the
+            // same id, and a shared id is what makes two halves one ribbon:
+            // selecting either dragged both, deleting either deleted both.
+            const groupId = randomId();
             const sectionHeight = totalHeight / 2;
             const color1 = `rgb(${discipline.couleursRGB[0]})`;
             const color2 = `rgb(${discipline.couleursRGB[1]})`;

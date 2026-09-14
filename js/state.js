@@ -191,10 +191,17 @@ function saveState() {
 // before that still reference the deleted copies, so rewrite them to the
 // surviving file. The physical size is stored on the placement itself, so
 // nothing the user sees changes.
+//
+// The two renames below are the same story for a different reason: an accent
+// and an @ in a filename only work while every checkout, server and CDN in
+// the chain encodes the name identically, so both were folded to ASCII. A
+// design saved before that still asks for the old name.
 const MOVED_ASSETS = [
     [/\/lettres\/min\/([a-z])_min\.webp$/, '/lettres/maj/$1_maj.webp'],
     [/\/chiffres\/petit\/(\d)_min\.webp$/, '/chiffres/grand/$1_maj.webp'],
     [/\/annees\/(beta|phi|psi)-24mm\.webp$/, '/filiere/$1-24mm.webp'],
+    [/\/filiere\/caducée-de-mercure-32mm\.webp$/, '/filiere/caducee-de-mercure-32mm.webp'],
+    [/\/filiere\/@-arobase-24mm\.webp$/, '/filiere/arobase-24mm.webp'],
 ];
 
 export function migrateAssetPath(url) {

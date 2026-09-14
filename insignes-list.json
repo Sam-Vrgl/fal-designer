@@ -300,8 +300,8 @@
     }
   },
   "filiere": {
-    "@ arobase": {
-      "path": "./assets/insignes/filiere/@-arobase-24mm.webp",
+    "arobase": {
+      "path": "./assets/insignes/filiere/arobase-24mm.webp",
       "size_mm": 24
     },
     "beta": {
@@ -312,6 +312,10 @@
       "path": "./assets/insignes/filiere/caducee-de-medecine-30mm.webp",
       "size_mm": 30
     },
+    "caducee de mercure": {
+      "path": "./assets/insignes/filiere/caducee-de-mercure-32mm.webp",
+      "size_mm": 32
+    },
     "caducee infirmier": {
       "path": "./assets/insignes/filiere/caducee-infirmier-24mm.webp",
       "size_mm": 24
@@ -319,10 +323,6 @@
     "caducee pharma": {
       "path": "./assets/insignes/filiere/caducee-pharma-24mm.webp",
       "size_mm": 24
-    },
-    "caducée de mercure": {
-      "path": "./assets/insignes/filiere/caducée-de-mercure-32mm.webp",
-      "size_mm": 32
     },
     "casque de pericles": {
       "path": "./assets/insignes/filiere/casque-de-pericles-28mm.webp",

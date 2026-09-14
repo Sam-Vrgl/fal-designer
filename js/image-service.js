@@ -2,7 +2,18 @@
 
 import { state, notify, recordStateForUndo } from './state.js';
 
+// Images that have finished loading. The renderer looks images up
+// synchronously on every frame, so this side of it holds the element itself.
 const imgCache = new Map();
+
+// Loads still in flight, keyed by url. Caching only the finished image meant
+// two requests for the same one before either resolved started two downloads
+// — routine, since preloading a design and drawing it both ask at once.
+const inFlight = new Map();
+
+// Urls that have already failed. Without remembering them, a 404 is
+// re-requested by every preload for the life of the page.
+const failed = new Set();
 
 export function loadImage(url) {
   return new Promise((resolve, reject) => {
@@ -14,23 +25,34 @@ export function loadImage(url) {
 }
 
 
-export function getCachedImage(url) { 
-    return imgCache.get(url) || null; 
+export function getCachedImage(url) {
+    return imgCache.get(url) || null;
 }
 
 
-async function ensureImageLoaded(url) {
-    if (imgCache.has(url)) {
-        return imgCache.get(url);
-    }
-    try {
-        const img = await loadImage(url);
-        imgCache.set(url, img);
-        return img;
-    } catch (e) {
-        console.error(`Failed to load image: ${url}`, e);
-        throw e;
-    }
+function ensureImageLoaded(url) {
+    const loaded = imgCache.get(url);
+    if (loaded) return Promise.resolve(loaded);
+
+    if (failed.has(url)) return Promise.reject(new Error(`Previously failed to load: ${url}`));
+
+    const pending = inFlight.get(url);
+    if (pending) return pending;
+
+    const request = loadImage(url)
+        .then((img) => {
+            imgCache.set(url, img);
+            return img;
+        })
+        .catch((error) => {
+            failed.add(url);
+            console.error(`Failed to load image: ${url}`, error);
+            throw error;
+        })
+        .finally(() => inFlight.delete(url));
+
+    inFlight.set(url, request);
+    return request;
 }
 
 

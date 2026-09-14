@@ -27,9 +27,23 @@ function webPath(absolutePath) {
     return './' + path.relative(PROJECT_ROOT, absolutePath).replace(/\\/g, '/');
 }
 
+// Anything outside this set has to survive a Windows checkout, a Linux
+// server and a CDN agreeing byte for byte on how the name is encoded. An
+// accented filename is a portability hazard rather than an error here, so it
+// is reported and still listed: the generator's job is to describe the disk,
+// and the fix is to rename the file.
+const PORTABLE_NAME = /^[a-z0-9._@-]+$/i;
+const unportableNames = [];
+
 function listImages(dir) {
     if (!fs.existsSync(dir)) return [];
-    return fs.readdirSync(dir).filter((file) => IMAGE_PATTERN.test(file));
+    const files = fs.readdirSync(dir).filter((file) => IMAGE_PATTERN.test(file));
+
+    for (const file of files) {
+        if (!PORTABLE_NAME.test(file)) unportableNames.push(webPath(path.join(dir, file)));
+    }
+
+    return files;
 }
 
 // "caducee-de-mercure-32mm.webp" -> { name: "caducee de mercure", size_mm: 32 }
@@ -109,6 +123,12 @@ try {
     console.log(`✅ Wrote ${OUTPUT_FILE}`);
     console.log(`   letters ${count(structured.letters.small)}×2  numbers ${count(structured.numbers.small)}×2  ` +
                 `filiere ${count(structured.filiere)}  annees ${count(structured.annees)}  other ${count(structured.other)}`);
+
+    if (unportableNames.length > 0) {
+        console.warn(`\n⚠️  ${unportableNames.length} filename(s) use characters outside [a-z0-9._@-].`);
+        console.warn(`   Rename them to plain ASCII — accents do not survive every host and CDN alike:`);
+        for (const name of unportableNames) console.warn(`   ${name}`);
+    }
 } catch (error) {
     console.error(`❌ Failed to generate ${OUTPUT_FILE}:`, error);
     process.exitCode = 1;

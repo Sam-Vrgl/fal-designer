@@ -320,6 +320,13 @@ button:hover {
     margin-bottom: 20px;
 }
 
+/* What the palette search hides. A class rather than an inline style, so
+   "is this entry showing?" is a class check instead of a substring match
+   against a serialised style attribute. */
+.is-hidden {
+    display: none;
+}
+
 #insigne-palette h4 {
     margin: 0 0 10px;
     font-size: 1em;

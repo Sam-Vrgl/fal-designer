@@ -45,6 +45,19 @@ export function downloadBlob(blob, filename) {
     URL.revokeObjectURL(url);
 }
 
+// 128 random bits as hex, for ids that have to stay distinct inside a file
+// and between files — the same strength as a UUID.
+//
+// Deliberately not crypto.randomUUID(), which exists only in a secure
+// context: over plain http from anything but localhost it is undefined, and
+// serving the app to a phone across the LAN is exactly that. getRandomValues
+// carries no such restriction, so this is one path that works everywhere
+// rather than a fallback that only ever runs where nobody is looking.
+export function randomId() {
+    const bytes = crypto.getRandomValues(new Uint8Array(16));
+    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
 // Trailing debounce: runs fn once the calls stop for ms. Used to collapse a
 // burst of input events into a single undo entry.
 export function debounce(fn, ms) {

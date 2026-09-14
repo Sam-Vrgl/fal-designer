@@ -2,6 +2,9 @@
 
 import { loadJson } from './data.js';
 import { showInlineNotice } from './messages.js';
+import { debounce } from './utils.js';
+
+const SEARCH_DEBOUNCE_MS = 120;
 
 
 export class InsignePaletteService {
@@ -96,8 +99,9 @@ export class InsignePaletteService {
         if (!this.paletteElement || this.sessionItemsDiv) return;
 
         this.sessionCategoryDiv = document.createElement('div');
-        this.sessionCategoryDiv.className = 'category';
-        this.sessionCategoryDiv.style.display = 'none';
+        // Empty until an upload arrives, and hidden by the same class the
+        // search uses, so the two cannot contradict each other.
+        this.sessionCategoryDiv.className = 'category is-hidden';
 
         const title = document.createElement('h4');
         title.textContent = 'Ajouts de la session';
@@ -110,25 +114,38 @@ export class InsignePaletteService {
         this.paletteElement.appendChild(this.sessionCategoryDiv);
     }
     
+    // Hiding is a class rather than an inline style because the previous
+    // version asked the DOM which entries were visible with
+    // `img:not([style*="display: none"])` — a substring match against the
+    // serialised style attribute, correct only for as long as browsers keep
+    // stringifying it with exactly that spacing.
+    #applySearch(term) {
+        const searchTerm = term.trim().toLowerCase();
+
+        for (const img of this.allInsigneElements) {
+            const matches = img.dataset.name.toLowerCase().includes(searchTerm);
+            img.classList.toggle('is-hidden', !matches);
+        }
+
+        if (this.paletteElement) {
+            for (const category of this.paletteElement.querySelectorAll('.category')) {
+                const images = [...category.querySelectorAll('img')];
+                const hasMatch = images.some((img) => !img.classList.contains('is-hidden'));
+                category.classList.toggle('is-hidden', !hasMatch);
+            }
+        }
+
+        // A search can hide whichever entry was holding the tab stop.
+        this.#ensureTabStop();
+    }
+
     #setupSearch() {
         if (!this.searchInput) return;
 
-        this.searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            this.allInsigneElements.forEach((img) => {
-                const name = img.dataset.name.toLowerCase();
-                img.style.display = name.includes(searchTerm) ? '' : 'none';
-            });
-
-            if (!this.paletteElement) return;
-            this.paletteElement.querySelectorAll('.category').forEach((cat) => {
-                const visibleItems = cat.querySelectorAll('img:not([style*="display: none"])');
-                cat.style.display = visibleItems.length > 0 ? '' : 'none';
-            });
-
-            // A search can hide whichever entry was holding the tab stop.
-            this.#ensureTabStop();
-        });
+        // Every keystroke otherwise reclasses several hundred elements and
+        // forces the layout that #ensureTabStop then reads back.
+        const search = debounce(() => this.#applySearch(this.searchInput.value), SEARCH_DEBOUNCE_MS);
+        this.searchInput.addEventListener('input', search);
     }
 
     // Focus reached an entry some other way — a click, or the browser
@@ -222,7 +239,7 @@ export class InsignePaletteService {
 
         if (this.sessionItemsDiv) {
             this.sessionItemsDiv.appendChild(insigneEl);
-            this.sessionCategoryDiv.style.display = '';
+            this.sessionCategoryDiv.classList.remove('is-hidden');
         }
 
         this.#ensureTabStop();
