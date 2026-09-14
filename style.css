@@ -27,7 +27,19 @@
     --border-color: #e2e8f0;
     --text-color: #cbd5e1;
     --text-light: #64748b;
+    /* Lighter than --primary-color, which would disappear against the blue
+       buttons it has to outline. */
+    --focus-ring: #93c5fd;
     --font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+/* One ring for every control, rather than per-element rules that were never
+   written for half of them. :focus-visible leaves it to the browser to decide
+   when focus deserves to be seen, so a mouse click on a button does not light
+   it up but tabbing to it does. */
+:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
 }
 
 body {
@@ -160,6 +172,12 @@ canvas {
     user-select: none;
 }
 
+/* Inwards, because the container clips and an outset ring would be cut off
+   on the edge the canvas is flush against. */
+canvas:focus-visible {
+    outline-offset: -2px;
+}
+
 #canvas-toolbar {
     height: var(--toolbar-height);
     flex-shrink: 0;
@@ -173,14 +191,22 @@ canvas {
     gap: 12px;
 }
 
-.modal-overlay {
-    position: fixed;
-    inset: 0;
+/* The browser centres a modal <dialog> and paints its own backdrop, so all
+   this has to do is get out of the way: no chrome of its own, and no padding,
+   which is what lets .modal-content fill it edge to edge. A click anywhere
+   inside the visible card then lands on the content, never on the dialog, so
+   "target is the dialog" means the backdrop and nothing else. */
+dialog {
+    width: 500px;
+    max-width: 90vw;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--text-color);
+}
+
+dialog::backdrop {
     background-color: rgba(0, 0, 0, 0.7);
-    z-index: 1000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 .modal-content {
@@ -188,8 +214,6 @@ canvas {
     padding: 32px;
     border-radius: 16px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    max-width: 90%;
-    width: 500px;
     text-align: center;
 }
 
@@ -260,8 +284,12 @@ button:hover {
     background-color: var(--primary-hover);
 }
 
+/* An active mode used to be painted --primary-color, which is exactly what
+   every other button is already painted, so "Sélectionner" being on looked
+   identical to it being off. The ring is what carries the state. */
 #toolbar button.active {
-    background-color: var(--primary-color);
+    background-color: var(--primary-hover);
+    box-shadow: inset 0 0 0 2px var(--focus-ring);
 }
 
 #resetBtn {
@@ -555,8 +583,23 @@ details[open]>summary::before {
     #tips-panel {
         display: none;
     }
-    
+
     footer {
         padding: 5px 15px;
+    }
+}
+
+/* Last, so it wins over every transition declared above. The drawers slide in
+   over a third of a second, which is exactly the kind of movement that makes
+   some people ill; the destination is what matters, not the travel. Near-zero
+   rather than `none` so transitionend still fires for anything listening. */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
     }
 }

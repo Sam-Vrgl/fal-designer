@@ -3,13 +3,37 @@
 import { state, notify, subscribe, resetState, recordStateForUndo, undo, redo } from './state.js';
 import { exportState, importState } from './file-handler.js';
 import { exportCanvasAsImage } from './image-exporter.js';
+import { placeInsigne } from './image-service.js';
 import { debounce } from './utils.js';
-import { LIMITS, readNumber } from './validation.js';
+import { LIMITS, readNumber, clamp } from './validation.js';
 import { fitToView } from './view.js';
 
 // Typing in a number field fires an input event per keystroke, and dragging a
 // spinner fires a stream of them. Collapse each burst into one history entry.
 const recordEdit = debounce(recordStateForUndo, 400);
+
+const NUDGE_STEP_MM = 1;
+const NUDGE_COARSE_MM = 10;
+
+const NUDGE_DIRECTIONS = {
+    ArrowLeft: { x: -1, y: 0 },
+    ArrowRight: { x: 1, y: 0 },
+    ArrowUp: { x: 0, y: -1 },
+    ArrowDown: { x: 0, y: 1 },
+};
+
+// How far each arrow moves through the palette. Its grid reflows with the
+// container, so up and down mean one entry rather than one row.
+const PALETTE_STEPS = {
+    ArrowRight: 1,
+    ArrowDown: 1,
+    ArrowLeft: -1,
+    ArrowUp: -1,
+};
+
+// Inside a field the arrows drive the spinner and Backspace erases a digit.
+// Those keys belong to whatever has focus, not to the canvas.
+const isEditingField = () => Boolean(document.activeElement?.matches('input, select, textarea'));
 
 // Every numeric control in the app goes through here, so no keystroke can put a
 // non-finite or out-of-range number into state.
@@ -62,6 +86,88 @@ function setMode(mode) {
     if (mode === 'select') {
         state.insigneToPlace = null;
     }
+    notify();
+}
+
+// Only one thing can be selected at a time: every place that selects
+// something clears the other two first.
+function selectedElement() {
+    return state.selectedInsigne ?? state.selectedMaterial ?? state.selectedMoivre;
+}
+
+function clearSelection() {
+    state.selectedInsigne = null;
+    state.selectedMaterial = null;
+    state.selectedMoivre = null;
+}
+
+// Everything on the canvas in one order, each paired with the state field
+// that holds it when selected, so Tab can walk the design as a single list.
+function selectableElements() {
+    return [
+        ...state.images.map((item) => ({ item, field: 'selectedInsigne' })),
+        ...state.materials.map((item) => ({ item, field: 'selectedMaterial' })),
+        ...state.moivres.map((item) => ({ item, field: 'selectedMoivre' })),
+    ];
+}
+
+// Moves the selection one element along, and reports whether it landed on
+// anything. Running off either end clears the selection and answers false,
+// which is what lets Tab out of the canvas instead of trapping focus there.
+function cycleSelection(step) {
+    const elements = selectableElements();
+    if (elements.length === 0) return false;
+
+    const selected = selectedElement();
+    const from = selected
+        ? elements.findIndex(({ item }) => item === selected)
+        : (step > 0 ? -1 : elements.length);
+
+    const next = elements[from + step];
+    clearSelection();
+    if (next) state[next.field] = next.item;
+    notify();
+
+    return Boolean(next);
+}
+
+// Every selectable thing carries a position in mm, so one mover covers all
+// three. The bounds are the same ones the inspector fields enforce.
+function nudgeSelection({ x, y }, stepMm) {
+    const target = selectedElement();
+    if (!target) return;
+
+    target.x_mm = clamp(target.x_mm + x * stepMm, LIMITS.x_mm.min, LIMITS.x_mm.max);
+    target.y_mm = clamp(target.y_mm + y * stepMm, LIMITS.y_mm.min, LIMITS.y_mm.max);
+    // Same debounce as typing a coordinate, so a held arrow key is one undo
+    // step rather than forty.
+    recordEdit();
+    notify();
+}
+
+// Drops whatever is selected. Only one thing can be at a time — selecting
+// anything clears the other two — so the three inspector buttons and the
+// Delete key are all the same operation and share this.
+//
+// A two-colour discipline places two stacked materials sharing a groupId.
+// They are one ribbon to whoever is looking at them, so they go together.
+function deleteSelection() {
+    const { selectedInsigne, selectedMaterial, selectedMoivre } = state;
+
+    if (selectedInsigne) {
+        state.images = state.images.filter(i => i !== selectedInsigne);
+    } else if (selectedMaterial) {
+        state.materials = selectedMaterial.groupId
+            ? state.materials.filter(m => m.groupId !== selectedMaterial.groupId)
+            : state.materials.filter(m => m !== selectedMaterial);
+    } else if (selectedMoivre) {
+        state.moivres = state.moivres.filter(m => m !== selectedMoivre);
+    } else {
+        return;
+    }
+
+    clearSelection();
+    recordStateForUndo();
     notify();
 }
 
@@ -189,16 +295,51 @@ function bindInsignePalette(paletteEl, insignePalette, sessionObjectUrls) {
     const uploadSessionImageBtn = paletteEl.querySelector('#uploadSessionImageBtn');
     const sessionImageInput = paletteEl.querySelector('#sessionImageInput');
 
+    const readInsigneToPlace = (img) => {
+        const { path, sizeMm, heightPct, sessionOnly } = img.dataset;
+        const insigneToPlace = { path, url: img.src };
+        if (sizeMm) insigneToPlace.sizeMm = sizeMm;
+        if (heightPct) insigneToPlace.heightPct = parseFloat(heightPct);
+        if (sessionOnly === 'true') insigneToPlace.sessionOnly = true;
+        return insigneToPlace;
+    };
+
     if (insigneList) insigneList.addEventListener('click', (e) => {
         if (e.target.tagName === 'IMG') {
-            const { path, sizeMm, heightPct, sessionOnly } = e.target.dataset;
-            const insigneToPlace = { path, url: e.target.src };
-            if (sizeMm) insigneToPlace.sizeMm = sizeMm;
-            if (heightPct) insigneToPlace.heightPct = parseFloat(heightPct);
-            if (sessionOnly === 'true') insigneToPlace.sessionOnly = true;
-            state.insigneToPlace = insigneToPlace;
+            state.insigneToPlace = readInsigneToPlace(e.target);
             setMode('place');
         }
+    });
+
+    // Picking with a pointer only arms the placement — the insigne lands where
+    // the canvas is clicked next, and a keyboard has no way to say where that
+    // is. So Enter and Space place it outright, in the middle of the grid, and
+    // leave it selected with focus on the inspector: the number fields there
+    // are the keyboard's way to position it.
+    if (insigneList) insigneList.addEventListener('keydown', (e) => {
+        if (e.target.tagName !== 'IMG') return;
+
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+
+            clearSelection();
+            state.selectedInsigne = placeInsigne(readInsigneToPlace(e.target), {
+                x_mm: state.gridWmm / 2,
+                y_mm: state.gridHmm / 2,
+            });
+            setMode('select');
+
+            document.getElementById('inspector-panel')?.focus();
+            return;
+        }
+
+        const step = PALETTE_STEPS[e.key];
+        if (step === undefined) return;
+
+        // preventDefault so roving the palette does not also scroll the
+        // sidebar out from under it.
+        e.preventDefault();
+        insignePalette.focusRelative(step);
     });
 
     if (uploadSessionImageBtn) {
@@ -258,15 +399,8 @@ function bindInspectorPanel(inspectorPanelEl) {
         },
         set: (value) => { state.selectedInsigne.heightPct = value / 100; },
     });
-    if (removeInsigneBtn) removeInsigneBtn.addEventListener('click', () => {
-        if (state.selectedInsigne) {
-            state.images = state.images.filter(i => i !== state.selectedInsigne);
-            state.selectedInsigne = null;
-            recordStateForUndo();
-            notify();
-        }
-    });
-    
+    if (removeInsigneBtn) removeInsigneBtn.addEventListener('click', deleteSelection);
+
     bindNumberInput(selectedMaterialX, LIMITS.x_mm, {
         get: () => state.selectedMaterial?.x_mm,
         set: (value) => { state.selectedMaterial.x_mm = value; },
@@ -283,33 +417,49 @@ function bindInspectorPanel(inspectorPanelEl) {
         get: () => state.selectedMaterial?.height_mm,
         set: (value) => { state.selectedMaterial.height_mm = value; },
     });
-    if (removeMaterialBtn) removeMaterialBtn.addEventListener('click', () => {
-        if (state.selectedMaterial) {
-            if (state.selectedMaterial.groupId) {
-                state.materials = state.materials.filter(m => m.groupId !== state.selectedMaterial.groupId);
-            } else {
-                state.materials = state.materials.filter(m => m !== state.selectedMaterial);
-            }
-            state.selectedMaterial = null;
-            recordStateForUndo();
-            notify();
-        }
-    });
+    if (removeMaterialBtn) removeMaterialBtn.addEventListener('click', deleteSelection);
 
-    if (removeMoivreBtn) removeMoivreBtn.addEventListener('click', () => {
-        if (state.selectedMoivre) {
-            state.moivres = state.moivres.filter(m => m !== state.selectedMoivre);
-            state.selectedMoivre = null;
-            recordStateForUndo();
-            notify();
-        }
-    });
+    if (removeMoivreBtn) removeMoivreBtn.addEventListener('click', deleteSelection);
 }
 
 function bindGlobalListeners(sessionObjectUrls) {
+    const canvas = document.getElementById('myCanvas');
+
+    // The selection keys reach only the canvas and the panel that edits it.
+    // Bound to the window at large, the arrows would take scrolling away from
+    // whatever else happened to have focus.
+    const inSelectionContext = () =>
+        document.activeElement === canvas ||
+        Boolean(document.activeElement?.closest('#inspector-panel'));
+
     window.addEventListener('keydown', (e) => {
+        // A modal owns the keyboard while it is up: Escape belongs to it, and
+        // undo would act on a canvas the user cannot reach or see.
+        if (document.querySelector('dialog[open]')) return;
+
         if (e.key === 'Escape') {
             setMode('select');
+        }
+
+        // With the canvas focused, Tab walks the design instead of leaving
+        // it — the only way to reach an element without a pointer. It lets go
+        // at both ends rather than trapping: once the selection runs out, the
+        // key is left alone and the browser moves on as usual.
+        if (e.key === 'Tab' && document.activeElement === canvas) {
+            if (cycleSelection(e.shiftKey ? -1 : 1)) e.preventDefault();
+        }
+
+        if (inSelectionContext() && !isEditingField()) {
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                e.preventDefault();
+                deleteSelection();
+            }
+
+            const nudge = NUDGE_DIRECTIONS[e.key];
+            if (nudge) {
+                e.preventDefault();
+                nudgeSelection(nudge, e.shiftKey ? NUDGE_COARSE_MM : NUDGE_STEP_MM);
+            }
         }
 
         if (e.ctrlKey || e.metaKey) {
@@ -407,7 +557,10 @@ function setupAllSubscriptions() {
 
     const updateModeUI = () => {
         const mode = state.currentMode;
-        if (selectModeBtn) selectModeBtn.classList.toggle('active', mode === 'select');
+        if (selectModeBtn) {
+            selectModeBtn.classList.toggle('active', mode === 'select');
+            selectModeBtn.setAttribute('aria-pressed', String(mode === 'select'));
+        }
         if (container) container.style.cursor = mode === 'place' && state.insigneToPlace ? 'copy' : 'default';
     };
     

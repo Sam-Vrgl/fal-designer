@@ -11,6 +11,7 @@ export class InsignePaletteService {
         this.sessionCategoryDiv = null;
         this.sessionItemsDiv = null;
         this.allInsigneElements = [];
+        this.tabStop = null;
     }
 
     async #fetchInsignes() {
@@ -30,6 +31,18 @@ export class InsignePaletteService {
         img.loading = 'lazy';
         img.dataset.name = name;
         img.dataset.path = path;
+
+        // Picking an insigne is the one thing this palette does, and it was a
+        // click on a decorative image — unreachable by keyboard and nameless
+        // to a screen reader. alt carries the name, and the role makes it the
+        // button it already behaved as.
+        //
+        // -1 because the palette is a roving tabindex: one entry holds the
+        // tab stop and the arrows move between them. Several hundred separate
+        // tab stops would be reachable but not usable.
+        img.alt = name;
+        img.setAttribute('role', 'button');
+        img.tabIndex = -1;
 
         const explicitSize = options.sizeMm ?? itemData.size_mm;
         if (explicitSize) {
@@ -112,7 +125,52 @@ export class InsignePaletteService {
                 const visibleItems = cat.querySelectorAll('img:not([style*="display: none"])');
                 cat.style.display = visibleItems.length > 0 ? '' : 'none';
             });
+
+            // A search can hide whichever entry was holding the tab stop.
+            this.#ensureTabStop();
         });
+    }
+
+    // Focus reached an entry some other way — a click, or the browser
+    // restoring it — so the stop follows, and tabbing back in returns to
+    // where the user actually was.
+    #setupRovingFocus() {
+        this.paletteElement?.addEventListener('focusin', (e) => {
+            if (e.target.tagName === 'IMG') this.#setTabStop(e.target);
+        });
+    }
+
+    // offsetParent goes null when the element or a parent is display:none,
+    // which is exactly what the search filter does to both entries and the
+    // categories holding them.
+    #visibleInsignes() {
+        return this.allInsigneElements.filter((img) => img.offsetParent !== null);
+    }
+
+    #setTabStop(img) {
+        if (this.tabStop) this.tabStop.tabIndex = -1;
+        this.tabStop = img;
+        if (img) img.tabIndex = 0;
+    }
+
+    // Exactly one visible entry must carry tabindex="0", or Tab passes the
+    // palette by entirely.
+    #ensureTabStop() {
+        if (this.tabStop?.offsetParent) return;
+        this.#setTabStop(this.#visibleInsignes()[0] ?? null);
+    }
+
+    // Moves focus by `step` entries, wrapping at both ends. The palette is a
+    // wrapping grid whose column count follows the container width, so the
+    // arrows walk it in document order rather than pretending to know rows.
+    focusRelative(step) {
+        const visible = this.#visibleInsignes();
+        if (visible.length === 0) return;
+
+        const current = visible.indexOf(document.activeElement);
+        const next = visible[(current + step + visible.length) % visible.length];
+        this.#setTabStop(next);
+        next.focus();
     }
 
 
@@ -122,6 +180,7 @@ export class InsignePaletteService {
         this.allInsigneElements = [];
         this.sessionCategoryDiv = null;
         this.sessionItemsDiv = null;
+        this.tabStop = null;
         this.paletteElement.innerHTML = '';
 
         const insignes = await this.#fetchInsignes();
@@ -146,6 +205,8 @@ export class InsignePaletteService {
 
         this.#ensureSessionCategory();
         this.#setupSearch();
+        this.#setupRovingFocus();
+        this.#ensureTabStop();
     }
 
 
@@ -164,6 +225,7 @@ export class InsignePaletteService {
             this.sessionCategoryDiv.style.display = '';
         }
 
+        this.#ensureTabStop();
         return insigneEl;
     }
 }

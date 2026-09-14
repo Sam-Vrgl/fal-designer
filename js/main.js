@@ -22,33 +22,33 @@ async function main() {
     document.getElementById('version-display-footer').textContent = `v${APP_VERSION}`;
 
     const aboutBtn = document.getElementById('about-btn');
-    const aboutModalOverlay = document.getElementById('about-modal-overlay');
+    const aboutModal = document.getElementById('about-modal');
 
-    aboutBtn.addEventListener('click', () => showModal(aboutModalOverlay));
+    aboutBtn.addEventListener('click', () => showModal(aboutModal));
 
     // Close the modal the button is actually inside, rather than naming each
     // one here. There are three now, and the error modal is opened from modules
     // that have no business being wired up in startup.
     document.querySelectorAll('.close-modal-btn').forEach(btn => {
-        btn.addEventListener('click', () => hideModal(btn.closest('.modal-overlay')));
+        btn.addEventListener('click', () => hideModal(btn.closest('dialog')));
     });
 
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) hideModal(overlay);
+    // A click on the backdrop lands on the dialog itself — the content fills
+    // it edge to edge, so nothing else can report the dialog as its target.
+    document.querySelectorAll('dialog').forEach(dialog => {
+        dialog.addEventListener('click', (e) => {
+            if (e.target === dialog) hideModal(dialog);
         });
     });
 
     // Shown from here rather than being visible by default, so it cannot appear
     // for a returning visitor while the script is still loading.
-    const welcomeModalOverlay = document.getElementById('welcome-modal-overlay');
+    const welcomeModal = document.getElementById('welcome-modal');
     if (shouldShowWelcome()) {
-        showModal(welcomeModalOverlay);
-        // Dismissing it is the acknowledgement, by either route out.
-        welcomeModalOverlay.querySelector('.close-modal-btn')?.addEventListener('click', markWelcomeSeen);
-        welcomeModalOverlay.addEventListener('click', (e) => {
-            if (e.target === welcomeModalOverlay) markWelcomeSeen();
-        });
+        // Dismissing it is the acknowledgement, by any route out — button,
+        // backdrop or Escape. They all end in one close event.
+        welcomeModal.addEventListener('close', markWelcomeSeen, { once: true });
+        showModal(welcomeModal);
     }
 
     // Neither depends on the other, so start both now rather than letting each

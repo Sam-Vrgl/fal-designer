@@ -10,15 +10,19 @@
 // where the tool then looks merely broken: a palette that failed to load and a
 // palette that is empty are indistinguishable until one of them says so.
 
-const ERROR_OVERLAY_ID = 'error-modal-overlay';
+const ERROR_DIALOG_ID = 'error-modal';
 const ERROR_MESSAGE_ID = 'error-modal-message';
 
-export function showModal(overlay) {
-    if (overlay) overlay.style.display = 'flex';
+// showModal() is what makes a <dialog> modal: it traps focus, closes on
+// Escape and paints the backdrop, none of which a hidden div did. Calling it
+// on an already-open dialog throws, and one modal can open over another —
+// an import can fail while the welcome message is still up.
+export function showModal(dialog) {
+    if (dialog && !dialog.open) dialog.showModal();
 }
 
-export function hideModal(overlay) {
-    if (overlay) overlay.style.display = 'none';
+export function hideModal(dialog) {
+    if (dialog) dialog.close();
 }
 
 // An actionable failure, in the shared modal. Non-blocking, unlike the alert()
@@ -28,16 +32,16 @@ export function hideModal(overlay) {
 // Falls back to alert() only when the markup is missing, because an error that
 // cannot find its element must still be louder than nothing.
 export function showError(message) {
-    const overlay = document.getElementById(ERROR_OVERLAY_ID);
+    const dialog = document.getElementById(ERROR_DIALOG_ID);
     const target = document.getElementById(ERROR_MESSAGE_ID);
 
-    if (!overlay || !target) {
+    if (!dialog || !target) {
         alert(message);
         return;
     }
 
     target.textContent = message;
-    showModal(overlay);
+    showModal(dialog);
 }
 
 // Says, in place, that something could not be loaded. Used where the fallback

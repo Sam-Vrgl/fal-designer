@@ -1,7 +1,7 @@
 // js/pointer-handler.js
 
 import { state, notify, recordStateForUndo } from './state.js';
-import { getCachedImage, addImageToState } from './image-service.js';
+import { getCachedImage, placeInsigne } from './image-service.js';
 
 const SNAP_THRESHOLD_MM = 5;
 const MOIVRE_ROTATION_DEG = 15;
@@ -45,27 +45,7 @@ export function handlePointerDown(event, container) {
     const { gridX, gridY } = getGridCoordsFromEvent(event, dragRect);
 
     if (state.currentMode === 'place' && state.insigneToPlace) {
-        const { path, sizeMm, heightPct, sessionOnly } = state.insigneToPlace;
-        const newInsigne = { url: path, x_mm: 0, y_mm: 0 };
-        if (sessionOnly) newInsigne.sessionOnly = true;
-
-        // Every palette entry now carries its physical size, so there is nothing
-        // left to infer from the file path.
-        if (sizeMm) newInsigne.height_mm = parseInt(sizeMm, 10);
-        else if (typeof heightPct === 'number' && !Number.isNaN(heightPct)) newInsigne.heightPct = heightPct;
-        else newInsigne.heightPct = 0.5;
-
-        addImageToState(newInsigne).then(() => {
-            const img = getCachedImage(newInsigne.url);
-            if (!img) return;
-            const natAspect = img.naturalWidth / img.naturalHeight;
-            let h_mm = newInsigne.height_mm || (newInsigne.heightPct * state.gridHmm);
-            const w_mm = h_mm * natAspect;
-            newInsigne.x_mm = gridX - w_mm / 2;
-            newInsigne.y_mm = gridY - h_mm / 2;
-            recordStateForUndo();
-            notify();
-        });
+        placeInsigne(state.insigneToPlace, { x_mm: gridX, y_mm: gridY });
 
         state.currentMode = 'select';
         state.insigneToPlace = null;
