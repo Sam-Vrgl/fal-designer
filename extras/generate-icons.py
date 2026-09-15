@@ -23,7 +23,6 @@ def load_square():
     side = max(w, h)
     square = Image.new('RGBA', (side, side), (0, 0, 0, 0))
     square.paste(img, ((side - w) // 2, (side - h) // 2))
-    # The gold loses saturation as it shrinks; lift it so the star still reads.
     return ImageEnhance.Color(square).enhance(1.25)
 
 
@@ -31,14 +30,10 @@ def main():
     art = load_square()
     resize = lambda n: art.resize((n, n), Image.LANCZOS)
 
-    # Tab icons keep transparency: tab strips are light in one theme, dark in the other.
-    # RGBA quantisation requires FASTOCTREE; flat artwork is identical at 256 colours.
     resize(32).quantize(colors=256, method=Image.FASTOCTREE).save(
         os.path.join(ICONS, 'icon-32.png'), optimize=True)
     resize(32).save(os.path.join(ROOT, 'favicon.ico'), format='ICO', sizes=[(16, 16), (32, 32)])
 
-    # iOS composites a home-screen icon onto black, so these get an opaque ground.
-    # White, because the artwork is dark red and gold and needs the contrast.
     for size in (180, 192, 512):
         flat = Image.new('RGBA', (size, size), (255, 255, 255, 255))
         flat.alpha_composite(resize(size))

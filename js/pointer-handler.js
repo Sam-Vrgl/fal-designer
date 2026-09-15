@@ -14,8 +14,6 @@ function getPointer(event) {
     return event.touches ? event.touches[0] : event;
 }
 
-// Shared client -> container-relative conversion, so every gesture (wheel,
-// pinch, drag) agrees on where the container origin is.
 export function toContainerXY(clientX, clientY, rect) {
     return { x: clientX - rect.left, y: clientY - rect.top };
 }

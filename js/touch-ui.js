@@ -22,9 +22,6 @@ export function initTouchUI(canvasContainer) {
         notify();
     };
 
-    // Opening either drawer closes the other, and every route in or out has to
-    // leave aria-expanded saying what the button actually did — a toggle that
-    // reports the wrong state is worse to a screen reader than a silent one.
     const drawers = [
         { button: togglePaletteBtn, panel: paletteContainer },
         { button: toggleInspectorBtn, panel: inspectorContainer },

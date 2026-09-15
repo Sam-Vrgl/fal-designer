@@ -18,9 +18,6 @@ function getMidpoint(touches, rect) {
     };
 }
 
-// Two-finger pinch only. Single-pointer input of every kind — mouse, pen and
-// one finger — goes through initCanvasInput (input-handler.js), so nothing here
-// runs for a one-finger drag and the two never double-handle the same gesture.
 export function initPinchZoom(canvas) {
     const container = canvas.parentElement;
     let lastTouchDistance = null;

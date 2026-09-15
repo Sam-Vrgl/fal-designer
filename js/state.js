@@ -44,19 +44,12 @@ const defaultState = {
   dragMoivreOffsetX: 0,
 };
 
-// structuredClone rather than a spread: defaultState holds three arrays and a
-// nested helper object, and a shallow copy leaves the running state mutating
-// the defaults themselves — so the "defaults" a later reset falls back to are
-// whatever the last session left behind.
 function freshState() {
     return structuredClone(defaultState);
 }
 
 export let state = freshState();
 
-// The whole design, plus the resolved discipline colours the renderer needs.
-// Colours are derived from disciplines.json, but carrying them means a restore
-// is self-consistent without having to re-resolve anything.
 function historyState() {
     return {
         ...designState({ includeSessionImages: true }),
@@ -72,13 +65,8 @@ function createSnapshot() {
 function restoreFromSnapshot(snapshot) {
     if (!snapshot) return;
 
-    // Clone on the way out as well as in. Assigning the stored arrays directly
-    // would leave state and the history entry sharing objects, so the next drag
-    // would mutate the very entry the user is standing on.
     Object.assign(state, structuredClone(snapshot));
 
-    // Selections point into the arrays that were just replaced, so any held
-    // reference is now an orphan the user could still drag.
     state.selectedInsigne = null;
     state.selectedMaterial = null;
     state.selectedMoivre = null;
@@ -119,16 +107,10 @@ export function redo() {
     restoreFromSnapshot(nextState);
 }
 
-// Session-only images live in blob: URLs that die with the page, so they are
-// never written to storage or to an exported file.
 function persistentImages() {
     return state.images.filter(img => !img.sessionOnly);
 }
 
-// The portable design: geometry and content, no view or interface state.
-// This is exactly what an exported .json file contains, and what undo needs
-// to restore. Anything added here is picked up by save, export and history
-// together, which is the point of it being one definition.
 export function designState({ includeSessionImages = false } = {}) {
     return {
         gridWmm: state.gridWmm,
@@ -137,15 +119,10 @@ export function designState({ includeSessionImages = false } = {}) {
         discipline: state.discipline,
         materials: state.materials,
         moivres: state.moivres,
-        // Session images are dead outside this page, so they are left out of
-        // anything that outlives it. Undo lives inside the page and must keep
-        // them, or undoing after placing one would silently delete it.
         images: includeSessionImages ? state.images : persistentImages(),
     };
 }
 
-// The design plus everything else that should survive a reload: resolved
-// discipline colours, guide toggles and the current view.
 function persistableState() {
     return {
         ...designState(),
@@ -159,22 +136,15 @@ function persistableState() {
     };
 }
 
-// The quota failure is the one worth interrupting for: the user carries on
-// designing, believing their work is saved, and it is not. Safari private mode
-// reaches this in ordinary use. They can act on it — export the design — so it
-// belongs in the UI rather than in a console line nobody has open.
 let storageWarningShown = false;
 
 function saveState() {
     try {
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(persistableState()));
-        // Room again. A later failure is news rather than the same news.
         storageWarningShown = false;
     } catch (error) {
         console.error("Could not save state to localStorage:", error);
 
-        // Once per run of failures. saveState runs on a debounce, so warning
-        // every time would put the modal back up every half second.
         if (!storageWarningShown) {
             storageWarningShown = true;
             showError(
@@ -186,16 +156,6 @@ function saveState() {
     }
 }
 
-// v0.5 removed the duplicate letter and digit files: the small and large
-// palette entries now share one image at two sizes. Designs saved or exported
-// before that still reference the deleted copies, so rewrite them to the
-// surviving file. The physical size is stored on the placement itself, so
-// nothing the user sees changes.
-//
-// The two renames below are the same story for a different reason: an accent
-// and an @ in a filename only work while every checkout, server and CDN in
-// the chain encodes the name identically, so both were folded to ASCII. A
-// design saved before that still asks for the old name.
 const MOVED_ASSETS = [
     [/\/lettres\/min\/([a-z])_min\.webp$/, '/lettres/maj/$1_maj.webp'],
     [/\/chiffres\/petit\/(\d)_min\.webp$/, '/chiffres/grand/$1_maj.webp'],
@@ -220,14 +180,6 @@ export function migrateImages(images) {
     return images;
 }
 
-// A design file is untrusted in exactly the way a saved state is — more so, in
-// that someone else may have written it — so it goes through the same shape
-// check rather than being assigned field by field at the call site.
-//
-// This covers geometry and image URLs. Discipline is validated by the caller,
-// which is the one that knows which discipline names actually exist.
-// Returns the French warnings sanitizeDesign collected, so the caller can
-// show the user what was rejected.
 export function applyImportedDesign(loadedState) {
     migrateImages(loadedState?.images);
     const { design, warnings } = sanitizeDesign(loadedState, defaultState);
@@ -248,10 +200,6 @@ function loadState() {
         if (savedStateJSON) {
             const savedState = JSON.parse(savedStateJSON);
             migrateImages(savedState.images);
-            // Field by field, not a wholesale spread. A design saved while a
-            // number field was empty carries null where a size should be —
-            // JSON.stringify writes NaN out that way — and spreading let that
-            // null overwrite the default and outlive the reload.
             const { design, warnings } = sanitizeDesign(savedState, defaultState);
             state = design;
             if (warnings.length > 0) {
@@ -280,12 +228,6 @@ export function shouldSeedDefaultDesign() {
     }
 }
 
-// The alpha warning is worth showing once. It carried no marker at all, so it
-// blocked the app on every load and every reload, forever.
-//
-// If storage cannot be read we choose not to show it: nagging someone on every
-// single visit is worse than a first-time visitor missing it once, which is the
-// same call shouldSeedDefaultDesign makes.
 export function shouldShowWelcome() {
     try {
         return localStorage.getItem(WELCOME_SEEN_KEY) === null;
@@ -313,8 +255,6 @@ export function markInitialised() {
 
 export function resetState() {
     if (confirm("Êtes-vous sûr de vouloir réinitialiser le circulaire? Toutes les données seront effacées.")) {
-        // Stop any pending or flush-triggered write, otherwise the state we are
-        // about to clear gets saved straight back during unload.
         suspendPersistence();
         localStorage.removeItem(LOCAL_STORAGE_KEY);
         markInitialised();
@@ -343,8 +283,6 @@ function clearSaveTimer() {
     }
 }
 
-// Write immediately, cancelling any pending debounce. Used when the page is
-// going away and a trailing timer would never fire.
 function flushSave() {
     if (persistenceSuspended) return;
     if (saveTimer === null) return;
@@ -352,15 +290,11 @@ function flushSave() {
     saveState();
 }
 
-// Permanently disable persistence for the remaining life of the page.
 function suspendPersistence() {
     persistenceSuspended = true;
     clearSaveTimer();
 }
 
-// Coalesces a burst of calls into one render per frame and one write per
-// quiet period. A drag emitting 60 notify() calls a second now costs one
-// repaint per frame and a single serialisation once the pointer settles.
 export function notify() {
     if (renderHandle === null) {
         renderHandle = requestAnimationFrame(runListeners);
@@ -374,8 +308,6 @@ export function notify() {
     }, SAVE_DEBOUNCE_MS);
 }
 
-// pagehide covers navigation and tab close; visibilitychange is the one that
-// actually fires when a mobile browser backgrounds the page.
 window.addEventListener('pagehide', flushSave);
 document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') flushSave();

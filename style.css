@@ -1,7 +1,4 @@
-/* Inter, SIL Open Font License 1.1 - see assets/fonts/OFL.txt
-   One variable file covering 400-700, latin subset only (48KB). Self-hosted so
-   the browser makes one same-origin request instead of resolving and
-   handshaking two Google hosts before any text can render in the right face. */
+/* Inter, SIL Open Font License 1.1 - see assets/fonts/OFL.txt */
 @font-face {
     font-family: 'Inter';
     font-style: normal;
@@ -27,16 +24,10 @@
     --border-color: #e2e8f0;
     --text-color: #cbd5e1;
     --text-light: #64748b;
-    /* Lighter than --primary-color, which would disappear against the blue
-       buttons it has to outline. */
     --focus-ring: #93c5fd;
     --font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
 }
 
-/* One ring for every control, rather than per-element rules that were never
-   written for half of them. :focus-visible leaves it to the browser to decide
-   when focus deserves to be seen, so a mouse click on a button does not light
-   it up but tabbing to it does. */
 :focus-visible {
     outline: 2px solid var(--focus-ring);
     outline-offset: 2px;
@@ -49,10 +40,6 @@ body {
     line-height: 1.5;
     display: flex;
     flex-direction: column;
-    /* 100vh on iOS and Android Chrome measures the viewport without the
-       collapsible URL bar, so the bottom of the app is cut off until the bar
-       hides. dvh tracks the viewport as it actually is; vh stays as the
-       fallback for browsers that do not know dvh. */
     height: 100vh;
     height: 100dvh;
     background-color: var(--background-color);
@@ -84,14 +71,6 @@ header h1 {
     gap: 16px;
 }
 
-/* The toolbar and the footer stack inside one container, so their order is
-   structural. The toolbar used to be pinned at the footer's rendered height in
-   pixels, which stopped being true the moment the copyright line wrapped or the
-   browser's default text size changed.
-
-   The safe-area insets live here rather than on the two children: this is the
-   element that touches the edge of the screen, and on a notched phone the home
-   indicator sits over anything that reaches bottom: 0. */
 #bottom-bar {
     display: flex;
     flex-direction: column;
@@ -154,8 +133,6 @@ footer button:hover {
     flex-grow: 1;
     position: relative;
     overflow: hidden;
-    /* Single-finger drags now arrive as pointer events rather than touchmove,
-       so the browser must be told not to claim the gesture for scrolling. */
     touch-action: none;
     background-color: var(--panel-background);
     border-radius: 12px;
@@ -172,8 +149,6 @@ canvas {
     user-select: none;
 }
 
-/* Inwards, because the container clips and an outset ring would be cut off
-   on the edge the canvas is flush against. */
 canvas:focus-visible {
     outline-offset: -2px;
 }
@@ -191,11 +166,6 @@ canvas:focus-visible {
     gap: 12px;
 }
 
-/* The browser centres a modal <dialog> and paints its own backdrop, so all
-   this has to do is get out of the way: no chrome of its own, and no padding,
-   which is what lets .modal-content fill it edge to edge. A click anywhere
-   inside the visible card then lands on the content, never on the dialog, so
-   "target is the dialog" means the backdrop and nothing else. */
 dialog {
     width: 500px;
     max-width: 90vw;
@@ -232,8 +202,6 @@ dialog::backdrop {
     color: var(--danger-color);
 }
 
-/* Sits where the content it is standing in for would have been, so an empty
-   list explains itself instead of just looking empty. */
 .inline-notice {
     margin: 8px 0;
     padding: 10px 12px;
@@ -284,9 +252,6 @@ button:hover {
     background-color: var(--primary-hover);
 }
 
-/* An active mode used to be painted --primary-color, which is exactly what
-   every other button is already painted, so "Sélectionner" being on looked
-   identical to it being off. The ring is what carries the state. */
 #toolbar button.active {
     background-color: var(--primary-hover);
     box-shadow: inset 0 0 0 2px var(--focus-ring);
@@ -320,9 +285,6 @@ button:hover {
     margin-bottom: 20px;
 }
 
-/* What the palette search hides. A class rather than an inline style, so
-   "is this entry showing?" is a class check instead of a substring match
-   against a serialised style attribute. */
 .is-hidden {
     display: none;
 }
@@ -512,12 +474,7 @@ details[open]>summary::before {
     display: none;
 }
 
-/* Mobile Styles */
 @media (max-width: 1024px) {
-    /* The drawers are fixed to the bottom of the viewport and slide up over
-       the app, so the bottom bar needs to sit above them. A stacking context is
-       all that takes now that it is a real flex child rather than a fixed
-       element the body had to reserve 64px of padding for. */
     #bottom-bar {
         position: relative;
         z-index: 101;
@@ -596,10 +553,6 @@ details[open]>summary::before {
     }
 }
 
-/* Last, so it wins over every transition declared above. The drawers slide in
-   over a third of a second, which is exactly the kind of movement that makes
-   some people ill; the destination is what matters, not the travel. Near-zero
-   rather than `none` so transitionend still fires for anything listening. */
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

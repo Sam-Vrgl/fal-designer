@@ -10,10 +10,6 @@ export function exportCanvasAsImage() {
     const totalW_mm = state.gridWmm;
     const totalH_mm = state.gridHmm;
 
-    // Past the browser's canvas ceiling the allocation fails without throwing:
-    // the context is blank and toDataURL() hands back the string "data:,", so
-    // the user gets a zero-byte download and no explanation. Refuse first, and
-    // name the width that would actually work.
     if (!canExport(totalW_mm, totalH_mm, EXPORT_DPI)) {
         const limit = maxExportWidthMm(totalH_mm, EXPORT_DPI);
         showError(
@@ -44,11 +40,6 @@ export function exportCanvasAsImage() {
 
     draw(exportCanvas, exportCtx, exportState, false);
 
-    // toBlob rather than toDataURL: the latter encodes synchronously and then
-    // base64-inflates the result by a third into a single JS string, several
-    // megabytes for a full-width ribbon. Mobile Safari also handles very large
-    // data: URLs on <a download> unreliably, which is the case that matters —
-    // the phone is where this tool is mostly used.
     exportCanvas.toBlob((blob) => {
         if (!blob) {
             console.error("Canvas encoding returned no blob during PNG export.");
@@ -58,8 +49,6 @@ export function exportCanvasAsImage() {
 
         downloadBlob(blob, designFilename(state.discipline, 'png'));
 
-        // Release the backing store now rather than waiting for the collector.
-        // At 300 DPI this is tens of megabytes that nothing refers to again.
         exportCanvas.width = 0;
         exportCanvas.height = 0;
     }, 'image/png');

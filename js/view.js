@@ -1,11 +1,7 @@
 // js/view.js
-//
-// Camera operations. Kept out of renderer.js, which only draws, and out of
-// ui.js, which only binds DOM.
 
 import { state, notify } from './state.js';
 
-// Leave a little air around the design when fitting.
 const FIT_PADDING = 0.95;
 
 function contentSizePx() {
@@ -30,11 +26,6 @@ export function fitToView(container) {
     notify();
 }
 
-// Keep whatever was in the middle of the canvas in the middle after the box
-// changes size, instead of letting the design drift towards a corner.
-//
-// The world point at the centre is (centre - offset) / scale, so holding it
-// still across a resize means shifting the offset by half the size delta.
 export function preserveCentre(container, previous) {
     if (!container || !previous) return;
     if (container.clientWidth === 0 || previous.width === 0) return;
@@ -44,12 +35,6 @@ export function preserveCentre(container, previous) {
     notify();
 }
 
-// Is any part of the design still inside the visible box?
-//
-// This is the escape hatch for the one case holding the centre cannot cover.
-// On mobile the zoom toolbar is display: none, so a design pushed entirely off
-// screen leaves the user with nothing to press — which is the "no recovery"
-// the issue names. Cheap to ask, and only acted on when the answer is no.
 export function isDesignVisible(container) {
     if (!container || container.clientWidth === 0) return true;
 

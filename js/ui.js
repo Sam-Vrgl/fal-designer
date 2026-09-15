@@ -8,8 +8,6 @@ import { debounce, randomId } from './utils.js';
 import { LIMITS, readNumber, clamp } from './validation.js';
 import { fitToView } from './view.js';
 
-// Typing in a number field fires an input event per keystroke, and dragging a
-// spinner fires a stream of them. Collapse each burst into one history entry.
 const recordEdit = debounce(recordStateForUndo, 400);
 
 const NUDGE_STEP_MM = 1;
@@ -22,8 +20,6 @@ const NUDGE_DIRECTIONS = {
     ArrowDown: { x: 0, y: 1 },
 };
 
-// How far each arrow moves through the palette. Its grid reflows with the
-// container, so up and down mean one entry rather than one row.
 const PALETTE_STEPS = {
     ArrowRight: 1,
     ArrowDown: 1,
@@ -31,28 +27,8 @@ const PALETTE_STEPS = {
     ArrowUp: -1,
 };
 
-// Inside a field the arrows drive the spinner and Backspace erases a digit.
-// Those keys belong to whatever has focus, not to the canvas.
 const isEditingField = () => Boolean(document.activeElement?.matches('input, select, textarea'));
 
-// Every numeric control in the app goes through here, so no keystroke can put a
-// non-finite or out-of-range number into state.
-//
-// `get` returns the current value in the unit the field displays, or undefined
-// when the field has nothing to edit — nothing selected, or a disabled field.
-// `set` receives a number already clamped to `limit`.
-//
-// Two rules make this bearable to type in:
-//
-//   - An unreadable field is not an edit. Clearing a box leaves the last good
-//     value in state, so the canvas stays on screen while the user retypes
-//     instead of blanking and being persisted that way.
-//   - Clamping happens in state, never in the box, while the field has focus.
-//     Rewriting the text mid-keystroke fights the user; the field is normalised
-//     on blur, which is when they have finished saying what they meant.
-// The control's own min/max come from the same table as everything else, so the
-// browser enforces the range on spinners and arrow keys without the bounds
-// being written down a second time in the markup.
 function applyLimit(el, limit) {
     if (!el) return;
     el.min = limit.min;
@@ -89,8 +65,6 @@ function setMode(mode) {
     notify();
 }
 
-// Only one thing can be selected at a time: every place that selects
-// something clears the other two first.
 function selectedElement() {
     return state.selectedInsigne ?? state.selectedMaterial ?? state.selectedMoivre;
 }
@@ -101,8 +75,6 @@ function clearSelection() {
     state.selectedMoivre = null;
 }
 
-// Everything on the canvas in one order, each paired with the state field
-// that holds it when selected, so Tab can walk the design as a single list.
 function selectableElements() {
     return [
         ...state.images.map((item) => ({ item, field: 'selectedInsigne' })),
@@ -111,9 +83,6 @@ function selectableElements() {
     ];
 }
 
-// Moves the selection one element along, and reports whether it landed on
-// anything. Running off either end clears the selection and answers false,
-// which is what lets Tab out of the canvas instead of trapping focus there.
 function cycleSelection(step) {
     const elements = selectableElements();
     if (elements.length === 0) return false;
@@ -131,26 +100,16 @@ function cycleSelection(step) {
     return Boolean(next);
 }
 
-// Every selectable thing carries a position in mm, so one mover covers all
-// three. The bounds are the same ones the inspector fields enforce.
 function nudgeSelection({ x, y }, stepMm) {
     const target = selectedElement();
     if (!target) return;
 
     target.x_mm = clamp(target.x_mm + x * stepMm, LIMITS.x_mm.min, LIMITS.x_mm.max);
     target.y_mm = clamp(target.y_mm + y * stepMm, LIMITS.y_mm.min, LIMITS.y_mm.max);
-    // Same debounce as typing a coordinate, so a held arrow key is one undo
-    // step rather than forty.
     recordEdit();
     notify();
 }
 
-// Drops whatever is selected. Only one thing can be at a time — selecting
-// anything clears the other two — so the three inspector buttons and the
-// Delete key are all the same operation and share this.
-//
-// A two-colour discipline places two stacked materials sharing a groupId.
-// They are one ribbon to whoever is looking at them, so they go together.
 function deleteSelection() {
     const { selectedInsigne, selectedMaterial, selectedMoivre } = state;
 
@@ -201,7 +160,6 @@ function bindSettings(settingsContainer, disciplinesData) {
     const moivreColor = settingsContainer.querySelector('#moivreColor');
     const addMoivreBtn = settingsContainer.querySelector('#addMoivreBtn');
 
-    // Read on click rather than bound to state, so it only needs its range.
     applyLimit(materialWidthInput, LIMITS.width_mm);
 
     if (chkV) chkV.checked = state.helper.showV;
@@ -211,8 +169,6 @@ function bindSettings(settingsContainer, disciplinesData) {
     if (gridH) gridH.value = state.gridHmm;
     if (margin) margin.value = state.marginMm;
 
-    // Guide and snap toggles are interface preferences, not document content,
-    // so they deliberately stay out of history.
     if (chkV) chkV.addEventListener('change', () => { state.helper.showV = chkV.checked; notify(); });
     if (chkH) chkH.addEventListener('change', () => { state.helper.showH = chkH.checked; notify(); });
     if (chkSnap) chkSnap.addEventListener('change', () => { state.snapEnabled = chkSnap.checked; notify(); });
@@ -256,9 +212,6 @@ function bindSettings(settingsContainer, disciplinesData) {
         const totalHeight = state.gridHmm * heightMultiplier;
 
         if (discipline.couleursRGB.length > 1) {
-            // Date.now() gave two sections added in the same millisecond the
-            // same id, and a shared id is what makes two halves one ribbon:
-            // selecting either dragged both, deleting either deleted both.
             const groupId = randomId();
             const sectionHeight = totalHeight / 2;
             const color1 = `rgb(${discipline.couleursRGB[0]})`;
@@ -314,11 +267,6 @@ function bindInsignePalette(paletteEl, insignePalette, sessionObjectUrls) {
         }
     });
 
-    // Picking with a pointer only arms the placement — the insigne lands where
-    // the canvas is clicked next, and a keyboard has no way to say where that
-    // is. So Enter and Space place it outright, in the middle of the grid, and
-    // leave it selected with focus on the inspector: the number fields there
-    // are the keyboard's way to position it.
     if (insigneList) insigneList.addEventListener('keydown', (e) => {
         if (e.target.tagName !== 'IMG') return;
 
@@ -339,8 +287,6 @@ function bindInsignePalette(paletteEl, insignePalette, sessionObjectUrls) {
         const step = PALETTE_STEPS[e.key];
         if (step === undefined) return;
 
-        // preventDefault so roving the palette does not also scroll the
-        // sidebar out from under it.
         e.preventDefault();
         insignePalette.focusRelative(step);
     });
@@ -392,9 +338,6 @@ function bindInspectorPanel(inspectorPanelEl) {
         get: () => state.selectedInsigne?.y_mm,
         set: (value) => { state.selectedInsigne.y_mm = value; },
     });
-    // The field is in percent of the grid height; state stores the fraction.
-    // It is disabled for insignes with a fixed physical size, and a disabled
-    // field has nothing to edit, so get() reports undefined for one.
     bindNumberInput(insigneHeight, LIMITS.heightPercent, {
         get: () => {
             if (!state.selectedInsigne || insigneHeight.disabled) return undefined;
@@ -428,26 +371,17 @@ function bindInspectorPanel(inspectorPanelEl) {
 function bindGlobalListeners(sessionObjectUrls) {
     const canvas = document.getElementById('myCanvas');
 
-    // The selection keys reach only the canvas and the panel that edits it.
-    // Bound to the window at large, the arrows would take scrolling away from
-    // whatever else happened to have focus.
     const inSelectionContext = () =>
         document.activeElement === canvas ||
         Boolean(document.activeElement?.closest('#inspector-panel'));
 
     window.addEventListener('keydown', (e) => {
-        // A modal owns the keyboard while it is up: Escape belongs to it, and
-        // undo would act on a canvas the user cannot reach or see.
         if (document.querySelector('dialog[open]')) return;
 
         if (e.key === 'Escape') {
             setMode('select');
         }
 
-        // With the canvas focused, Tab walks the design instead of leaving
-        // it — the only way to reach an element without a pointer. It lets go
-        // at both ends rather than trapping: once the selection runs out, the
-        // key is left alone and the browser moves on as usual.
         if (e.key === 'Tab' && document.activeElement === canvas) {
             if (cycleSelection(e.shiftKey ? -1 : 1)) e.preventDefault();
         }
@@ -506,8 +440,6 @@ function setupAllSubscriptions() {
     const marginInput = document.getElementById('marginInput');
     const disciplineSelect = document.getElementById('disciplineSelect');
 
-    // Never write into the control the user is currently editing; doing so
-    // moves the caret mid-keystroke.
     const setValue = (el, value) => {
         if (el && el !== document.activeElement) el.value = value;
     };
@@ -545,10 +477,6 @@ function setupAllSubscriptions() {
         }
     };
     
-    // Undo and redo can change grid geometry and discipline, so the controls
-    // that own those values have to follow state rather than only being seeded
-    // once at bind time. Assigning .value does not fire change, so this cannot
-    // loop back into the handlers above.
     const updateSettingsControls = () => {
         setValue(gridWInput, state.gridWmm);
         setValue(gridHInput, state.gridHmm);
@@ -609,6 +537,4 @@ export function bindUI(disciplinesData, insignePalette) {
     bindGlobalListeners(sessionObjectUrls);
     
     setupAllSubscriptions();
-    // The initial fit used to be a setTimeout racing layout. main.js now does it
-    // from the ResizeObserver's first callback, when the box is really known.
 }

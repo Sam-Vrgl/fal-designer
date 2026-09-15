@@ -7,18 +7,12 @@ const OUTPUT_FILE = path.join(PROJECT_ROOT, 'insignes-list.json');
 
 const IMAGE_PATTERN = /\.(png|jpg|jpeg|gif|svg|webp)$/i;
 
-// Letters and digits are one artwork set offered at two physical sizes, not two
-// sets of artwork. A single file backs both palette entries; only size_mm
-// differs. The source directories are still named maj/grand for historical
-// reasons — they hold the only copy, at both sizes.
 const SIZE_MM = { small: 10, big: 18 };
 const SIZED_SETS = [
     { source: ['lettres', 'maj'], target: 'letters' },
     { source: ['chiffres', 'grand'], target: 'numbers' },
 ];
 
-// Symbols offered under more than one heading are stored once and referenced
-// from the others, rather than duplicated on disk.
 const CROSS_CATEGORY = {
     annees: ['filiere/beta-24mm.webp', 'filiere/phi-24mm.webp', 'filiere/psi-24mm.webp'],
 };
@@ -27,11 +21,6 @@ function webPath(absolutePath) {
     return './' + path.relative(PROJECT_ROOT, absolutePath).replace(/\\/g, '/');
 }
 
-// Anything outside this set has to survive a Windows checkout, a Linux
-// server and a CDN agreeing byte for byte on how the name is encoded. An
-// accented filename is a portability hazard rather than an error here, so it
-// is reported and still listed: the generator's job is to describe the disk,
-// and the fix is to rename the file.
 const PORTABLE_NAME = /^[a-z0-9._@-]+$/i;
 const unportableNames = [];
 
@@ -46,7 +35,6 @@ function listImages(dir) {
     return files;
 }
 
-// "caducee-de-mercure-32mm.webp" -> { name: "caducee de mercure", size_mm: 32 }
 function describeInsigne(file) {
     const match = file.match(/-(\d+)mm\./i);
     return {
@@ -70,7 +58,6 @@ function buildSizedSet(structure) {
 
 function buildFlatCategory(structure, categoryName) {
     const dir = path.join(ASSETS_DIR, categoryName);
-    // Anything that is not a known heading lands under "other".
     const target = ['filiere', 'annees'].includes(categoryName) ? categoryName : 'other';
 
     for (const file of listImages(dir)) {

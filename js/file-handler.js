@@ -20,15 +20,8 @@ export function importState(file) {
         try {
             const loadedState = JSON.parse(e.target.result);
 
-            // Geometry and image URLs are schema-checked and allowlisted inside
-            // applyImportedDesign; anything it rejects comes back as a warning
-            // rather than silently vanishing.
             const warnings = applyImportedDesign(loadedState);
 
-            // Discipline is resolved the same way picking it from the dropdown
-            // would be. An unknown name is reported rather than pushed into the
-            // <select> anyway — assigning it there is a silent no-op that used
-            // to fire a change event and wipe the colour ribbon.
             if (loadedState.discipline) {
                 if (isKnownDiscipline(loadedState.discipline)) {
                     applyDiscipline(loadedState.discipline);
@@ -41,9 +34,6 @@ export function importState(file) {
             state.selectedMaterial = null;
             state.selectedMoivre = null;
 
-            // The import replaces the design outright, so it is the new
-            // baseline: undoing past it would silently bring back whatever was
-            // open before the import.
             resetHistory();
 
             await preloadImages();
@@ -57,8 +47,6 @@ export function importState(file) {
             }
 
         } catch (error) {
-            // English detail for whoever is debugging, French for whoever is
-            // holding the file — they can act on this by picking another one.
             console.error("Failed to parse or load the state file:", error);
             showError(
                 "Ce fichier n'a pas pu être ouvert. Il est peut-être endommagé, " +

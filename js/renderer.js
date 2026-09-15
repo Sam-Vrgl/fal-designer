@@ -5,9 +5,6 @@ import { createVelvetTexture, createSatinTexture } from './textures.js';
 
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
-// The rectangle of the design, in millimetres, that the canvas is currently
-// showing. Read back off the context rather than recomputed from the state, so
-// it cannot disagree with the transform that was actually applied.
 function visibleRangeMm(ctx, canvas) {
     const inverse = ctx.getTransform().inverse();
     const topLeft = inverse.transformPoint({ x: 0, y: 0 });
@@ -21,10 +18,6 @@ function visibleRangeMm(ctx, canvas) {
     };
 }
 
-// Assigning canvas.width or canvas.height throws away the entire backing store
-// and resets every context property, even when the value written is identical.
-// Doing that unconditionally meant a buffer reallocation on every pointer move,
-// so only write when the size has genuinely changed.
 export function syncCanvasSize(canvas) {
     const container = canvas.parentElement;
     if (!container || container.clientWidth === 0) return 0;
@@ -70,9 +63,6 @@ function drawBase(ctx, s, baseLineWidth) {
     ctx.strokeRect(0, 0, TOTAL_W_MM, TOTAL_H_MM);
 }
 
-// Index range of grid lines at `step` that fall inside the viewport, given the
-// lines run from `origin` for `length` millimetres. Clamped to the grid, so a
-// viewport panned off the design does no work at all.
 function visibleLineRange(origin, length, step, viewFrom, viewTo) {
     const last = Math.floor(length / step + 1e-9);
     const first = Math.floor((viewFrom - origin) / step);
@@ -94,9 +84,6 @@ function drawGrid(ctx, s, baseLineWidth, view) {
     ctx.lineWidth = baseLineWidth;
     ctx.strokeRect(left, top, gridW, gridH);
 
-    // Only the lines the viewport can actually show. Zoomed in on a 700mm
-    // ribbon the full grid is 740 segments in one path for perhaps a tenth of
-    // that on screen, which made precision editing the slowest mode there is.
     const drawLines = (step, strokeStyle, lineWidth) => {
         ctx.beginPath();
         ctx.lineWidth = lineWidth;
@@ -261,9 +248,6 @@ export function draw(canvas, ctx, s, isLiveRender = true) {
 
     const baseLineWidth = 1 / (s.mmToPx * s.viewScale);
 
-    // Millimetres to output pixels, including the device pixel ratio — the
-    // moivre call site used to leave dpr out, which understated the scale by
-    // half on any retina screen.
     const outputScale = s.mmToPx * s.viewScale * dpr;
     const view = visibleRangeMm(ctx, canvas);
 

@@ -7,14 +7,8 @@
   <meta name="description" content="Outil pour planifier la création d'une faluche : le circulaire, les rubans et les insignes nécessaires à sa confection.">
   <meta name="theme-color" content="#172235">
 
-  <!-- Nothing here needs a third party beyond the Cloudflare beacon below, and
-       nothing needs inline script. An imported design file's image URLs are
-       allowlisted in code (js/validation.js), but img-src is the backstop if
-       that ever slips. -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' blob: data:; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://cloudflareinsights.com https://static.cloudflareinsights.com;">
 
-  <!-- Self-hosted, so the font arrives in one same-origin request instead of
-       two chained handshakes to fonts.googleapis.com then fonts.gstatic.com. -->
   <link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="style.css">
 
@@ -124,9 +118,6 @@
             <span id="zoom-display">100%</span>
         </div>
         <div id="canvas-container" title="Molette pour défiler. Maj+Molette pour défiler horizontalement. Ctrl/Cmd+Molette pour zoomer.">
-          <!-- Focusable, because Tab walking the design is the only way to
-               reach an element without a pointer. No role="img": it stopped
-               being a picture the moment it answered to the keyboard. -->
           <canvas id="myCanvas" tabindex="0" aria-label="Aperçu du circulaire : rubans, moivres et insignes placés sur la grille. Tab pour parcourir les éléments, flèches pour déplacer la sélection, Suppr pour la retirer.">
             Votre navigateur ne peut pas afficher l'aperçu du circulaire.
           </canvas>
@@ -134,9 +125,6 @@
     </div>
 
     <div id="inspector-container">
-      <!-- tabindex="-1" so placing an insigne from the keyboard can hand focus
-           to the panel that positions it: reachable programmatically, still
-           out of the tab order. -->
       <div id="inspector-panel" class="panel" tabindex="-1">
         <h3>Propriétés</h3>
         <div id="inspector-content">
@@ -175,9 +163,6 @@
     </div>
   </div>
   
-  <!-- One container so the toolbar sits on top of the footer structurally.
-       They used to be two separately fixed elements, with the toolbar offset by
-       the footer's rendered height in pixels. -->
   <div id="bottom-bar">
     <div id="mobile-toolbar">
         <button id="toggle-palette-btn" aria-label="Palette d'insignes" aria-controls="palette-container" aria-expanded="false">🎨</button>
@@ -191,9 +176,6 @@
     </footer>
   </div>
 
-  <!-- <dialog> rather than a div the script has to hide: it is closed until
-       showModal() opens it, and it brings the focus trap, the Escape key and
-       the backdrop with it. A returning visitor never sees this one at all. -->
   <dialog id="welcome-modal" aria-labelledby="welcome-modal-title">
       <div class="modal-content">
           <h2 id="welcome-modal-title">OUTIL EN ALPHA</h2>
@@ -217,12 +199,10 @@
               En évolution constante, il se peut que certaines fonctionnalités soient instables. Vos retours sont les bienvenus! <br/>
               Vous pouvez me contacter via facebook (Samuel VERGNOL) ou par email (contact@sam-vrgl.com).
           </p>
-          <button class="close-modal-btn">Close</button>
+          <button class="close-modal-btn">Fermer</button>
       </div>
   </dialog>
 
-  <!-- alertdialog rather than dialog: this one is a message to acknowledge,
-       and the role is what makes a screen reader read it out on open. -->
   <dialog id="error-modal" role="alertdialog" aria-labelledby="error-modal-title" aria-describedby="error-modal-message">
       <div class="modal-content">
           <h2 id="error-modal-title">Une erreur est survenue</h2>

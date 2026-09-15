@@ -13,18 +13,11 @@ async function fetchDisciplines() {
   }
 }
 
-// True for a real, selectable discipline name — not one that is merely a key
-// in disciplines.json, since "custom" entries are placeholders the UI shows
-// disabled and were never a value a user could have actually picked.
 export function isKnownDiscipline(name) {
     const discipline = disciplinesData[name];
     return Boolean(discipline && discipline.custom !== true);
 }
 
-// Resolves a discipline name to its colours and material and writes all three
-// into state. Shared by the dropdown's change handler and by import, so a
-// design file's discipline is applied exactly the way picking it in the UI
-// would be — rather than going through the <select> element as a side door.
 export function applyDiscipline(name) {
     const discipline = disciplinesData[name];
 
@@ -84,9 +77,6 @@ function populateDropdown(selector) {
 export async function initDisciplines(selector) {
   disciplinesData = await fetchDisciplines();
 
-  // Nothing the user can fix — the console already has the English detail — but
-  // an empty dropdown and a dropdown that failed to load look identical, and
-  // one of them is worth reloading the page for.
   if (Object.keys(disciplinesData).length === 0) {
     const select = document.getElementById(selector);
     showInlineNotice(
