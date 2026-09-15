@@ -1,57 +1,13 @@
-import { state, notify } from './state.js';
+import { state, notify, designState, applyImportedDesign, resetHistory } from './state.js';
 import { preloadImages } from './image-service.js';
-
-function sanitizeString(str) {
-    if (!str) return '';
-    return str.normalize('NFD')
-              .replace(/[\u0300-\u036f]/g, '')
-              .replace(/['\s\W]/g, '')
-              .toLowerCase();
-}
-
-
-function getTimestamp() {
-    const d = new Date();
-    const pad = (n) => n.toString().padStart(2, '0');
-    
-    const year = d.getFullYear();
-    const month = pad(d.getMonth() + 1);
-    const day = pad(d.getDate());
-    const hours = pad(d.getHours());
-    const minutes = pad(d.getMinutes());
-
-    return `${year}-${month}-${day}_${hours}-${minutes}`;
-}
+import { designFilename, downloadBlob } from './utils.js';
+import { showError } from './messages.js';
+import { isKnownDiscipline, applyDiscipline } from './disciplines.js';
 
 export function exportState() {
-    const disciplineSelect = document.getElementById('disciplineSelect');
-    const discipline = sanitizeString(disciplineSelect.value) || 'design';
-    const timestamp = getTimestamp();
-    const filename = `fal-design-${discipline}-${timestamp}.json`;
-
-    const persistentImages = state.images.filter(img => !img.sessionOnly);
-
-    const stateToSave = {
-        gridWmm: state.gridWmm,
-        gridHmm: state.gridHmm,
-        marginMm: state.marginMm,
-        discipline: disciplineSelect.value,
-        materials: state.materials,
-        moivres: state.moivres,
-        images: persistentImages,
-    };
-
-    const jsonString = JSON.stringify(stateToSave, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const json = JSON.stringify(designState(), null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    downloadBlob(blob, designFilename(state.discipline, 'json'));
 }
 
 export function importState(file) {
@@ -64,30 +20,38 @@ export function importState(file) {
         try {
             const loadedState = JSON.parse(e.target.result);
 
-            state.gridWmm = loadedState.gridWmm;
-            state.gridHmm = loadedState.gridHmm;
-            state.marginMm = loadedState.marginMm;
-            
-            const disciplineSelect = document.getElementById('disciplineSelect');
+            const warnings = applyImportedDesign(loadedState);
+
             if (loadedState.discipline) {
-                disciplineSelect.value = loadedState.discipline;
-                disciplineSelect.dispatchEvent(new Event('change'));
+                if (isKnownDiscipline(loadedState.discipline)) {
+                    applyDiscipline(loadedState.discipline);
+                } else {
+                    warnings.push(`Discipline inconnue « ${loadedState.discipline} » ignorée.`);
+                }
             }
 
-            state.materials = loadedState.materials || [];
-            state.moivres = loadedState.moivres || [];
-            state.images = loadedState.images || [];
-            
             state.selectedInsigne = null;
             state.selectedMaterial = null;
             state.selectedMoivre = null;
 
-            await preloadImages(state.images);
+            resetHistory();
+
+            await preloadImages();
             notify();
+
+            if (warnings.length > 0) {
+                showError(
+                    "Le fichier a été importé, mais certains éléments ont été ignorés :\n" +
+                    warnings.join('\n')
+                );
+            }
 
         } catch (error) {
             console.error("Failed to parse or load the state file:", error);
-            alert("Error: Could not load the file. It might be corrupted or in the wrong format.");
+            showError(
+                "Ce fichier n'a pas pu être ouvert. Il est peut-être endommagé, " +
+                "ou il ne s'agit pas d'un circulaire exporté depuis Fal Designer."
+            );
         }
     };
     reader.readAsText(file);

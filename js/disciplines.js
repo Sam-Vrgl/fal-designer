@@ -1,18 +1,35 @@
 import { state, notify } from './state.js';
+import { loadJson } from './data.js';
+import { showInlineNotice } from './messages.js';
 
 let disciplinesData = {};
 
 async function fetchDisciplines() {
   try {
-    const response = await fetch('./disciplines.json');
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return await response.json();
+    return await loadJson('./disciplines.json');
   } catch (e) {
     console.error("Could not load disciplines:", e);
     return {};
   }
+}
+
+export function isKnownDiscipline(name) {
+    const discipline = disciplinesData[name];
+    return Boolean(discipline && discipline.custom !== true);
+}
+
+export function applyDiscipline(name) {
+    const discipline = disciplinesData[name];
+
+    if (discipline && discipline.custom !== true) {
+        state.discipline = name;
+        state.disciplineColors = discipline.couleursRGB.map(c => `rgb(${c})`);
+        state.disciplineMaterial = discipline.matière;
+    } else {
+        state.discipline = '';
+        state.disciplineColors = [];
+        state.disciplineMaterial = null;
+    }
 }
 
 function populateDropdown(selector) {
@@ -41,19 +58,7 @@ function populateDropdown(selector) {
   }
 
   select.addEventListener('change', (event) => {
-    const selectedDisciplineName = event.target.value;
-    const discipline = disciplinesData[selectedDisciplineName];
-
-    if (discipline && discipline.custom !== true) {
-      const colors = discipline.couleursRGB.map(c => `rgb(${c})`);
-      state.discipline = selectedDisciplineName;
-      state.disciplineColors = colors;
-      state.disciplineMaterial = discipline.matière;
-    } else {
-      state.discipline = '';
-      state.disciplineColors = [];
-      state.disciplineMaterial = null;
-    }
+    applyDiscipline(event.target.value);
     notify();
   });
 
@@ -71,6 +76,15 @@ function populateDropdown(selector) {
 
 export async function initDisciplines(selector) {
   disciplinesData = await fetchDisciplines();
+
+  if (Object.keys(disciplinesData).length === 0) {
+    const select = document.getElementById(selector);
+    showInlineNotice(
+      select?.closest('.row')?.parentElement,
+      "La liste des disciplines n'a pas pu être chargée. Rechargez la page pour réessayer."
+    );
+  }
+
   populateDropdown(selector);
   return disciplinesData;
 }

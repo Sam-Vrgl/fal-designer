@@ -5,18 +5,40 @@ import { createVelvetTexture, createSatinTexture } from './textures.js';
 
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
-function setupCanvas(canvas, ctx, s, isLiveRender) {
-    let dpr = 1;
-    if (isLiveRender) {
-        const container = canvas.parentElement;
-        if (!container || container.clientWidth === 0) return 0;
-        dpr = window.devicePixelRatio || 1;
+function visibleRangeMm(ctx, canvas) {
+    const inverse = ctx.getTransform().inverse();
+    const topLeft = inverse.transformPoint({ x: 0, y: 0 });
+    const bottomRight = inverse.transformPoint({ x: canvas.width, y: canvas.height });
 
-        canvas.width = container.clientWidth * dpr;
-        canvas.height = container.clientHeight * dpr;
+    return {
+        left: Math.min(topLeft.x, bottomRight.x),
+        right: Math.max(topLeft.x, bottomRight.x),
+        top: Math.min(topLeft.y, bottomRight.y),
+        bottom: Math.max(topLeft.y, bottomRight.y),
+    };
+}
+
+export function syncCanvasSize(canvas) {
+    const container = canvas.parentElement;
+    if (!container || container.clientWidth === 0) return 0;
+
+    const dpr = window.devicePixelRatio || 1;
+    const width = Math.round(container.clientWidth * dpr);
+    const height = Math.round(container.clientHeight * dpr);
+
+    if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
         canvas.style.width = `${container.clientWidth}px`;
         canvas.style.height = `${container.clientHeight}px`;
     }
+
+    return dpr;
+}
+
+function setupCanvas(canvas, ctx, s, isLiveRender) {
+    const dpr = isLiveRender ? syncCanvasSize(canvas) : 1;
+    if (dpr === 0) return 0;
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -41,7 +63,18 @@ function drawBase(ctx, s, baseLineWidth) {
     ctx.strokeRect(0, 0, TOTAL_W_MM, TOTAL_H_MM);
 }
 
-function drawGrid(ctx, s, baseLineWidth) {
+function visibleLineRange(origin, length, step, viewFrom, viewTo) {
+    const last = Math.floor(length / step + 1e-9);
+    const first = Math.floor((viewFrom - origin) / step);
+    const beyond = Math.ceil((viewTo - origin) / step);
+
+    return {
+        first: Math.max(0, first),
+        last: Math.min(last, beyond),
+    };
+}
+
+function drawGrid(ctx, s, baseLineWidth, view) {
     const left = s.marginMm;
     const top = s.marginMm;
     const gridW = s.gridWmm;
@@ -51,39 +84,43 @@ function drawGrid(ctx, s, baseLineWidth) {
     ctx.lineWidth = baseLineWidth;
     ctx.strokeRect(left, top, gridW, gridH);
 
-    if (s.minorStepMm * s.viewScale * s.mmToPx > 4) {
-        const minor = Math.max(0.1, s.minorStepMm);
+    const drawLines = (step, strokeStyle, lineWidth) => {
         ctx.beginPath();
-        for (let i = 0; i <= Math.floor(gridW / minor + 1e-9); i++) {
-            const x = left + i * minor; ctx.moveTo(x, top); ctx.lineTo(x, top + gridH);
+        ctx.lineWidth = lineWidth;
+
+        const cols = visibleLineRange(left, gridW, step, view.left, view.right);
+        for (let i = cols.first; i <= cols.last; i++) {
+            const x = left + i * step;
+            ctx.moveTo(x, top);
+            ctx.lineTo(x, top + gridH);
         }
-        for (let i = 0; i <= Math.floor(gridH / minor + 1e-9); i++) {
-            const y = top + i * minor; ctx.moveTo(left, y); ctx.lineTo(left + gridW, y);
+
+        const rows = visibleLineRange(top, gridH, step, view.top, view.bottom);
+        for (let i = rows.first; i <= rows.last; i++) {
+            const y = top + i * step;
+            ctx.moveTo(left, y);
+            ctx.lineTo(left + gridW, y);
         }
-        ctx.strokeStyle = 'lightgray';
+
+        ctx.strokeStyle = strokeStyle;
         ctx.stroke();
+    };
+
+    if (s.minorStepMm * s.viewScale * s.mmToPx > 4) {
+        drawLines(Math.max(0.1, s.minorStepMm), 'lightgray', baseLineWidth);
     }
-    
+
     const major = Math.max(s.minorStepMm, s.majorStepMm);
     if (major * s.viewScale * s.mmToPx > 3) {
-        ctx.beginPath();
-        ctx.lineWidth = baseLineWidth * 1.25;
-        for (let i = 0; i <= Math.floor(gridW / major + 1e-9); i++) {
-            const x = left + i * major; ctx.moveTo(x, top); ctx.lineTo(x, top + gridH);
-        }
-        for (let i = 0; i <= Math.floor(gridH / major + 1e-9); i++) {
-            const y = top + i * major; ctx.moveTo(left, y); ctx.lineTo(left + gridW, y);
-        }
-        ctx.strokeStyle = '#c0c0c0';
-        ctx.stroke();
+        drawLines(major, '#c0c0c0', baseLineWidth * 1.25);
     }
 }
 
-function drawMaterials(ctx, s) {
+function drawMaterials(ctx, s, outputScale) {
     if (s.disciplineColors && s.disciplineColors.length > 0) {
       const fillStyles = s.disciplineColors.map(color => {
-        if (s.disciplineMaterial === 'velours') return createVelvetTexture(ctx, color);
-        if (s.disciplineMaterial === 'satin') return createSatinTexture(ctx, color);
+        if (s.disciplineMaterial === 'velours') return createVelvetTexture(ctx, color, outputScale);
+        if (s.disciplineMaterial === 'satin') return createSatinTexture(ctx, color, outputScale);
         return color;
       });
       if (fillStyles.length === 1) {
@@ -97,13 +134,13 @@ function drawMaterials(ctx, s) {
 
     s.materials.forEach(material => {
         let fillStyle = material.color;
-        if (material.material === 'velours') fillStyle = createVelvetTexture(ctx, material.color);
-        else if (material.material === 'satin') fillStyle = createSatinTexture(ctx, material.color);
+        if (material.material === 'velours') fillStyle = createVelvetTexture(ctx, material.color, outputScale);
+        else if (material.material === 'satin') fillStyle = createSatinTexture(ctx, material.color, outputScale);
         colorRectGridMM(ctx, s, material.x_mm, material.y_mm, material.x_mm + material.width_mm, material.y_mm + material.height_mm, fillStyle);
     });
 }
 
-function drawMoivres(ctx, s) {
+function drawMoivres(ctx, s, outputScale) {
     ctx.save();
     ctx.beginPath(); 
     ctx.rect(s.marginMm, s.marginMm, s.gridWmm, s.gridHmm); 
@@ -111,7 +148,7 @@ function drawMoivres(ctx, s) {
     
     const moivrePadding = 10;
     s.moivres.forEach(moivre => {
-        const satinPattern = createSatinTexture(ctx, moivre.color, s.mmToPx * s.viewScale);
+        const satinPattern = createSatinTexture(ctx, moivre.color, outputScale);
         const extendedHeight = moivre.height_mm + moivrePadding * 2;
         const centerX = s.marginMm + moivre.x_mm + (moivre.width_mm / 2);
         const centerY = s.marginMm + moivre.y_mm + (moivre.height_mm / 2);
@@ -211,10 +248,13 @@ export function draw(canvas, ctx, s, isLiveRender = true) {
 
     const baseLineWidth = 1 / (s.mmToPx * s.viewScale);
 
+    const outputScale = s.mmToPx * s.viewScale * dpr;
+    const view = visibleRangeMm(ctx, canvas);
+
     drawBase(ctx, s, baseLineWidth);
-    drawGrid(ctx, s, baseLineWidth);
-    drawMaterials(ctx, s);
-    drawMoivres(ctx, s);
+    drawGrid(ctx, s, baseLineWidth, view);
+    drawMaterials(ctx, s, outputScale);
+    drawMoivres(ctx, s, outputScale);
     drawInsignes(ctx, s);
     
     if (isLiveRender) {
@@ -240,9 +280,9 @@ export function colorRectGridMM(ctx, s, x1_mm, y1_mm, x2_mm, y2_mm, fillStyle, o
     ctx.restore();
 }
 
-export function drawImgMM(ctx, s, img, x_mm, y_mm, opts = {}, mmToPxOverride = null) {
+export function drawImgMM(ctx, s, img, x_mm, y_mm, opts = {}) {
   const { height_mm = null, heightPct = null } = opts;
-  if (!img.complete || img.naturalWidth === 0) return null;
+  if (!img.complete || img.naturalWidth === 0) return;
   const natAspect = img.naturalWidth / img.naturalHeight;
   let h_mm = height_mm != null ? height_mm : (heightPct || 0.3) * s.gridHmm;
   let w_mm = h_mm * natAspect;

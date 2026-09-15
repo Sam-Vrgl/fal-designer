@@ -1,33 +1,26 @@
 import { state } from './state.js';
 import { draw } from './renderer.js';
+import { designFilename, downloadBlob } from './utils.js';
+import { canExport, maxExportWidthMm } from './validation.js';
+import { showError } from './messages.js';
 
-function sanitizeString(str) {
-    if (!str) return '';
-    return str.normalize('NFD')
-              .replace(/[\u0300-\u036f]/g, '')
-              .replace(/['\s\W]/g, '')
-              .toLowerCase();
-}
-
-function getTimestamp() {
-    const d = new Date();
-    const pad = (n) => n.toString().padStart(2, '0');
-    const year = d.getFullYear();
-    const month = pad(d.getMonth() + 1);
-    const day = pad(d.getDate());
-    const hours = pad(d.getHours());
-    const minutes = pad(d.getMinutes());
-    return `${year}-${month}-${day}_${hours}-${minutes}`;
-}
-
+const EXPORT_DPI = 300;
 
 export function exportCanvasAsImage() {
-    const exportCanvas = document.createElement('canvas');
-    const dpi = 300;
-    const pxPerMm = dpi / 25.4;
-    
     const totalW_mm = state.gridWmm;
     const totalH_mm = state.gridHmm;
+
+    if (!canExport(totalW_mm, totalH_mm, EXPORT_DPI)) {
+        const limit = maxExportWidthMm(totalH_mm, EXPORT_DPI);
+        showError(
+            `Le circulaire est trop grand pour être exporté en image à ${EXPORT_DPI} DPI. ` +
+            `Avec une hauteur de ${totalH_mm} mm, la largeur maximale est de ${limit} mm.`
+        );
+        return;
+    }
+
+    const exportCanvas = document.createElement('canvas');
+    const pxPerMm = EXPORT_DPI / 25.4;
 
     exportCanvas.width = Math.round(totalW_mm * pxPerMm);
     exportCanvas.height = Math.round(totalH_mm * pxPerMm);
@@ -47,17 +40,16 @@ export function exportCanvasAsImage() {
 
     draw(exportCanvas, exportCtx, exportState, false);
 
-    const disciplineSelect = document.getElementById('disciplineSelect');
-    const discipline = sanitizeString(disciplineSelect.value) || 'design';
-    const timestamp = getTimestamp();
-    const filename = `fal-design-${discipline}-${timestamp}.png`;
+    exportCanvas.toBlob((blob) => {
+        if (!blob) {
+            console.error("Canvas encoding returned no blob during PNG export.");
+            showError("L'image n'a pas pu être générée. Réessayez, ou réduisez la taille du circulaire.");
+            return;
+        }
 
-    const dataUrl = exportCanvas.toDataURL('image/png');
-    
-    const a = document.createElement('a');
-    a.href = dataUrl;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+        downloadBlob(blob, designFilename(state.discipline, 'png'));
+
+        exportCanvas.width = 0;
+        exportCanvas.height = 0;
+    }, 'image/png');
 }

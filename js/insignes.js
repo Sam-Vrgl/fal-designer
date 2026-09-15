@@ -1,5 +1,11 @@
 // js/insignes.js
 
+import { loadJson } from './data.js';
+import { showInlineNotice } from './messages.js';
+import { debounce } from './utils.js';
+
+const SEARCH_DEBOUNCE_MS = 120;
+
 
 export class InsignePaletteService {
     constructor(paletteId, searchInputId) {
@@ -8,15 +14,12 @@ export class InsignePaletteService {
         this.sessionCategoryDiv = null;
         this.sessionItemsDiv = null;
         this.allInsigneElements = [];
+        this.tabStop = null;
     }
 
     async #fetchInsignes() {
         try {
-            const response = await fetch('./insignes-list.json');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return await response.json();
+            return await loadJson('./insignes-list.json');
         } catch (e) {
             console.error("Could not load insignes-list.json:", e);
             return {};
@@ -25,12 +28,16 @@ export class InsignePaletteService {
 
     #createInsigneElement(name, itemData, options = {}) {
         const img = document.createElement('img');
-        const path = itemData.path || itemData;
+        const path = itemData.path;
         img.src = path;
         img.title = name;
         img.loading = 'lazy';
         img.dataset.name = name;
         img.dataset.path = path;
+
+        img.alt = name;
+        img.setAttribute('role', 'button');
+        img.tabIndex = -1;
 
         const explicitSize = options.sizeMm ?? itemData.size_mm;
         if (explicitSize) {
@@ -49,7 +56,11 @@ export class InsignePaletteService {
         return img;
     }
 
-    #createCategory(label, items, isObjectBased) {
+    static #normalise(item) {
+        return typeof item === 'string' ? { path: item } : item;
+    }
+
+    #createCategory(label, items) {
         if (!this.paletteElement || !items || Object.keys(items).length === 0) return;
 
         const entries = Object.keys(items);
@@ -66,8 +77,7 @@ export class InsignePaletteService {
         itemsDiv.className = 'items';
 
         for (const name of entries) {
-            const item = isObjectBased ? items[name] : { path: items[name] };
-            const insigneEl = this.#createInsigneElement(name, item);
+            const insigneEl = this.#createInsigneElement(name, InsignePaletteService.#normalise(items[name]));
             itemsDiv.appendChild(insigneEl);
         }
 
@@ -79,8 +89,7 @@ export class InsignePaletteService {
         if (!this.paletteElement || this.sessionItemsDiv) return;
 
         this.sessionCategoryDiv = document.createElement('div');
-        this.sessionCategoryDiv.className = 'category';
-        this.sessionCategoryDiv.style.display = 'none';
+        this.sessionCategoryDiv.className = 'category is-hidden';
 
         const title = document.createElement('h4');
         title.textContent = 'Ajouts de la session';
@@ -93,22 +102,61 @@ export class InsignePaletteService {
         this.paletteElement.appendChild(this.sessionCategoryDiv);
     }
     
+    #applySearch(term) {
+        const searchTerm = term.trim().toLowerCase();
+
+        for (const img of this.allInsigneElements) {
+            const matches = img.dataset.name.toLowerCase().includes(searchTerm);
+            img.classList.toggle('is-hidden', !matches);
+        }
+
+        if (this.paletteElement) {
+            for (const category of this.paletteElement.querySelectorAll('.category')) {
+                const images = [...category.querySelectorAll('img')];
+                const hasMatch = images.some((img) => !img.classList.contains('is-hidden'));
+                category.classList.toggle('is-hidden', !hasMatch);
+            }
+        }
+
+        this.#ensureTabStop();
+    }
+
     #setupSearch() {
         if (!this.searchInput) return;
 
-        this.searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            this.allInsigneElements.forEach((img) => {
-                const name = img.dataset.name.toLowerCase();
-                img.style.display = name.includes(searchTerm) ? '' : 'none';
-            });
+        const search = debounce(() => this.#applySearch(this.searchInput.value), SEARCH_DEBOUNCE_MS);
+        this.searchInput.addEventListener('input', search);
+    }
 
-            if (!this.paletteElement) return;
-            this.paletteElement.querySelectorAll('.category').forEach((cat) => {
-                const visibleItems = cat.querySelectorAll('img:not([style*="display: none"])');
-                cat.style.display = visibleItems.length > 0 ? '' : 'none';
-            });
+    #setupRovingFocus() {
+        this.paletteElement?.addEventListener('focusin', (e) => {
+            if (e.target.tagName === 'IMG') this.#setTabStop(e.target);
         });
+    }
+
+    #visibleInsignes() {
+        return this.allInsigneElements.filter((img) => img.offsetParent !== null);
+    }
+
+    #setTabStop(img) {
+        if (this.tabStop) this.tabStop.tabIndex = -1;
+        this.tabStop = img;
+        if (img) img.tabIndex = 0;
+    }
+
+    #ensureTabStop() {
+        if (this.tabStop?.offsetParent) return;
+        this.#setTabStop(this.#visibleInsignes()[0] ?? null);
+    }
+
+    focusRelative(step) {
+        const visible = this.#visibleInsignes();
+        if (visible.length === 0) return;
+
+        const current = visible.indexOf(document.activeElement);
+        const next = visible[(current + step + visible.length) % visible.length];
+        this.#setTabStop(next);
+        next.focus();
     }
 
 
@@ -118,20 +166,30 @@ export class InsignePaletteService {
         this.allInsigneElements = [];
         this.sessionCategoryDiv = null;
         this.sessionItemsDiv = null;
+        this.tabStop = null;
         this.paletteElement.innerHTML = '';
 
         const insignes = await this.#fetchInsignes();
 
-        this.#createCategory('Filière', insignes.filiere, true);
-        this.#createCategory('Années', insignes.annees, true);
-        this.#createCategory('Chiffre (petits)', insignes.numbers?.small, false);
-        this.#createCategory('Chiffre (grands)', insignes.numbers?.big, false);
-        this.#createCategory('Lettres (petites)', insignes.letters?.small, false);
-        this.#createCategory('Lettres (grandes)', insignes.letters?.big, false);
-        this.#createCategory('Autres', insignes.other, true);
+        if (Object.keys(insignes).length === 0) {
+            showInlineNotice(
+                this.paletteElement,
+                "La palette d'insignes n'a pas pu être chargée. Rechargez la page pour réessayer."
+            );
+        }
+
+        this.#createCategory('Filière', insignes.filiere);
+        this.#createCategory('Années', insignes.annees);
+        this.#createCategory('Chiffre (petits)', insignes.numbers?.small);
+        this.#createCategory('Chiffre (grands)', insignes.numbers?.big);
+        this.#createCategory('Lettres (petites)', insignes.letters?.small);
+        this.#createCategory('Lettres (grandes)', insignes.letters?.big);
+        this.#createCategory('Autres', insignes.other);
 
         this.#ensureSessionCategory();
         this.#setupSearch();
+        this.#setupRovingFocus();
+        this.#ensureTabStop();
     }
 
 
@@ -147,9 +205,10 @@ export class InsignePaletteService {
 
         if (this.sessionItemsDiv) {
             this.sessionItemsDiv.appendChild(insigneEl);
-            this.sessionCategoryDiv.style.display = '';
+            this.sessionCategoryDiv.classList.remove('is-hidden');
         }
 
+        this.#ensureTabStop();
         return insigneEl;
     }
 }

@@ -3,12 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-  <title>FalDesigner V1</title>
+  <title>Fal Designer</title>
+  <meta name="description" content="Outil pour planifier la création d'une faluche : le circulaire, les rubans et les insignes nécessaires à sa confection.">
+  <meta name="theme-color" content="#172235">
+
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' blob: data:; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://cloudflareinsights.com https://static.cloudflareinsights.com;">
+
+  <link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" type="image/png" href="favicon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="icon" href="assets/icons/icon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="assets/icons/icon-180.png">
+  <link rel="manifest" href="manifest.webmanifest">
 </head>
 
 <body>
@@ -20,7 +26,7 @@
     <div id="palette-container">
       <div id="toolbar" class="panel">
         <div class="row">
-          <button id="selectModeBtn" class="active">Sélectionner</button>
+          <button id="selectModeBtn" class="active" aria-pressed="true">Sélectionner</button>
           <button id="resetBtn" title="Réinitialiser la création et toutes les données">Réinitialiser</button>
         </div>
          <div class="row" style="margin-top: 10px;">
@@ -112,12 +118,14 @@
             <span id="zoom-display">100%</span>
         </div>
         <div id="canvas-container" title="Molette pour défiler. Maj+Molette pour défiler horizontalement. Ctrl/Cmd+Molette pour zoomer.">
-          <canvas id="myCanvas"></canvas>
+          <canvas id="myCanvas" tabindex="0" aria-label="Aperçu du circulaire : rubans, moivres et insignes placés sur la grille. Tab pour parcourir les éléments, flèches pour déplacer la sélection, Suppr pour la retirer.">
+            Votre navigateur ne peut pas afficher l'aperçu du circulaire.
+          </canvas>
         </div>
     </div>
 
     <div id="inspector-container">
-      <div id="inspector-panel" class="panel">
+      <div id="inspector-panel" class="panel" tabindex="-1">
         <h3>Propriétés</h3>
         <div id="inspector-content">
           <div id="no-selection">Sélectionnez un élément sur le canevas.</div>
@@ -147,25 +155,30 @@
               <li><b>Maj + Molette</b> pour défiler horizontalement.</li>
               <li><b>Ctrl/Cmd + Molette</b> pour zoomer.</li>
               <li>Maintenir <b>Maj</b> en déplaçant un élément pour désactiver l'aimantation.</li>
+              <li><b>Tab</b> sur le canevas pour parcourir les éléments.</li>
+              <li><b>Flèches</b> pour déplacer la sélection, avec <b>Maj</b> par 10 mm.</li>
+              <li><b>Suppr</b> pour retirer la sélection.</li>
           </ul>
       </div>
     </div>
   </div>
   
-  <div id="mobile-toolbar">
-      <button id="toggle-palette-btn">🎨</button>
-      <button id="toggle-inspector-btn">🔧</button>
-  </div>
-  
-  <footer>
-    <span id="copyright"></span>
-    <button id="about-btn">A propos</button>
-    <span id="version-display-footer"></span>
-  </footer>
+  <div id="bottom-bar">
+    <div id="mobile-toolbar">
+        <button id="toggle-palette-btn" aria-label="Palette d'insignes" aria-controls="palette-container" aria-expanded="false">🎨</button>
+        <button id="toggle-inspector-btn" aria-label="Propriétés" aria-controls="inspector-container" aria-expanded="false">🔧</button>
+    </div>
 
-  <div id="welcome-modal-overlay" class="modal-overlay">
-      <div id="welcome-modal" class="modal-content">
-          <h2>OUTIL EN ALPHA</h2>
+    <footer>
+      <span id="copyright"></span>
+      <button id="about-btn">A propos</button>
+      <span id="version-display-footer"></span>
+    </footer>
+  </div>
+
+  <dialog id="welcome-modal" aria-labelledby="welcome-modal-title">
+      <div class="modal-content">
+          <h2 id="welcome-modal-title">OUTIL EN ALPHA</h2>
           <p>
               Bienvenue sur Fal Designer! <br/>
               ATTENTION, cet outil est actuellement en phase d'alpha-testing!
@@ -175,20 +188,28 @@
           </p>
           <button class="close-modal-btn">Compris</button>
       </div>
-  </div>
+  </dialog>
 
-  <div id="about-modal-overlay" class="modal-overlay" style="display: none;">
-      <div id="about-modal" class="modal-content">
-          <h2>A propos de Fal Designer</h2>
+  <dialog id="about-modal" aria-labelledby="about-modal-title">
+      <div class="modal-content">
+          <h2 id="about-modal-title">A propos de Fal Designer</h2>
           <p>
               Hello, ici Sami aka SpHOTnik alias Challenger IPP! <br/>
               J'ai développé cet outil pour faciliter la planification et la visualisation de circulaires de fal. <br/>
               En évolution constante, il se peut que certaines fonctionnalités soient instables. Vos retours sont les bienvenus! <br/>
               Vous pouvez me contacter via facebook (Samuel VERGNOL) ou par email (contact@sam-vrgl.com).
           </p>
-          <button class="close-modal-btn">Close</button>
+          <button class="close-modal-btn">Fermer</button>
       </div>
-  </div>
+  </dialog>
+
+  <dialog id="error-modal" role="alertdialog" aria-labelledby="error-modal-title" aria-describedby="error-modal-message">
+      <div class="modal-content">
+          <h2 id="error-modal-title">Une erreur est survenue</h2>
+          <p id="error-modal-message"></p>
+          <button class="close-modal-btn">Fermer</button>
+      </div>
+  </dialog>
 
   <!-- Cloudflare Web Analytics -->
    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "bcf4e89c1e9f439dae8df5502c5dd3ce"}'></script>

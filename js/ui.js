@@ -3,12 +3,130 @@
 import { state, notify, subscribe, resetState, recordStateForUndo, undo, redo } from './state.js';
 import { exportState, importState } from './file-handler.js';
 import { exportCanvasAsImage } from './image-exporter.js';
+import { placeInsigne } from './image-service.js';
+import { debounce, randomId } from './utils.js';
+import { LIMITS, readNumber, clamp } from './validation.js';
+import { fitToView } from './view.js';
+
+const recordEdit = debounce(recordStateForUndo, 400);
+
+const NUDGE_STEP_MM = 1;
+const NUDGE_COARSE_MM = 10;
+
+const NUDGE_DIRECTIONS = {
+    ArrowLeft: { x: -1, y: 0 },
+    ArrowRight: { x: 1, y: 0 },
+    ArrowUp: { x: 0, y: -1 },
+    ArrowDown: { x: 0, y: 1 },
+};
+
+const PALETTE_STEPS = {
+    ArrowRight: 1,
+    ArrowDown: 1,
+    ArrowLeft: -1,
+    ArrowUp: -1,
+};
+
+const isEditingField = () => Boolean(document.activeElement?.matches('input, select, textarea'));
+
+function applyLimit(el, limit) {
+    if (!el) return;
+    el.min = limit.min;
+    el.max = limit.max;
+}
+
+function bindNumberInput(el, limit, { get, set }) {
+    if (!el) return;
+
+    applyLimit(el, limit);
+
+    el.addEventListener('input', () => {
+        if (get() === undefined) return;
+
+        const value = readNumber(el, limit);
+        if (value === null) return;
+
+        set(value);
+        notify();
+        recordEdit();
+    });
+
+    el.addEventListener('blur', () => {
+        const current = get();
+        if (current !== undefined) el.value = current;
+    });
+}
 
 function setMode(mode) {
     state.currentMode = mode;
     if (mode === 'select') {
         state.insigneToPlace = null;
     }
+    notify();
+}
+
+function selectedElement() {
+    return state.selectedInsigne ?? state.selectedMaterial ?? state.selectedMoivre;
+}
+
+function clearSelection() {
+    state.selectedInsigne = null;
+    state.selectedMaterial = null;
+    state.selectedMoivre = null;
+}
+
+function selectableElements() {
+    return [
+        ...state.images.map((item) => ({ item, field: 'selectedInsigne' })),
+        ...state.materials.map((item) => ({ item, field: 'selectedMaterial' })),
+        ...state.moivres.map((item) => ({ item, field: 'selectedMoivre' })),
+    ];
+}
+
+function cycleSelection(step) {
+    const elements = selectableElements();
+    if (elements.length === 0) return false;
+
+    const selected = selectedElement();
+    const from = selected
+        ? elements.findIndex(({ item }) => item === selected)
+        : (step > 0 ? -1 : elements.length);
+
+    const next = elements[from + step];
+    clearSelection();
+    if (next) state[next.field] = next.item;
+    notify();
+
+    return Boolean(next);
+}
+
+function nudgeSelection({ x, y }, stepMm) {
+    const target = selectedElement();
+    if (!target) return;
+
+    target.x_mm = clamp(target.x_mm + x * stepMm, LIMITS.x_mm.min, LIMITS.x_mm.max);
+    target.y_mm = clamp(target.y_mm + y * stepMm, LIMITS.y_mm.min, LIMITS.y_mm.max);
+    recordEdit();
+    notify();
+}
+
+function deleteSelection() {
+    const { selectedInsigne, selectedMaterial, selectedMoivre } = state;
+
+    if (selectedInsigne) {
+        state.images = state.images.filter(i => i !== selectedInsigne);
+    } else if (selectedMaterial) {
+        state.materials = selectedMaterial.groupId
+            ? state.materials.filter(m => m.groupId !== selectedMaterial.groupId)
+            : state.materials.filter(m => m !== selectedMaterial);
+    } else if (selectedMoivre) {
+        state.moivres = state.moivres.filter(m => m !== selectedMoivre);
+    } else {
+        return;
+    }
+
+    clearSelection();
+    recordStateForUndo();
     notify();
 }
 
@@ -42,6 +160,8 @@ function bindSettings(settingsContainer, disciplinesData) {
     const moivreColor = settingsContainer.querySelector('#moivreColor');
     const addMoivreBtn = settingsContainer.querySelector('#addMoivreBtn');
 
+    applyLimit(materialWidthInput, LIMITS.width_mm);
+
     if (chkV) chkV.checked = state.helper.showV;
     if (chkH) chkH.checked = state.helper.showH;
     if (chkSnap) chkSnap.checked = state.snapEnabled;
@@ -52,9 +172,19 @@ function bindSettings(settingsContainer, disciplinesData) {
     if (chkV) chkV.addEventListener('change', () => { state.helper.showV = chkV.checked; notify(); });
     if (chkH) chkH.addEventListener('change', () => { state.helper.showH = chkH.checked; notify(); });
     if (chkSnap) chkSnap.addEventListener('change', () => { state.snapEnabled = chkSnap.checked; notify(); });
-    if (gridW) gridW.addEventListener('input', () => { state.gridWmm = gridW.valueAsNumber; notify(); });
-    if (gridH) gridH.addEventListener('input', () => { state.gridHmm = gridH.valueAsNumber; notify(); });
-    if (margin) margin.addEventListener('input', () => { state.marginMm = margin.valueAsNumber; notify(); });
+
+    bindNumberInput(gridW, LIMITS.gridWmm, {
+        get: () => state.gridWmm,
+        set: (value) => { state.gridWmm = value; },
+    });
+    bindNumberInput(gridH, LIMITS.gridHmm, {
+        get: () => state.gridHmm,
+        set: (value) => { state.gridHmm = value; },
+    });
+    bindNumberInput(margin, LIMITS.marginMm, {
+        get: () => state.marginMm,
+        set: (value) => { state.marginMm = value; },
+    });
 
     if (materialDisciplineSelect) {
         const disciplineNames = Object.keys(disciplinesData);
@@ -75,14 +205,14 @@ function bindSettings(settingsContainer, disciplinesData) {
         if (!discipline) return;
         
         const heightMultiplier = parseFloat(materialHeightSelect?.value ?? '1');
-        const width = materialWidthInput?.valueAsNumber ?? 0;
+        const width = readNumber(materialWidthInput, LIMITS.width_mm);
 
-        if (!Number.isFinite(heightMultiplier) || !Number.isFinite(width) || width <= 0) return;
+        if (!Number.isFinite(heightMultiplier) || width === null) return;
 
         const totalHeight = state.gridHmm * heightMultiplier;
 
         if (discipline.couleursRGB.length > 1) {
-            const groupId = Date.now();
+            const groupId = randomId();
             const sectionHeight = totalHeight / 2;
             const color1 = `rgb(${discipline.couleursRGB[0]})`;
             const color2 = `rgb(${discipline.couleursRGB[1]})`;
@@ -113,19 +243,7 @@ function bindCanvasToolbar(toolbarEl, canvasContainer) {
 
     if (zoomInBtn) zoomInBtn.addEventListener('click', () => { state.viewScale *= 1.25; notify(); });
     if (zoomOutBtn) zoomOutBtn.addEventListener('click', () => { state.viewScale /= 1.25; notify(); });
-    if (zoomFitBtn) zoomFitBtn.addEventListener('click', () => {
-        if (!canvasContainer) return;
-        const totalW_px = (state.gridWmm + 2 * state.marginMm) * state.mmToPx;
-        const totalH_px = (state.gridHmm + 2 * state.marginMm) * state.mmToPx;
-        const scaleX = canvasContainer.clientWidth / totalW_px;
-        const scaleY = canvasContainer.clientHeight / totalH_px;
-        state.viewScale = Math.min(scaleX, scaleY) * 0.95;
-        state.viewOffsetX = (canvasContainer.clientWidth - (totalW_px * state.viewScale)) / 2;
-        state.viewOffsetY = (canvasContainer.clientHeight - (totalH_px * state.viewScale)) / 2;
-        notify();
-    });
-
-    return { zoomFitBtn };
+    if (zoomFitBtn) zoomFitBtn.addEventListener('click', () => fitToView(canvasContainer));
 }
 
 function bindInsignePalette(paletteEl, insignePalette, sessionObjectUrls) {
@@ -133,16 +251,44 @@ function bindInsignePalette(paletteEl, insignePalette, sessionObjectUrls) {
     const uploadSessionImageBtn = paletteEl.querySelector('#uploadSessionImageBtn');
     const sessionImageInput = paletteEl.querySelector('#sessionImageInput');
 
+    const readInsigneToPlace = (img) => {
+        const { path, sizeMm, heightPct, sessionOnly } = img.dataset;
+        const insigneToPlace = { path, url: img.src };
+        if (sizeMm) insigneToPlace.sizeMm = sizeMm;
+        if (heightPct) insigneToPlace.heightPct = parseFloat(heightPct);
+        if (sessionOnly === 'true') insigneToPlace.sessionOnly = true;
+        return insigneToPlace;
+    };
+
     if (insigneList) insigneList.addEventListener('click', (e) => {
         if (e.target.tagName === 'IMG') {
-            const { path, sizeMm, heightPct, sessionOnly } = e.target.dataset;
-            const insigneToPlace = { path, url: e.target.src };
-            if (sizeMm) insigneToPlace.sizeMm = sizeMm;
-            if (heightPct) insigneToPlace.heightPct = parseFloat(heightPct);
-            if (sessionOnly === 'true') insigneToPlace.sessionOnly = true;
-            state.insigneToPlace = insigneToPlace;
+            state.insigneToPlace = readInsigneToPlace(e.target);
             setMode('place');
         }
+    });
+
+    if (insigneList) insigneList.addEventListener('keydown', (e) => {
+        if (e.target.tagName !== 'IMG') return;
+
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+
+            clearSelection();
+            state.selectedInsigne = placeInsigne(readInsigneToPlace(e.target), {
+                x_mm: state.gridWmm / 2,
+                y_mm: state.gridHmm / 2,
+            });
+            setMode('select');
+
+            document.getElementById('inspector-panel')?.focus();
+            return;
+        }
+
+        const step = PALETTE_STEPS[e.key];
+        if (step === undefined) return;
+
+        e.preventDefault();
+        insignePalette.focusRelative(step);
     });
 
     if (uploadSessionImageBtn) {
@@ -184,49 +330,73 @@ function bindInspectorPanel(inspectorPanelEl) {
 
     const removeMoivreBtn = inspectorPanelEl.querySelector('#removeMoivreBtn');
 
-    if (insigneX) insigneX.addEventListener('input', () => { if (state.selectedInsigne) { state.selectedInsigne.x_mm = insigneX.valueAsNumber; notify(); }});
-    if (insigneY) insigneY.addEventListener('input', () => { if (state.selectedInsigne) { state.selectedInsigne.y_mm = insigneY.valueAsNumber; notify(); }});
-    if (insigneHeight) insigneHeight.addEventListener('input', () => { if (state.selectedInsigne && !insigneHeight.disabled) { state.selectedInsigne.heightPct = insigneHeight.valueAsNumber / 100; notify(); }});
-    if (removeInsigneBtn) removeInsigneBtn.addEventListener('click', () => {
-        if (state.selectedInsigne) {
-            state.images = state.images.filter(i => i !== state.selectedInsigne);
-            state.selectedInsigne = null;
-            recordStateForUndo();
-            notify();
-        }
+    bindNumberInput(insigneX, LIMITS.x_mm, {
+        get: () => state.selectedInsigne?.x_mm,
+        set: (value) => { state.selectedInsigne.x_mm = value; },
     });
-    
-    if (selectedMaterialX) selectedMaterialX.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.x_mm = selectedMaterialX.valueAsNumber; notify(); }});
-    if (selectedMaterialY) selectedMaterialY.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.y_mm = selectedMaterialY.valueAsNumber; notify(); }});
-    if (selectedMaterialWidth) selectedMaterialWidth.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.width_mm = selectedMaterialWidth.valueAsNumber; notify(); }});
-    if (selectedMaterialHeight) selectedMaterialHeight.addEventListener('input', () => { if (state.selectedMaterial) { state.selectedMaterial.height_mm = selectedMaterialHeight.valueAsNumber; notify(); }});
-    if (removeMaterialBtn) removeMaterialBtn.addEventListener('click', () => {
-        if (state.selectedMaterial) {
-            if (state.selectedMaterial.groupId) {
-                state.materials = state.materials.filter(m => m.groupId !== state.selectedMaterial.groupId);
-            } else {
-                state.materials = state.materials.filter(m => m !== state.selectedMaterial);
-            }
-            state.selectedMaterial = null;
-            recordStateForUndo();
-            notify();
-        }
+    bindNumberInput(insigneY, LIMITS.y_mm, {
+        get: () => state.selectedInsigne?.y_mm,
+        set: (value) => { state.selectedInsigne.y_mm = value; },
     });
+    bindNumberInput(insigneHeight, LIMITS.heightPercent, {
+        get: () => {
+            if (!state.selectedInsigne || insigneHeight.disabled) return undefined;
+            return (state.selectedInsigne.heightPct ?? 0) * 100;
+        },
+        set: (value) => { state.selectedInsigne.heightPct = value / 100; },
+    });
+    if (removeInsigneBtn) removeInsigneBtn.addEventListener('click', deleteSelection);
 
-    if (removeMoivreBtn) removeMoivreBtn.addEventListener('click', () => {
-        if (state.selectedMoivre) {
-            state.moivres = state.moivres.filter(m => m !== state.selectedMoivre);
-            state.selectedMoivre = null;
-            recordStateForUndo();
-            notify();
-        }
+    bindNumberInput(selectedMaterialX, LIMITS.x_mm, {
+        get: () => state.selectedMaterial?.x_mm,
+        set: (value) => { state.selectedMaterial.x_mm = value; },
     });
+    bindNumberInput(selectedMaterialY, LIMITS.y_mm, {
+        get: () => state.selectedMaterial?.y_mm,
+        set: (value) => { state.selectedMaterial.y_mm = value; },
+    });
+    bindNumberInput(selectedMaterialWidth, LIMITS.width_mm, {
+        get: () => state.selectedMaterial?.width_mm,
+        set: (value) => { state.selectedMaterial.width_mm = value; },
+    });
+    bindNumberInput(selectedMaterialHeight, LIMITS.height_mm, {
+        get: () => state.selectedMaterial?.height_mm,
+        set: (value) => { state.selectedMaterial.height_mm = value; },
+    });
+    if (removeMaterialBtn) removeMaterialBtn.addEventListener('click', deleteSelection);
+
+    if (removeMoivreBtn) removeMoivreBtn.addEventListener('click', deleteSelection);
 }
 
 function bindGlobalListeners(sessionObjectUrls) {
+    const canvas = document.getElementById('myCanvas');
+
+    const inSelectionContext = () =>
+        document.activeElement === canvas ||
+        Boolean(document.activeElement?.closest('#inspector-panel'));
+
     window.addEventListener('keydown', (e) => {
+        if (document.querySelector('dialog[open]')) return;
+
         if (e.key === 'Escape') {
             setMode('select');
+        }
+
+        if (e.key === 'Tab' && document.activeElement === canvas) {
+            if (cycleSelection(e.shiftKey ? -1 : 1)) e.preventDefault();
+        }
+
+        if (inSelectionContext() && !isEditingField()) {
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                e.preventDefault();
+                deleteSelection();
+            }
+
+            const nudge = NUDGE_DIRECTIONS[e.key];
+            if (nudge) {
+                e.preventDefault();
+                nudgeSelection(nudge, e.shiftKey ? NUDGE_COARSE_MM : NUDGE_STEP_MM);
+            }
         }
 
         if (e.ctrlKey || e.metaKey) {
@@ -265,6 +435,14 @@ function setupAllSubscriptions() {
     const selectedMaterialY = document.getElementById('selectedMaterialY');
     const selectedMaterialWidth = document.getElementById('selectedMaterialWidth');
     const selectedMaterialHeight = document.getElementById('selectedMaterialHeight');
+    const gridWInput = document.getElementById('gridWInput');
+    const gridHInput = document.getElementById('gridHInput');
+    const marginInput = document.getElementById('marginInput');
+    const disciplineSelect = document.getElementById('disciplineSelect');
+
+    const setValue = (el, value) => {
+        if (el && el !== document.activeElement) el.value = value;
+    };
 
     const updateZoomDisplay = () => {
         if(zoomDisplay) zoomDisplay.textContent = `${Math.round(state.viewScale * 100)}%`;
@@ -279,8 +457,8 @@ function setupAllSubscriptions() {
         moivrePropsDiv.style.display = state.selectedMoivre ? 'block' : 'none';
 
         if (state.selectedInsigne) {
-            if (insigneX) insigneX.value = state.selectedInsigne.x_mm;
-            if (insigneY) insigneY.value = state.selectedInsigne.y_mm;
+            setValue(insigneX, state.selectedInsigne.x_mm);
+            setValue(insigneY, state.selectedInsigne.y_mm);
             if (insigneHeight) {
                 if (state.selectedInsigne.height_mm) {
                     insigneHeight.value = ((state.selectedInsigne.height_mm / state.gridHmm) * 100).toFixed(2);
@@ -292,21 +470,34 @@ function setupAllSubscriptions() {
             }
         }
         if (state.selectedMaterial) {
-            if (selectedMaterialX) selectedMaterialX.value = state.selectedMaterial.x_mm;
-            if (selectedMaterialY) selectedMaterialY.value = state.selectedMaterial.y_mm;
-            if (selectedMaterialWidth) selectedMaterialWidth.value = state.selectedMaterial.width_mm;
-            if (selectedMaterialHeight) selectedMaterialHeight.value = state.selectedMaterial.height_mm;
+            setValue(selectedMaterialX, state.selectedMaterial.x_mm);
+            setValue(selectedMaterialY, state.selectedMaterial.y_mm);
+            setValue(selectedMaterialWidth, state.selectedMaterial.width_mm);
+            setValue(selectedMaterialHeight, state.selectedMaterial.height_mm);
         }
     };
     
+    const updateSettingsControls = () => {
+        setValue(gridWInput, state.gridWmm);
+        setValue(gridHInput, state.gridHmm);
+        setValue(marginInput, state.marginMm);
+        if (disciplineSelect && disciplineSelect.value !== state.discipline) {
+            setValue(disciplineSelect, state.discipline);
+        }
+    };
+
     const updateModeUI = () => {
         const mode = state.currentMode;
-        if (selectModeBtn) selectModeBtn.classList.toggle('active', mode === 'select');
+        if (selectModeBtn) {
+            selectModeBtn.classList.toggle('active', mode === 'select');
+            selectModeBtn.setAttribute('aria-pressed', String(mode === 'select'));
+        }
         if (container) container.style.cursor = mode === 'place' && state.insigneToPlace ? 'copy' : 'default';
     };
     
     subscribe(updateZoomDisplay);
     subscribe(updateInspector);
+    subscribe(updateSettingsControls);
     subscribe(updateModeUI);
 }
 
@@ -319,11 +510,9 @@ export function bindUI(disciplinesData, insignePalette) {
     const inspectorPanel = $('inspector-panel');
 
     const sessionObjectUrls = new Set();
-    let zoomFitBtn = null;
 
     if (canvasToolbar && canvasContainer) {
-        const { zoomFitBtn: fitBtn } = bindCanvasToolbar(canvasToolbar, canvasContainer);
-        zoomFitBtn = fitBtn;
+        bindCanvasToolbar(canvasToolbar, canvasContainer);
     }
 
     if (paletteContainer) {
@@ -348,8 +537,4 @@ export function bindUI(disciplinesData, insignePalette) {
     bindGlobalListeners(sessionObjectUrls);
     
     setupAllSubscriptions();
-
-    setTimeout(() => {
-        if(zoomFitBtn) zoomFitBtn.click();
-    }, 50);
 }

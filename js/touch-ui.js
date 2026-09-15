@@ -22,32 +22,27 @@ export function initTouchUI(canvasContainer) {
         notify();
     };
 
-    togglePaletteBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const isOpen = paletteContainer.classList.contains('open');
-        inspectorContainer.classList.remove('open');
-        if (!isOpen) {
-            paletteContainer.classList.add('open');
-            adjustCanvasView();
-        } else {
-            paletteContainer.classList.remove('open');
-        }
-    });
+    const drawers = [
+        { button: togglePaletteBtn, panel: paletteContainer },
+        { button: toggleInspectorBtn, panel: inspectorContainer },
+    ];
 
-    toggleInspectorBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const isOpen = inspectorContainer.classList.contains('open');
-        paletteContainer.classList.remove('open');
-        if (!isOpen) {
-            inspectorContainer.classList.add('open');
-            adjustCanvasView();
-        } else {
-            inspectorContainer.classList.remove('open');
-        }
-    });
+    const setOpen = (drawer, open) => {
+        drawer.panel.classList.toggle('open', open);
+        drawer.button.setAttribute('aria-expanded', String(open));
+    };
 
-    mainContent.addEventListener('click', () => {
-        paletteContainer.classList.remove('open');
-        inspectorContainer.classList.remove('open');
-    });
+    const closeAll = () => drawers.forEach((drawer) => setOpen(drawer, false));
+
+    for (const drawer of drawers) {
+        drawer.button.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const open = !drawer.panel.classList.contains('open');
+            closeAll();
+            setOpen(drawer, open);
+            if (open) adjustCanvasView();
+        });
+    }
+
+    mainContent.addEventListener('click', closeAll);
 }
